@@ -4,6 +4,7 @@ import { PodcastList } from "@/components/podcast-list"
 import { Button } from "@/components/ui/button"
 import { PlusCircle } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image"
 
 export default async function PodcastsPage() {
   const supabase = await createClient()
@@ -19,7 +20,10 @@ export default async function PodcastsPage() {
     <div className="min-h-screen bg-background">
       <header className="border-b">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Podcast管理</h1>
+          <div className="flex items-center gap-2">
+            <Image src="/podqueue-icon.svg" alt="PodQueue" width={32} height={32} />
+            <h1 className="text-2xl font-bold">Podcast管理</h1>
+          </div>
           <div className="flex items-center gap-4">
             <Link href="/podcasts/add">
               <Button>

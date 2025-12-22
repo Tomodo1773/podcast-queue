@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <linearGradient id="purpleBlueGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B5CF6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#3B82F6;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- P letter with modern rounded style -->
+  <path d="M 20 25 L 20 75 L 28 75 L 28 55 L 45 55 C 55 55 62 48 62 40 C 62 32 55 25 45 25 Z M 28 33 L 45 33 C 50 33 54 37 54 40 C 54 43 50 47 45 47 L 28 47 Z" 
+        fill="url(#purpleBlueGradient)"/>
+  
+  <!-- Three horizontal lines (queue representation) -->
+  <rect x="68" y="32" width="14" height="3" rx="1.5" fill="url(#purpleBlueGradient)"/>
+  <rect x="68" y="45" width="14" height="3" rx="1.5" fill="url(#purpleBlueGradient)"/>
+  <rect x="68" y="58" width="14" height="3" rx="1.5" fill="url(#purpleBlueGradient)"/>
+</svg>
