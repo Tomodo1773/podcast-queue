@@ -113,12 +113,13 @@ export function PodcastList({ userId }: PodcastListProps) {
         </div>
 
         {/* View mode toggle buttons */}
-        <div className="flex items-center gap-2">
+        <div className="hidden md:flex items-center gap-2">
           <Button
             size="sm"
             variant={viewMode === "grid" ? "default" : "outline"}
             onClick={() => setViewMode("grid")}
             title="グリッド表示"
+            aria-label="グリッド表示に切り替え"
           >
             <Grid3x3 className="size-4" />
           </Button>
@@ -127,6 +128,7 @@ export function PodcastList({ userId }: PodcastListProps) {
             variant={viewMode === "list" ? "default" : "outline"}
             onClick={() => setViewMode("list")}
             title="リスト表示"
+            aria-label="リスト表示に切り替え"
           >
             <List className="size-4" />
           </Button>
@@ -141,7 +143,7 @@ export function PodcastList({ userId }: PodcastListProps) {
               : `${filter === "watched" ? "視聴済み" : "未視聴"}のPodcastがありません`}
           </p>
         </div>
-      ) : viewMode === "grid" ? (
+      ) : viewMode === "grid" || typeof window !== "undefined" && window.innerWidth < 768 ? (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {filteredPodcasts.map((podcast) => (
             <PodcastCard
