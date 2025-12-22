@@ -43,7 +43,6 @@ export default function SignUpPage() {
       router.push("/auth/sign-up-success")
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "登録に失敗しました")
-    } finally {
       setIsLoading(false)
     }
   }

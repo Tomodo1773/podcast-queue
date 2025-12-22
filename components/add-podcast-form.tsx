@@ -122,12 +122,11 @@ export function AddPodcastForm({ userId }: AddPodcastFormProps) {
       console.log("[v0] Podcast追加成功、リダイレクト開始")
       router.push("/podcasts")
       router.refresh()
+      console.log("[v0] フォーム送信完了")
     } catch (error: unknown) {
       console.error("[v0] Podcast追加エラー:", error)
       setError(error instanceof Error ? error.message : "Podcastの追加に失敗しました")
-    } finally {
       setIsLoading(false)
-      console.log("[v0] フォーム送信完了")
     }
   }
 

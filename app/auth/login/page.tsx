@@ -34,7 +34,6 @@ export default function LoginPage() {
       router.refresh()
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "ログインに失敗しました")
-    } finally {
       setIsLoading(false)
     }
   }
