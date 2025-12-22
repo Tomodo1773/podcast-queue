@@ -165,10 +165,17 @@ export function PodcastCard({ podcast, onToggleWatched, onDelete }: PodcastCardP
                 開く
               </a>
             </Button>
-            <Button variant="destructive" onClick={() => {
-              onDelete(podcast.id)
-              setIsDialogOpen(false)
-            }}>
+            <Button
+              variant="destructive"
+              onClick={async () => {
+                try {
+                  await onDelete(podcast.id)
+                  setIsDialogOpen(false)
+                } catch (error) {
+                  console.error("Failed to delete podcast:", error)
+                }
+              }}
+            >
               <Trash2 className="mr-2 size-4" />
               削除
             </Button>
