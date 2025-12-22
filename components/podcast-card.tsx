@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Check, ExternalLink, Trash2, X } from "lucide-react"
 import Image from "next/image"
 
@@ -44,7 +44,7 @@ export function PodcastCard({ podcast, onToggleWatched, onDelete }: PodcastCardP
         {podcast.thumbnail_url ? (
           <div className="relative w-full aspect-video">
             <Image
-              src={podcast.thumbnail_url || "/placeholder.svg"}
+              src={podcast.thumbnail_url}
               alt={podcast.title || "Podcast thumbnail"}
               fill
               className="object-cover rounded-t-lg"
