@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Check, ExternalLink, Trash2, X } from "lucide-react"
 import Image from "next/image"
+import { getPlatformColor } from "@/lib/utils"
 
 type Podcast = {
   id: string
@@ -26,16 +27,6 @@ type PodcastCardProps = {
 
 export function PodcastCard({ podcast, onToggleWatched, onDelete }: PodcastCardProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-
-  const getPlatformColor = (platform: string | null) => {
-    if (!platform) return "bg-gray-500"
-    const platformLower = platform.toLowerCase()
-    if (platformLower.includes("youtube")) return "bg-red-500"
-    if (platformLower.includes("spotify")) return "bg-green-500"
-    if (platformLower.includes("newspicks")) return "bg-blue-500"
-    if (platformLower.includes("pivot")) return "bg-purple-500"
-    return "bg-gray-500"
-  }
 
   return (
     <>

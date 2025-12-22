@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Check, ExternalLink, Trash2, X } from "lucide-react"
 import Image from "next/image"
+import { getPlatformColor } from "@/lib/utils"
 
 type Podcast = {
   id: string
@@ -26,16 +27,6 @@ type PodcastListItemProps = {
 export function PodcastListItem({ podcast, onToggleWatched, onDelete }: PodcastListItemProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
-  const getPlatformColor = (platform: string | null) => {
-    if (!platform) return "bg-gray-500"
-    const platformLower = platform.toLowerCase()
-    if (platformLower.includes("youtube")) return "bg-red-500"
-    if (platformLower.includes("spotify")) return "bg-green-500"
-    if (platformLower.includes("newspicks")) return "bg-blue-500"
-    if (platformLower.includes("pivot")) return "bg-purple-500"
-    return "bg-gray-500"
-  }
-
   return (
     <>
       <div 
@@ -45,7 +36,7 @@ export function PodcastListItem({ podcast, onToggleWatched, onDelete }: PodcastL
         {/* Left side: Thumbnail */}
         <div className="flex-shrink-0">
           {podcast.thumbnail_url ? (
-            <div className="relative w-40 h-24 md:w-48 md:h-28">
+            <div className="relative w-48 aspect-video">
               <Image
                 src={podcast.thumbnail_url}
                 alt={podcast.title || "Podcast thumbnail"}
@@ -54,7 +45,7 @@ export function PodcastListItem({ podcast, onToggleWatched, onDelete }: PodcastL
               />
             </div>
           ) : (
-            <div className="w-40 h-24 md:w-48 md:h-28 bg-muted flex items-center justify-center rounded-lg">
+            <div className="w-48 aspect-video bg-muted flex items-center justify-center rounded-lg">
               <span className="text-sm text-muted-foreground">サムネイルなし</span>
             </div>
           )}
