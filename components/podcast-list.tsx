@@ -3,8 +3,9 @@
 import { createClient } from "@/lib/supabase/client"
 import { useEffect, useState } from "react"
 import { PodcastCard } from "@/components/podcast-card"
+import { PodcastListItem } from "@/components/podcast-list-item"
 import { Button } from "@/components/ui/button"
-import { Loader2 } from "lucide-react"
+import { Grid3x3, List, Loader2 } from "lucide-react"
 
 type Podcast = {
   id: string
@@ -25,11 +26,24 @@ export function PodcastList({ userId }: PodcastListProps) {
   const [podcasts, setPodcasts] = useState<Podcast[]>([])
   const [filteredPodcasts, setFilteredPodcasts] = useState<Podcast[]>([])
   const [filter, setFilter] = useState<"all" | "watched" | "unwatched">("all")
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [isLoading, setIsLoading] = useState(true)
+  const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
     loadPodcasts()
   }, [userId])
+
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    
+    checkIsMobile()
+    window.addEventListener('resize', checkIsMobile)
+    
+    return () => window.removeEventListener('resize', checkIsMobile)
+  }, [])
 
   useEffect(() => {
     applyFilter()
@@ -97,16 +111,40 @@ export function PodcastList({ userId }: PodcastListProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2">
-        <Button variant={filter === "all" ? "default" : "outline"} onClick={() => setFilter("all")}>
-          すべて ({podcasts.length})
-        </Button>
-        <Button variant={filter === "unwatched" ? "default" : "outline"} onClick={() => setFilter("unwatched")}>
-          未視聴 ({podcasts.filter((p) => !p.is_watched).length})
-        </Button>
-        <Button variant={filter === "watched" ? "default" : "outline"} onClick={() => setFilter("watched")}>
-          視聴済み ({podcasts.filter((p) => p.is_watched).length})
-        </Button>
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-2">
+          <Button variant={filter === "all" ? "default" : "outline"} onClick={() => setFilter("all")}>
+            すべて ({podcasts.length})
+          </Button>
+          <Button variant={filter === "unwatched" ? "default" : "outline"} onClick={() => setFilter("unwatched")}>
+            未視聴 ({podcasts.filter((p) => !p.is_watched).length})
+          </Button>
+          <Button variant={filter === "watched" ? "default" : "outline"} onClick={() => setFilter("watched")}>
+            視聴済み ({podcasts.filter((p) => p.is_watched).length})
+          </Button>
+        </div>
+
+        {/* View mode toggle buttons */}
+        <div className="hidden md:flex items-center gap-2">
+          <Button
+            size="sm"
+            variant={viewMode === "grid" ? "default" : "outline"}
+            onClick={() => setViewMode("grid")}
+            title="グリッド表示"
+            aria-label="グリッド表示に切り替え"
+          >
+            <Grid3x3 className="size-4" />
+          </Button>
+          <Button
+            size="sm"
+            variant={viewMode === "list" ? "default" : "outline"}
+            onClick={() => setViewMode("list")}
+            title="リスト表示"
+            aria-label="リスト表示に切り替え"
+          >
+            <List className="size-4" />
+          </Button>
+        </div>
       </div>
 
       {filteredPodcasts.length === 0 ? (
@@ -117,10 +155,21 @@ export function PodcastList({ userId }: PodcastListProps) {
               : `${filter === "watched" ? "視聴済み" : "未視聴"}のPodcastがありません`}
           </p>
         </div>
-      ) : (
+      ) : viewMode === "grid" || isMobile ? (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {filteredPodcasts.map((podcast) => (
             <PodcastCard
+              key={podcast.id}
+              podcast={podcast}
+              onToggleWatched={handleToggleWatched}
+              onDelete={handleDelete}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {filteredPodcasts.map((podcast) => (
+            <PodcastListItem
               key={podcast.id}
               podcast={podcast}
               onToggleWatched={handleToggleWatched}
