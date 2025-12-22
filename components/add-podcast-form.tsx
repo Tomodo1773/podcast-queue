@@ -30,7 +30,7 @@ export function AddPodcastForm({ userId }: AddPodcastFormProps) {
   const detectPlatform = (url: string): string => {
     if (url.includes("youtube.com") || url.includes("youtu.be")) return "YouTube"
     if (url.includes("spotify.com")) return "Spotify"
-    if (url.includes("newspicks.com")) return "NewsPicks"
+    if (url.includes("npx.me")) return "NewsPicks"
     if (url.includes("pivot")) return "Pivot"
     return "その他"
   }
