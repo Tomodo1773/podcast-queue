@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PodcastList } from "@/components/podcast-list";
 import { Button } from "@/components/ui/button";
-import { PlusCircle } from "lucide-react";
+import { LogOut, PlusCircle } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -27,8 +27,8 @@ export default async function PodcastsPage() {
 					<div className="flex items-center gap-4">
 						<Link href="/podcasts/add">
 							<Button>
-								<PlusCircle className="mr-2 size-4" />
-								Podcastを追加
+								<PlusCircle className="size-4 sm:mr-2" />
+								<span className="hidden sm:inline">Podcastを追加</span>
 							</Button>
 						</Link>
 						<form
@@ -40,7 +40,8 @@ export default async function PodcastsPage() {
 							}}
 						>
 							<Button variant="outline" type="submit">
-								ログアウト
+								<LogOut className="size-4 sm:mr-2" />
+								<span className="hidden sm:inline">ログアウト</span>
 							</Button>
 						</form>
 					</div>
