@@ -95,7 +95,7 @@ export function PodcastDialog({ podcast, open, onOpenChange, onToggleWatched, on
                   await onDelete(podcast.id)
                   onOpenChange(false)
                 } catch (error) {
-                  console.error("Failed to delete podcast:", error)
+                  console.error("ポッドキャストの削除に失敗しました:", error)
                 }
               }}
             >

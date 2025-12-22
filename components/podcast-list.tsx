@@ -28,10 +28,22 @@ export function PodcastList({ userId }: PodcastListProps) {
   const [filter, setFilter] = useState<"all" | "watched" | "unwatched">("all")
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
   const [isLoading, setIsLoading] = useState(true)
+  const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
     loadPodcasts()
   }, [userId])
+
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    
+    checkIsMobile()
+    window.addEventListener('resize', checkIsMobile)
+    
+    return () => window.removeEventListener('resize', checkIsMobile)
+  }, [])
 
   useEffect(() => {
     applyFilter()
@@ -143,7 +155,7 @@ export function PodcastList({ userId }: PodcastListProps) {
               : `${filter === "watched" ? "視聴済み" : "未視聴"}のPodcastがありません`}
           </p>
         </div>
-      ) : viewMode === "grid" || typeof window !== "undefined" && window.innerWidth < 768 ? (
+      ) : viewMode === "grid" || isMobile ? (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {filteredPodcasts.map((podcast) => (
             <PodcastCard
