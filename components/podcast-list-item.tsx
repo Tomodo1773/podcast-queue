@@ -52,7 +52,7 @@ export function PodcastListItem({ podcast, onToggleWatched, onDelete }: PodcastL
   return (
     <>
       <div 
-        className="flex gap-4 p-4 border rounded-lg cursor-pointer hover:shadow-md transition-shadow bg-card"
+        className="flex gap-2 sm:gap-4 p-3 sm:p-4 border rounded-lg cursor-pointer hover:shadow-md transition-shadow bg-card"
         role="button"
         tabIndex={0}
         onClick={handleClick}
@@ -61,7 +61,7 @@ export function PodcastListItem({ podcast, onToggleWatched, onDelete }: PodcastL
         {/* Left side: Thumbnail */}
         <div className="flex-shrink-0">
           {podcast.thumbnail_url ? (
-            <div className="relative w-32 md:w-48 aspect-video">
+            <div className="relative w-24 sm:w-32 md:w-48 aspect-video">
               <Image
                 src={podcast.thumbnail_url}
                 alt={podcast.title || "Podcast thumbnail"}
@@ -70,8 +70,8 @@ export function PodcastListItem({ podcast, onToggleWatched, onDelete }: PodcastL
               />
             </div>
           ) : (
-            <div className="w-32 md:w-48 aspect-video bg-muted flex items-center justify-center rounded-lg">
-              <span className="text-sm text-muted-foreground">サムネイルなし</span>
+            <div className="w-24 sm:w-32 md:w-48 aspect-video bg-muted flex items-center justify-center rounded-lg">
+              <span className="text-xs sm:text-sm text-muted-foreground">サムネイルなし</span>
             </div>
           )}
         </div>
@@ -81,22 +81,22 @@ export function PodcastListItem({ podcast, onToggleWatched, onDelete }: PodcastL
           {/* Top section: Title and Platform */}
           <div>
             <div className="flex items-start justify-between gap-2 mb-2">
-              <h3 className="font-semibold line-clamp-2 text-pretty">{podcast.title || "タイトルなし"}</h3>
+              <h3 className="font-semibold line-clamp-2 text-pretty text-sm sm:text-base">{podcast.title || "タイトルなし"}</h3>
               {podcast.platform && (
                 <Badge className={getPlatformColor(podcast.platform)} variant="default">
-                  {podcast.platform}
+                  <span className="text-xs">{podcast.platform}</span>
                 </Badge>
               )}
             </div>
             {podcast.description && (
-              <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+              <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2 mb-3">
                 {podcast.description}
               </p>
             )}
           </div>
 
           {/* Bottom section: Action buttons */}
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Button
               size="sm"
               variant={podcast.is_watched ? "default" : "outline"}
@@ -104,26 +104,29 @@ export function PodcastListItem({ podcast, onToggleWatched, onDelete }: PodcastL
                 e.stopPropagation()
                 onToggleWatched(podcast.id, podcast.is_watched)
               }}
+              className="text-xs sm:text-sm"
             >
               {podcast.is_watched ? (
                 <>
-                  <Check className="mr-1 size-4" />
-                  視聴済み
+                  <Check className="mr-1 size-3 sm:size-4" />
+                  <span className="hidden sm:inline">視聴済み</span>
+                  <span className="sm:hidden">済</span>
                 </>
               ) : (
                 <>
-                  <X className="mr-1 size-4" />
-                  未視聴
+                  <X className="mr-1 size-3 sm:size-4" />
+                  <span className="hidden sm:inline">未視聴</span>
+                  <span className="sm:hidden">未</span>
                 </>
               )}
             </Button>
             <Button size="sm" variant="outline" asChild>
               <a href={podcast.url} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
-                <ExternalLink className="size-4" />
+                <ExternalLink className="size-3 sm:size-4" />
               </a>
             </Button>
             <Button size="sm" variant="ghost" onClick={handleDelete}>
-              <Trash2 className="size-4 text-destructive" />
+              <Trash2 className="size-3 sm:size-4 text-destructive" />
             </Button>
           </div>
         </div>

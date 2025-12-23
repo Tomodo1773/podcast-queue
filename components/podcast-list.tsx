@@ -111,8 +111,8 @@ export function PodcastList({ userId }: PodcastListProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-2 overflow-x-auto">
           <Button variant={filter === "all" ? "default" : "outline"} onClick={() => setFilter("all")}>
             すべて ({podcasts.length})
           </Button>
@@ -125,7 +125,7 @@ export function PodcastList({ userId }: PodcastListProps) {
         </div>
 
         {/* View mode toggle buttons */}
-        <div className="hidden md:flex items-center gap-2">
+        <div className="flex items-center gap-2 justify-end">
           <Button
             size="sm"
             variant={viewMode === "grid" ? "default" : "outline"}
@@ -155,7 +155,7 @@ export function PodcastList({ userId }: PodcastListProps) {
               : `${filter === "watched" ? "視聴済み" : "未視聴"}のPodcastがありません`}
           </p>
         </div>
-      ) : viewMode === "grid" || isMobile ? (
+      ) : viewMode === "grid" ? (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {filteredPodcasts.map((podcast) => (
             <PodcastCard
