@@ -1,19 +1,19 @@
-import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-import { PodcastList } from "@/components/podcast-list";
-import { Button } from "@/components/ui/button";
-import { LogOut, PlusCircle } from "lucide-react";
-import Link from "next/link";
-import Image from "next/image";
+import { LogOut, PlusCircle } from "lucide-react"
+import Image from "next/image"
+import Link from "next/link"
+import { redirect } from "next/navigation"
+import { PodcastList } from "@/components/podcast-list"
+import { Button } from "@/components/ui/button"
+import { createClient } from "@/lib/supabase/server"
 
 export default async function PodcastsPage() {
-	const supabase = await createClient();
+	const supabase = await createClient()
 
 	const {
 		data: { user },
-	} = await supabase.auth.getUser();
+	} = await supabase.auth.getUser()
 	if (!user) {
-		redirect("/auth/login");
+		redirect("/auth/login")
 	}
 
 	return (
@@ -33,10 +33,10 @@ export default async function PodcastsPage() {
 						</Link>
 						<form
 							action={async () => {
-								"use server";
-								const supabase = await createClient();
-								await supabase.auth.signOut();
-								redirect("/auth/login");
+								"use server"
+								const supabase = await createClient()
+								await supabase.auth.signOut()
+								redirect("/auth/login")
 							}}
 						>
 							<Button variant="outline" type="submit">
@@ -51,5 +51,5 @@ export default async function PodcastsPage() {
 				<PodcastList userId={user.id} />
 			</main>
 		</div>
-	);
+	)
 }
