@@ -1,10 +1,17 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { PodcastDialog } from "@/components/podcast-dialog"
-import { Check, ExternalLink, Trash2, X } from "lucide-react"
+import { Check, ExternalLink, MoreVertical, Trash2, X } from "lucide-react"
 import Image from "next/image"
 import { getPlatformColor } from "@/lib/utils"
 
@@ -38,8 +45,7 @@ export function PodcastListItem({ podcast, onToggleWatched, onDelete }: PodcastL
     }
   }
 
-  const handleDelete = async (e: React.MouseEvent) => {
-    e.stopPropagation()
+  const handleDelete = async () => {
     const confirmed = window.confirm("このポッドキャストを削除してもよろしいですか？この操作は取り消せません。")
     if (!confirmed) return
     try {
@@ -51,8 +57,8 @@ export function PodcastListItem({ podcast, onToggleWatched, onDelete }: PodcastL
 
   return (
     <>
-      <div 
-        className="flex gap-2 sm:gap-4 p-3 sm:p-4 border rounded-lg cursor-pointer hover:shadow-md transition-shadow bg-card"
+      <div
+        className="flex gap-3 p-3 sm:p-4 border rounded-lg cursor-pointer hover:shadow-md transition-shadow bg-card"
         role="button"
         tabIndex={0}
         onClick={handleClick}
@@ -61,7 +67,7 @@ export function PodcastListItem({ podcast, onToggleWatched, onDelete }: PodcastL
         {/* Left side: Thumbnail */}
         <div className="flex-shrink-0">
           {podcast.thumbnail_url ? (
-            <div className="relative w-24 sm:w-32 md:w-48 aspect-video">
+            <div className="relative w-32 sm:w-40 md:w-48 aspect-video">
               <Image
                 src={podcast.thumbnail_url}
                 alt={podcast.title || "Podcast thumbnail"}
@@ -70,65 +76,69 @@ export function PodcastListItem({ podcast, onToggleWatched, onDelete }: PodcastL
               />
             </div>
           ) : (
-            <div className="w-24 sm:w-32 md:w-48 aspect-video bg-muted flex items-center justify-center rounded-lg">
+            <div className="w-32 sm:w-40 md:w-48 aspect-video bg-muted flex items-center justify-center rounded-lg">
               <span className="text-xs sm:text-sm text-muted-foreground">サムネイルなし</span>
             </div>
           )}
         </div>
 
         {/* Right side: Content */}
-        <div className="flex-1 min-w-0 flex flex-col justify-between">
-          {/* Top section: Title and Platform */}
-          <div>
-            <div className="flex items-start justify-between gap-2 mb-2">
+        <div className="flex-1 min-w-0 flex flex-col">
+          {/* Title row with menu */}
+          <div className="flex items-start gap-2">
+            <div className="flex-1 min-w-0">
               <h3 className="font-semibold line-clamp-2 text-pretty text-sm sm:text-base">{podcast.title || "タイトルなし"}</h3>
-              {podcast.platform && (
-                <Badge className={getPlatformColor(podcast.platform)} variant="default">
-                  <span className="text-xs">{podcast.platform}</span>
-                </Badge>
-              )}
             </div>
-            {podcast.description && (
-              <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2 mb-3">
-                {podcast.description}
-              </p>
-            )}
+            {/* 3-dot menu */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0 flex-shrink-0">
+                  <MoreVertical className="size-4" />
+                  <span className="sr-only">メニューを開く</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+                <DropdownMenuItem onClick={() => onToggleWatched(podcast.id, podcast.is_watched)}>
+                  {podcast.is_watched ? (
+                    <>
+                      <X className="mr-2 size-4" />
+                      未視聴にする
+                    </>
+                  ) : (
+                    <>
+                      <Check className="mr-2 size-4" />
+                      視聴済みにする
+                    </>
+                  )}
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <a href={podcast.url} target="_blank" rel="noopener noreferrer">
+                    <ExternalLink className="mr-2 size-4" />
+                    リンクを開く
+                  </a>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleDelete} className="text-destructive focus:text-destructive">
+                  <Trash2 className="mr-2 size-4" />
+                  削除
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
-          {/* Bottom section: Action buttons */}
-          <div className="flex flex-wrap items-center gap-2">
-            <Button
-              size="sm"
-              variant={podcast.is_watched ? "default" : "outline"}
-              onClick={(e) => {
-                e.stopPropagation()
-                onToggleWatched(podcast.id, podcast.is_watched)
-              }}
-              className="text-xs sm:text-sm"
-            >
-              {podcast.is_watched ? (
-                <>
-                  <Check className="mr-1 size-3 sm:size-4" />
-                  <span className="hidden sm:inline">視聴済み</span>
-                  <span className="sm:hidden">済</span>
-                </>
-              ) : (
-                <>
-                  <X className="mr-1 size-3 sm:size-4" />
-                  <span className="hidden sm:inline">未視聴</span>
-                  <span className="sm:hidden">未</span>
-                </>
-              )}
-            </Button>
-            <Button size="sm" variant="outline" asChild>
-              <a href={podcast.url} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
-                <ExternalLink className="size-3 sm:size-4" />
-              </a>
-            </Button>
-            <Button size="sm" variant="ghost" onClick={handleDelete}>
-              <Trash2 className="size-3 sm:size-4 text-destructive" />
-            </Button>
-          </div>
+          {/* Platform badge */}
+          {podcast.platform && (
+            <Badge className={`${getPlatformColor(podcast.platform)} mt-1 w-fit`} variant="default">
+              <span className="text-xs">{podcast.platform}</span>
+            </Badge>
+          )}
+
+          {/* Description */}
+          {podcast.description && (
+            <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2 mt-1">
+              {podcast.description}
+            </p>
+          )}
         </div>
       </div>
 
