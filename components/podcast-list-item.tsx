@@ -58,7 +58,7 @@ export function PodcastListItem({ podcast, onToggleWatched, onDelete }: PodcastL
   return (
     <>
       <div
-        className="flex gap-3 p-3 sm:p-4 border rounded-lg cursor-pointer hover:shadow-md transition-shadow bg-card"
+        className="flex gap-3 p-3 sm:p-4 border rounded-lg cursor-pointer hover:shadow-md hover:border-primary/30 transition-all bg-card"
         role="button"
         tabIndex={0}
         onClick={handleClick}

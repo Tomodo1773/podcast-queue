@@ -136,9 +136,9 @@ export function AddPodcastForm({ userId, onSuccess }: AddPodcastFormProps) {
 	};
 
 	return (
-		<Card>
+		<Card className="border-t-4 border-t-primary">
 			<CardHeader>
-				<CardTitle>新しいPodcastを追加</CardTitle>
+				<CardTitle className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">新しいPodcastを追加</CardTitle>
 				<CardDescription>PodcastのURLを入力して、自動的にメタデータを取得できます</CardDescription>
 			</CardHeader>
 			<CardContent>

@@ -61,8 +61,8 @@ export function PodcastDialog({ podcast, open, onOpenChange, onToggleWatched, on
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-xl pr-6">{podcast.title || "タイトルなし"}</DialogTitle>
+        <DialogHeader className="border-b pb-4">
+          <DialogTitle className="text-xl pr-6 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">{podcast.title || "タイトルなし"}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           {podcast.thumbnail_url && (
