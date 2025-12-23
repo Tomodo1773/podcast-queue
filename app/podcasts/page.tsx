@@ -27,7 +27,7 @@ export default async function PodcastsPage() {
 					<div className="flex items-center gap-4">
 						<Link href="/podcasts/add">
 							<Button>
-								<PlusCircle className="size-4 sm:mr-2" />
+								<PlusCircle className="size-4" />
 								<span className="hidden sm:inline">Podcastを追加</span>
 							</Button>
 						</Link>
@@ -40,7 +40,7 @@ export default async function PodcastsPage() {
 							}}
 						>
 							<Button variant="outline" type="submit">
-								<LogOut className="size-4 sm:mr-2" />
+								<LogOut className="size-4" />
 								<span className="hidden sm:inline">ログアウト</span>
 							</Button>
 						</form>
