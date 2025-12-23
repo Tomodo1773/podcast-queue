@@ -14,9 +14,10 @@ import { Loader2 } from "lucide-react";
 
 type AddPodcastFormProps = {
 	userId: string;
+	onSuccess?: () => void;
 };
 
-export function AddPodcastForm({ userId }: AddPodcastFormProps) {
+export function AddPodcastForm({ userId, onSuccess }: AddPodcastFormProps) {
 	const [url, setUrl] = useState("");
 	const [title, setTitle] = useState("");
 	const [description, setDescription] = useState("");
@@ -120,7 +121,11 @@ export function AddPodcastForm({ userId }: AddPodcastFormProps) {
 			}
 
 			console.log("[v0] Podcast追加成功、リダイレクト開始");
-			router.push("/podcasts");
+			if (onSuccess) {
+				onSuccess();
+			} else {
+				router.push("/podcasts");
+			}
 			router.refresh();
 			console.log("[v0] フォーム送信完了");
 		} catch (error: unknown) {
