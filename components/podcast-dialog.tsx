@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Check, ExternalLink, Trash2, X } from "lucide-react"
+import { Check, ExternalLink, Play, Trash2, X } from "lucide-react"
 import Image from "next/image"
 import { getPlatformColor } from "@/lib/utils"
 
@@ -66,14 +66,24 @@ export function PodcastDialog({ podcast, open, onOpenChange, onToggleWatched, on
         </DialogHeader>
         <div className="space-y-4">
           {podcast.thumbnail_url && (
-            <div className="relative w-full aspect-video">
+            <a
+              href={podcast.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group relative block w-full aspect-video"
+            >
               <Image
                 src={podcast.thumbnail_url}
                 alt={podcast.title || "Podcast thumbnail"}
                 fill
-                className="object-cover rounded-lg"
+                className="object-cover rounded-lg transition-opacity group-hover:opacity-80"
               />
-            </div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="flex size-16 items-center justify-center rounded-full bg-black/50 text-white transition-transform group-hover:scale-110">
+                  <Play className="size-8 ml-1" fill="currentColor" />
+                </div>
+              </div>
+            </a>
           )}
           <div className="space-y-2">
             {podcast.platform && (
