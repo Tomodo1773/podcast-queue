@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -25,9 +26,40 @@ type PodcastDialogProps = {
   onDelete: (id: string) => Promise<void>
 }
 
+const DESCRIPTION_MAX_LENGTH_MOBILE = 70
+const DESCRIPTION_MAX_LENGTH_DESKTOP = 200
+const MOBILE_BREAKPOINT = 768
+
 export function PodcastDialog({ podcast, open, onOpenChange, onToggleWatched, onDelete }: PodcastDialogProps) {
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false)
+  const [maxLength, setMaxLength] = useState(DESCRIPTION_MAX_LENGTH_DESKTOP)
+
+  useEffect(() => {
+    const updateMaxLength = () => {
+      setMaxLength(window.innerWidth < MOBILE_BREAKPOINT
+        ? DESCRIPTION_MAX_LENGTH_MOBILE
+        : DESCRIPTION_MAX_LENGTH_DESKTOP)
+    }
+    updateMaxLength()
+    window.addEventListener("resize", updateMaxLength)
+    return () => window.removeEventListener("resize", updateMaxLength)
+  }, [])
+
+  const description = podcast.description || ""
+  const isLongDescription = description.length > maxLength
+  const displayedDescription = isDescriptionExpanded || !isLongDescription
+    ? description
+    : description.slice(0, maxLength)
+
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen) {
+      setIsDescriptionExpanded(false)
+    }
+    onOpenChange(newOpen)
+  }
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl pr-6">{podcast.title || "タイトルなし"}</DialogTitle>
@@ -62,7 +94,19 @@ export function PodcastDialog({ podcast, open, onOpenChange, onToggleWatched, on
           {podcast.description && (
             <div className="space-y-2">
               <h3 className="text-sm font-semibold text-muted-foreground">説明:</h3>
-              <p className="text-sm whitespace-pre-wrap">{podcast.description}</p>
+              <p className="text-sm whitespace-pre-wrap">
+                {displayedDescription}
+                {isLongDescription && !isDescriptionExpanded && "..."}
+              </p>
+              {isLongDescription && (
+                <button
+                  type="button"
+                  onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                  className="text-sm text-primary hover:underline"
+                >
+                  {isDescriptionExpanded ? "閉じる" : "もっと見る"}
+                </button>
+              )}
             </div>
           )}
           <div className="flex items-center gap-2 pt-4">
