@@ -1,9 +1,10 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Check, ExternalLink, Trash2, X } from "lucide-react"
+import { Check, ExternalLink, Play, Trash2, X } from "lucide-react"
 import Image from "next/image"
 import { getPlatformColor } from "@/lib/utils"
 
@@ -25,23 +26,64 @@ type PodcastDialogProps = {
   onDelete: (id: string) => Promise<void>
 }
 
+const DESCRIPTION_MAX_LENGTH_MOBILE = 70
+const DESCRIPTION_MAX_LENGTH_DESKTOP = 200
+const MOBILE_BREAKPOINT = 768
+
 export function PodcastDialog({ podcast, open, onOpenChange, onToggleWatched, onDelete }: PodcastDialogProps) {
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false)
+  const [maxLength, setMaxLength] = useState(DESCRIPTION_MAX_LENGTH_DESKTOP)
+
+  useEffect(() => {
+    const updateMaxLength = () => {
+      setMaxLength(window.innerWidth < MOBILE_BREAKPOINT
+        ? DESCRIPTION_MAX_LENGTH_MOBILE
+        : DESCRIPTION_MAX_LENGTH_DESKTOP)
+    }
+    updateMaxLength()
+    window.addEventListener("resize", updateMaxLength)
+    return () => window.removeEventListener("resize", updateMaxLength)
+  }, [])
+
+  const description = podcast.description || ""
+  const isLongDescription = description.length > maxLength
+  const displayedDescription = isDescriptionExpanded || !isLongDescription
+    ? description
+    : description.slice(0, maxLength)
+
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen) {
+      setIsDescriptionExpanded(false)
+    }
+    onOpenChange(newOpen)
+  }
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl pr-6">{podcast.title || "タイトルなし"}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           {podcast.thumbnail_url && (
-            <div className="relative w-full aspect-video">
+            <a
+              href={podcast.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group relative block w-full aspect-video"
+            >
               <Image
                 src={podcast.thumbnail_url}
                 alt={podcast.title || "Podcast thumbnail"}
                 fill
-                className="object-cover rounded-lg"
+                className="object-cover rounded-lg transition-opacity group-hover:opacity-80"
               />
-            </div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="flex size-16 items-center justify-center rounded-full bg-black/50 text-white transition-transform group-hover:scale-110">
+                  <Play className="size-8 ml-1" fill="currentColor" />
+                </div>
+              </div>
+            </a>
           )}
           <div className="space-y-2">
             {podcast.platform && (
@@ -62,7 +104,19 @@ export function PodcastDialog({ podcast, open, onOpenChange, onToggleWatched, on
           {podcast.description && (
             <div className="space-y-2">
               <h3 className="text-sm font-semibold text-muted-foreground">説明:</h3>
-              <p className="text-sm whitespace-pre-wrap">{podcast.description}</p>
+              <p className="text-sm whitespace-pre-wrap">
+                {displayedDescription}
+                {isLongDescription && !isDescriptionExpanded && "..."}
+              </p>
+              {isLongDescription && (
+                <button
+                  type="button"
+                  onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                  className="text-sm text-primary hover:underline"
+                >
+                  {isDescriptionExpanded ? "閉じる" : "もっと見る"}
+                </button>
+              )}
             </div>
           )}
           <div className="flex items-center gap-2 pt-4">
