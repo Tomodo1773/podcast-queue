@@ -20,9 +20,9 @@ export default async function PodcastsPage() {
 		<div className="min-h-screen bg-background">
 			<header className="border-b">
 				<div className="container mx-auto px-4 py-4 flex items-center justify-between">
-					<div className="flex items-center gap-2">
-						<Image src="/podqueue-icon.svg" alt="PodQueue" width={32} height={32} />
-						<h1 className="text-2xl font-bold">PodQueue</h1>
+					<div className="flex items-center gap-0">
+						<Image src="/podqueue-icon.svg" alt="P" width={32} height={32} />
+						<h1 className="text-2xl font-bold">odQueue</h1>
 					</div>
 					<div className="flex items-center gap-4">
 						<Link href="/podcasts/add">
