@@ -4,7 +4,7 @@
 	"private": true,
 	"scripts": {
 		"build": "next build",
-		"check": "biome check --write --unsafe .",
+		"check": "biome check --write .",
 		"dev": "next dev",
 		"format": "biome format --write .",
 		"lint": "biome lint .",
