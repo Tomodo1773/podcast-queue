@@ -13,8 +13,14 @@ npm run dev
 # ビルド
 npm run build
 
-# Lint
+# Lint + Format + 未使用コード検出（修正も適用）
+npm run check
+
+# Lintのみ
 npm run lint
+
+# Formatのみ
+npm run format
 
 # 本番起動
 npm start
@@ -47,6 +53,7 @@ Next.js 16 (App Router) + Supabase + shadcn/ui で構成されたPodcast管理We
 - **UI**: shadcn/ui (new-york スタイル), Radix UI, Lucide Icons
 - **バックエンド**: Supabase (認証 + PostgreSQL)
 - **パスエイリアス**: `@/*` でルートからのインポート
+- **Lint/Format**: Biome, knip（未使用コード検出）
 
 ### データモデル
 
