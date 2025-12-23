@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PodcastList } from "@/components/podcast-list";
+import { AddPodcastDialog } from "@/components/add-podcast-dialog";
 import { Button } from "@/components/ui/button";
-import { LogOut, PlusCircle } from "lucide-react";
-import Link from "next/link";
+import { LogOut } from "lucide-react";
 import Image from "next/image";
 
 export default async function PodcastsPage() {
@@ -25,12 +25,7 @@ export default async function PodcastsPage() {
 						<h1 className="text-2xl font-bold">PodQueue</h1>
 					</div>
 					<div className="flex items-center gap-4">
-						<Link href="/podcasts/add">
-							<Button>
-								<PlusCircle className="size-4" />
-								<span className="hidden sm:inline">Podcastを追加</span>
-							</Button>
-						</Link>
+						<AddPodcastDialog userId={user.id} />
 						<form
 							action={async () => {
 								"use server";

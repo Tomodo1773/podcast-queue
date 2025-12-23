@@ -1,0 +1,259 @@
+"use client";
+
+import type React from "react";
+
+import { createClient } from "@/lib/supabase/client";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "@/components/ui/dialog";
+import { Loader2, PlusCircle } from "lucide-react";
+
+type AddPodcastDialogProps = {
+	userId: string;
+};
+
+export function AddPodcastDialog({ userId }: AddPodcastDialogProps) {
+	const [open, setOpen] = useState(false);
+	const [url, setUrl] = useState("");
+	const [title, setTitle] = useState("");
+	const [description, setDescription] = useState("");
+	const [thumbnailUrl, setThumbnailUrl] = useState("");
+	const [platform, setPlatform] = useState("");
+	const [isLoading, setIsLoading] = useState(false);
+	const [isFetchingMetadata, setIsFetchingMetadata] = useState(false);
+	const [error, setError] = useState<string | null>(null);
+	const router = useRouter();
+
+	const detectPlatform = (url: string): string => {
+		if (url.includes("youtube.com") || url.includes("youtu.be")) return "YouTube";
+		if (url.includes("spotify.com")) return "Spotify";
+		if (url.includes("newspicks.com") || url.includes("npx.me")) return "NewsPicks";
+		if (url.includes("pivot")) return "Pivot";
+		return "その他";
+	};
+
+	const resetForm = () => {
+		setUrl("");
+		setTitle("");
+		setDescription("");
+		setThumbnailUrl("");
+		setPlatform("");
+		setError(null);
+	};
+
+	const handleOpenChange = (newOpen: boolean) => {
+		setOpen(newOpen);
+		if (!newOpen) {
+			resetForm();
+		}
+	};
+
+	const handleFetchMetadata = async () => {
+		if (!url) return;
+
+		setIsFetchingMetadata(true);
+		setError(null);
+
+		try {
+			const response = await fetch("/api/fetch-metadata", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ url }),
+			});
+
+			if (!response.ok) {
+				throw new Error("メタデータの取得に失敗しました");
+			}
+
+			const data = await response.json();
+
+			if (data.title) setTitle(data.title);
+			if (data.description) setDescription(data.description);
+			if (data.image) setThumbnailUrl(data.image);
+		} catch (error: unknown) {
+			console.error("メタデータ取得エラー:", error);
+			setError("メタデータの取得に失敗しました。手動で入力してください。");
+		} finally {
+			setIsFetchingMetadata(false);
+		}
+	};
+
+	const handleUrlChange = (newUrl: string) => {
+		setUrl(newUrl);
+		if (newUrl) {
+			setPlatform(detectPlatform(newUrl));
+		}
+	};
+
+	const handleSubmit = async (e: React.FormEvent) => {
+		e.preventDefault();
+		const supabase = createClient();
+		setIsLoading(true);
+		setError(null);
+
+		try {
+			const {
+				data: { user },
+				error: userError,
+			} = await supabase.auth.getUser();
+
+			if (userError) {
+				throw new Error("認証に失敗しました。再度ログインしてください。");
+			}
+
+			if (!user) {
+				throw new Error("ログインが必要です");
+			}
+
+			const podcastData = {
+				user_id: user.id,
+				url,
+				title: title || null,
+				description: description || null,
+				thumbnail_url: thumbnailUrl || null,
+				platform: platform || null,
+				is_watched: false,
+			};
+
+			const { error: insertError } = await supabase.from("podcasts").insert(podcastData).select();
+
+			if (insertError) {
+				throw insertError;
+			}
+
+			setOpen(false);
+			resetForm();
+			router.refresh();
+		} catch (error: unknown) {
+			console.error("Podcast追加エラー:", error);
+			setError(error instanceof Error ? error.message : "Podcastの追加に失敗しました");
+		} finally {
+			setIsLoading(false);
+		}
+	};
+
+	return (
+		<Dialog open={open} onOpenChange={handleOpenChange}>
+			<DialogTrigger asChild>
+				<Button>
+					<PlusCircle className="size-4" />
+					<span className="hidden sm:inline">Podcastを追加</span>
+				</Button>
+			</DialogTrigger>
+			<DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
+				<DialogHeader>
+					<DialogTitle>新しいPodcastを追加</DialogTitle>
+					<DialogDescription>
+						PodcastのURLを入力して、自動的にメタデータを取得できます
+					</DialogDescription>
+				</DialogHeader>
+				<form onSubmit={handleSubmit} className="space-y-6">
+					<div className="space-y-2">
+						<Label htmlFor="url">URL *</Label>
+						<div className="flex gap-2">
+							<Input
+								id="url"
+								type="url"
+								placeholder="https://..."
+								required
+								value={url}
+								onChange={(e) => handleUrlChange(e.target.value)}
+								className="flex-1"
+							/>
+							<Button
+								type="button"
+								variant="outline"
+								onClick={handleFetchMetadata}
+								disabled={!url || isFetchingMetadata}
+							>
+								{isFetchingMetadata ? (
+									<>
+										<Loader2 className="mr-2 size-4 animate-spin" />
+										取得中
+									</>
+								) : (
+									"メタデータ取得"
+								)}
+							</Button>
+						</div>
+					</div>
+
+					<div className="space-y-2">
+						<Label htmlFor="title">タイトル</Label>
+						<Input
+							id="title"
+							type="text"
+							placeholder="Podcastのタイトル"
+							value={title}
+							onChange={(e) => setTitle(e.target.value)}
+						/>
+					</div>
+
+					<div className="space-y-2">
+						<Label htmlFor="description">説明</Label>
+						<Textarea
+							id="description"
+							placeholder="Podcastの説明"
+							value={description}
+							onChange={(e) => setDescription(e.target.value)}
+							rows={4}
+						/>
+					</div>
+
+					<div className="space-y-2">
+						<Label htmlFor="thumbnail">サムネイルURL</Label>
+						<Input
+							id="thumbnail"
+							type="url"
+							placeholder="https://..."
+							value={thumbnailUrl}
+							onChange={(e) => setThumbnailUrl(e.target.value)}
+						/>
+					</div>
+
+					<div className="space-y-2">
+						<Label htmlFor="platform">プラットフォーム</Label>
+						<Input
+							id="platform"
+							type="text"
+							placeholder="YouTube, Spotify等"
+							value={platform}
+							onChange={(e) => setPlatform(e.target.value)}
+						/>
+					</div>
+
+					{error && <p className="text-sm text-destructive">{error}</p>}
+
+					<div className="flex gap-2">
+						<Button type="submit" disabled={isLoading} className="flex-1">
+							{isLoading ? (
+								<>
+									<Loader2 className="mr-2 size-4 animate-spin" />
+									追加中...
+								</>
+							) : (
+								"追加"
+							)}
+						</Button>
+						<Button type="button" variant="outline" onClick={() => setOpen(false)}>
+							キャンセル
+						</Button>
+					</div>
+				</form>
+			</DialogContent>
+		</Dialog>
+	);
+}
