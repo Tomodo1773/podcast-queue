@@ -15,6 +15,7 @@ type Podcast = {
 	thumbnail_url: string | null;
 	platform: string | null;
 	is_watched: boolean;
+	watched_at: string | null;
 	created_at: string;
 };
 
@@ -76,13 +77,15 @@ export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
 
 	const handleToggleWatched = async (id: string, currentStatus: boolean) => {
 		const supabase = createClient();
+		const newStatus = !currentStatus;
+		const watched_at = newStatus ? new Date().toISOString() : null;
 
-		const { error } = await supabase.from("podcasts").update({ is_watched: !currentStatus }).eq("id", id);
+		const { error } = await supabase.from("podcasts").update({ is_watched: newStatus, watched_at }).eq("id", id);
 
 		if (error) {
 			console.error("[v0] ステータス更新エラー:", error);
 		} else {
-			setPodcasts((prev) => prev.map((p) => (p.id === id ? { ...p, is_watched: !currentStatus } : p)));
+			setPodcasts((prev) => prev.map((p) => (p.id === id ? { ...p, is_watched: newStatus, watched_at } : p)));
 		}
 	};
 

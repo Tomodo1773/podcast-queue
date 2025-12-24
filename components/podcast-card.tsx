@@ -24,6 +24,7 @@ type Podcast = {
   thumbnail_url: string | null
   platform: string | null
   is_watched: boolean
+  watched_at: string | null
 }
 
 type PodcastCardProps = {
