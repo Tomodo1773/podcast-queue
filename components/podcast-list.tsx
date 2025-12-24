@@ -20,9 +20,10 @@ type Podcast = {
 
 type PodcastListProps = {
 	userId: string;
+	refreshKey?: number;
 };
 
-export function PodcastList({ userId }: PodcastListProps) {
+export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
 	const [podcasts, setPodcasts] = useState<Podcast[]>([]);
 	const [filteredPodcasts, setFilteredPodcasts] = useState<Podcast[]>([]);
 	const [filter, setFilter] = useState<"all" | "watched" | "unwatched">("unwatched");
@@ -32,7 +33,7 @@ export function PodcastList({ userId }: PodcastListProps) {
 
 	useEffect(() => {
 		loadPodcasts();
-	}, [userId]);
+	}, [userId, refreshKey]);
 
 	useEffect(() => {
 		const checkIsMobile = () => {

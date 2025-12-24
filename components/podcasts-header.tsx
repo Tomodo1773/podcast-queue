@@ -11,9 +11,10 @@ import { createClient } from "@/lib/supabase/client";
 
 type PodcastsHeaderProps = {
 	userId: string;
+	onPodcastAdded?: () => void;
 };
 
-export function PodcastsHeader({ userId }: PodcastsHeaderProps) {
+export function PodcastsHeader({ userId, onPodcastAdded }: PodcastsHeaderProps) {
 	const [open, setOpen] = useState(false);
 	const router = useRouter();
 
@@ -48,7 +49,10 @@ export function PodcastsHeader({ userId }: PodcastsHeaderProps) {
 						<DialogTitle className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">Podcastを追加</DialogTitle>
 						<DialogDescription>PodcastのURLを入力して追加できます</DialogDescription>
 					</DialogHeader>
-					<AddPodcastForm userId={userId} onSuccess={() => setOpen(false)} />
+					<AddPodcastForm userId={userId} onSuccess={() => {
+						setOpen(false);
+						onPodcastAdded?.();
+					}} />
 				</DialogContent>
 			</Dialog>
 		</header>
