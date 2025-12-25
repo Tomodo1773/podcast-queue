@@ -33,6 +33,7 @@ export function AddPodcastForm({ userId, onSuccess }: AddPodcastFormProps) {
 		if (url.includes("spotify.com")) return "Spotify";
 		if (url.includes("newspicks.com") || url.includes("npx.me")) return "NewsPicks";
 		if (url.includes("pivot")) return "Pivot";
+		if (url.includes("txbiz.tv-tokyo.co.jp")) return "テレ東Biz";
 		return "その他";
 	};
 
