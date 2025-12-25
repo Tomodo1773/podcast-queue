@@ -24,13 +24,28 @@ type PodcastListProps = {
 	refreshKey?: number;
 };
 
+const VIEW_MODE_STORAGE_KEY = "podcast-view-mode";
+
 export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
 	const [podcasts, setPodcasts] = useState<Podcast[]>([]);
 	const [filteredPodcasts, setFilteredPodcasts] = useState<Podcast[]>([]);
 	const [filter, setFilter] = useState<"all" | "watched" | "unwatched">("unwatched");
-	const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+	const [viewMode, setViewMode] = useState<"grid" | "list">(() => {
+		if (typeof window !== "undefined") {
+			const saved = localStorage.getItem(VIEW_MODE_STORAGE_KEY);
+			if (saved === "grid" || saved === "list") {
+				return saved;
+			}
+		}
+		return "grid";
+	});
 	const [isLoading, setIsLoading] = useState(true);
 	const [isMobile, setIsMobile] = useState(false);
+
+	const handleViewModeChange = (mode: "grid" | "list") => {
+		setViewMode(mode);
+		localStorage.setItem(VIEW_MODE_STORAGE_KEY, mode);
+	};
 
 	useEffect(() => {
 		loadPodcasts();
@@ -126,10 +141,10 @@ export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
 
 				{/* View mode toggle buttons */}
 				<div className="flex items-center gap-2 justify-end">
-					<Button size="sm" variant={viewMode === "grid" ? "default" : "outline"} onClick={() => setViewMode("grid")} title="グリッド表示" aria-label="グリッド表示に切り替え">
+					<Button size="sm" variant={viewMode === "grid" ? "default" : "outline"} onClick={() => handleViewModeChange("grid")} title="グリッド表示" aria-label="グリッド表示に切り替え">
 						<Grid3x3 className="size-4" />
 					</Button>
-					<Button size="sm" variant={viewMode === "list" ? "default" : "outline"} onClick={() => setViewMode("list")} title="リスト表示" aria-label="リスト表示に切り替え">
+					<Button size="sm" variant={viewMode === "list" ? "default" : "outline"} onClick={() => handleViewModeChange("list")} title="リスト表示" aria-label="リスト表示に切り替え">
 						<List className="size-4" />
 					</Button>
 				</div>
