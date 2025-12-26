@@ -4,7 +4,13 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Check, ExternalLink, Play, Trash2, X } from "lucide-react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Check, ChevronDown, ExternalLink, Play, Trash2, X } from "lucide-react"
 import Image from "next/image"
 import { getPlatformColor, getPriorityLabel, getPriorityColor, type Priority } from "@/lib/utils"
 
@@ -26,13 +32,14 @@ type PodcastDialogProps = {
   onOpenChange: (open: boolean) => void
   onToggleWatched: (id: string, currentStatus: boolean) => Promise<void>
   onDelete: (id: string) => Promise<void>
+  onChangePriority: (id: string, newPriority: Priority) => Promise<void>
 }
 
 const DESCRIPTION_MAX_LENGTH_MOBILE = 70
 const DESCRIPTION_MAX_LENGTH_DESKTOP = 200
 const MOBILE_BREAKPOINT = 768
 
-export function PodcastDialog({ podcast, open, onOpenChange, onToggleWatched, onDelete }: PodcastDialogProps) {
+export function PodcastDialog({ podcast, open, onOpenChange, onToggleWatched, onDelete, onChangePriority }: PodcastDialogProps) {
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false)
   const [maxLength, setMaxLength] = useState(DESCRIPTION_MAX_LENGTH_DESKTOP)
 
@@ -98,9 +105,27 @@ export function PodcastDialog({ podcast, open, onOpenChange, onToggleWatched, on
             )}
             <div className="flex items-center gap-2">
               <span className="text-sm font-semibold text-muted-foreground">優先度:</span>
-              <Badge className={getPriorityColor(podcast.priority)} variant="default">
-                {getPriorityLabel(podcast.priority)}
-              </Badge>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-1 hover:opacity-80 transition-opacity">
+                    <Badge className={getPriorityColor(podcast.priority)} variant="default">
+                      {getPriorityLabel(podcast.priority)}
+                    </Badge>
+                    <ChevronDown className="size-3 text-muted-foreground" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem onClick={() => onChangePriority(podcast.id, "high")} disabled={podcast.priority === "high"}>
+                    {getPriorityLabel("high")}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => onChangePriority(podcast.id, "medium")} disabled={podcast.priority === "medium"}>
+                    {getPriorityLabel("medium")}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => onChangePriority(podcast.id, "low")} disabled={podcast.priority === "low"}>
+                    {getPriorityLabel("low")}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-sm font-semibold text-muted-foreground">ステータス:</span>

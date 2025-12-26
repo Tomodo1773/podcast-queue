@@ -136,6 +136,18 @@ export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
 		}
 	};
 
+	const handleChangePriority = async (id: string, newPriority: Priority) => {
+		const supabase = createClient();
+
+		const { error } = await supabase.from("podcasts").update({ priority: newPriority }).eq("id", id);
+
+		if (error) {
+			console.error("[v0] 優先度更新エラー:", error);
+		} else {
+			setPodcasts((prev) => prev.map((p) => (p.id === id ? { ...p, priority: newPriority } : p)));
+		}
+	};
+
 	if (isLoading) {
 		return (
 			<div className="flex items-center justify-center py-12">
@@ -208,13 +220,13 @@ export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
 			) : viewMode === "grid" ? (
 				<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
 					{filteredPodcasts.map((podcast) => (
-						<PodcastCard key={podcast.id} podcast={podcast} onToggleWatched={handleToggleWatched} onDelete={handleDelete} />
+						<PodcastCard key={podcast.id} podcast={podcast} onToggleWatched={handleToggleWatched} onDelete={handleDelete} onChangePriority={handleChangePriority} />
 					))}
 				</div>
 			) : (
 				<div className="space-y-4">
 					{filteredPodcasts.map((podcast) => (
-						<PodcastListItem key={podcast.id} podcast={podcast} onToggleWatched={handleToggleWatched} onDelete={handleDelete} />
+						<PodcastListItem key={podcast.id} podcast={podcast} onToggleWatched={handleToggleWatched} onDelete={handleDelete} onChangePriority={handleChangePriority} />
 					))}
 				</div>
 			)}
