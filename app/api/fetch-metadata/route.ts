@@ -1,5 +1,47 @@
 import { NextResponse } from "next/server"
 
+// YouTube Data API v3を使って動画情報を取得する関数
+async function fetchYouTubeVideoInfo(videoId: string): Promise<{
+  title: string
+  description: string
+  thumbnail: string
+} | null> {
+  const apiKey = process.env.YOUTUBE_API_KEY
+  if (!apiKey) {
+    console.warn("YOUTUBE_API_KEY is not set, falling back to oEmbed")
+    return null
+  }
+
+  try {
+    const apiUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}&key=${apiKey}`
+    const response = await fetch(apiUrl)
+
+    if (!response.ok) {
+      console.error("YouTube Data API error:", response.status, response.statusText)
+      return null
+    }
+
+    const data = await response.json()
+    if (!data.items || data.items.length === 0) {
+      console.error("YouTube video not found:", videoId)
+      return null
+    }
+
+    const snippet = data.items[0].snippet
+    return {
+      title: snippet.title || "",
+      description: snippet.description || "",
+      thumbnail: snippet.thumbnails?.maxres?.url ||
+        snippet.thumbnails?.high?.url ||
+        snippet.thumbnails?.medium?.url ||
+        `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`,
+    }
+  } catch (error) {
+    console.error("YouTube Data API fetch error:", error)
+    return null
+  }
+}
+
 // YouTube動画IDを抽出する関数
 function extractYouTubeVideoId(url: string): string | null {
   const patterns = [
@@ -37,6 +79,17 @@ export async function POST(request: Request) {
 
     const youtubeVideoId = extractYouTubeVideoId(url)
     if (youtubeVideoId) {
+      // YouTube Data API v3 を優先的に使用
+      const videoInfo = await fetchYouTubeVideoInfo(youtubeVideoId)
+      if (videoInfo) {
+        return NextResponse.json({
+          title: videoInfo.title,
+          description: videoInfo.description,
+          image: videoInfo.thumbnail,
+        })
+      }
+
+      // API Key がない場合や API 失敗時は oEmbed にフォールバック
       try {
         const oembedUrl = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${youtubeVideoId}&format=json`
         const response = await fetch(oembedUrl)
