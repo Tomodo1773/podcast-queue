@@ -107,7 +107,7 @@ export function PodcastDialog({ podcast, open, onOpenChange, onToggleWatched, on
               <span className="text-sm font-semibold text-muted-foreground">優先度:</span>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-1 hover:opacity-80 transition-opacity">
+                  <button className="flex items-center gap-1 hover:opacity-80 transition-opacity focus:outline-none">
                     <Badge className={getPriorityColor(podcast.priority)} variant="default">
                       {getPriorityLabel(podcast.priority)}
                     </Badge>
