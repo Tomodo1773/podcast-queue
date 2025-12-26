@@ -14,7 +14,7 @@ import {
 import { PodcastDialog } from "@/components/podcast-dialog"
 import { Check, ExternalLink, MoreVertical, Trash2, X } from "lucide-react"
 import Image from "next/image"
-import { getPlatformColor } from "@/lib/utils"
+import { getPlatformColor, getPriorityLabel, getPriorityColor, type Priority } from "@/lib/utils"
 
 type Podcast = {
   id: string
@@ -23,6 +23,7 @@ type Podcast = {
   description: string | null
   thumbnail_url: string | null
   platform: string | null
+  priority: Priority
   is_watched: boolean
   watched_at: string | null
 }
@@ -106,11 +107,16 @@ export function PodcastCard({ podcast, onToggleWatched, onDelete }: PodcastCardP
         </CardHeader>
         <CardContent className="flex-1 px-4 pt-3 pb-4">
           <h3 className="font-semibold line-clamp-2 text-pretty mb-1">{podcast.title || "タイトルなし"}</h3>
-          {podcast.platform && (
-            <Badge className={`${getPlatformColor(podcast.platform)} mb-2`} variant="default">
-              {podcast.platform}
+          <div className="flex items-center gap-1 mb-2 flex-wrap">
+            {podcast.platform && (
+              <Badge className={getPlatformColor(podcast.platform)} variant="default">
+                {podcast.platform}
+              </Badge>
+            )}
+            <Badge className={getPriorityColor(podcast.priority)} variant="default">
+              {getPriorityLabel(podcast.priority)}
             </Badge>
-          )}
+          </div>
           {podcast.description && <p className="text-sm text-muted-foreground line-clamp-3">{podcast.description}</p>}
         </CardContent>
       </Card>

@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Check, ExternalLink, Play, Trash2, X } from "lucide-react"
 import Image from "next/image"
-import { getPlatformColor } from "@/lib/utils"
+import { getPlatformColor, getPriorityLabel, getPriorityColor, type Priority } from "@/lib/utils"
 
 type Podcast = {
   id: string
@@ -15,6 +15,7 @@ type Podcast = {
   description: string | null
   thumbnail_url: string | null
   platform: string | null
+  priority: Priority
   is_watched: boolean
   watched_at: string | null
 }
@@ -95,6 +96,12 @@ export function PodcastDialog({ podcast, open, onOpenChange, onToggleWatched, on
                 </Badge>
               </div>
             )}
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold text-muted-foreground">優先度:</span>
+              <Badge className={getPriorityColor(podcast.priority)} variant="default">
+                {getPriorityLabel(podcast.priority)}
+              </Badge>
+            </div>
             <div className="flex items-center gap-2">
               <span className="text-sm font-semibold text-muted-foreground">ステータス:</span>
               <Badge variant={podcast.is_watched ? "default" : "outline"}>

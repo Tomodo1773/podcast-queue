@@ -5,7 +5,8 @@ import { useEffect, useState } from "react";
 import { PodcastCard } from "@/components/podcast-card";
 import { PodcastListItem } from "@/components/podcast-list-item";
 import { Button } from "@/components/ui/button";
-import { Grid3x3, List, Loader2 } from "lucide-react";
+import { Grid3x3, List, Loader2, ArrowUpDown } from "lucide-react";
+import { type Priority, getPriorityLabel, getPriorityOrder } from "@/lib/utils";
 
 type Podcast = {
 	id: string;
@@ -14,6 +15,7 @@ type Podcast = {
 	description: string | null;
 	thumbnail_url: string | null;
 	platform: string | null;
+	priority: Priority;
 	is_watched: boolean;
 	watched_at: string | null;
 	created_at: string;
@@ -26,10 +28,14 @@ type PodcastListProps = {
 
 const VIEW_MODE_STORAGE_KEY = "podcast-view-mode";
 
+type SortOption = "created_at" | "priority";
+
 export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
 	const [podcasts, setPodcasts] = useState<Podcast[]>([]);
 	const [filteredPodcasts, setFilteredPodcasts] = useState<Podcast[]>([]);
 	const [filter, setFilter] = useState<"all" | "watched" | "unwatched">("unwatched");
+	const [priorityFilter, setPriorityFilter] = useState<Priority | "all">("all");
+	const [sortBy, setSortBy] = useState<SortOption>("created_at");
 	const [viewMode, setViewMode] = useState<"grid" | "list">(() => {
 		if (typeof window !== "undefined") {
 			const saved = localStorage.getItem(VIEW_MODE_STORAGE_KEY);
@@ -63,8 +69,8 @@ export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
 	}, []);
 
 	useEffect(() => {
-		applyFilter();
-	}, [filter, podcasts]);
+		applyFilterAndSort();
+	}, [filter, priorityFilter, sortBy, podcasts]);
 
 	const loadPodcasts = async () => {
 		const supabase = createClient();
@@ -80,14 +86,28 @@ export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
 		setIsLoading(false);
 	};
 
-	const applyFilter = () => {
-		if (filter === "all") {
-			setFilteredPodcasts(podcasts);
-		} else if (filter === "watched") {
-			setFilteredPodcasts(podcasts.filter((p) => p.is_watched));
-		} else {
-			setFilteredPodcasts(podcasts.filter((p) => !p.is_watched));
+	const applyFilterAndSort = () => {
+		let result = [...podcasts];
+
+		// 視聴状態フィルタ
+		if (filter === "watched") {
+			result = result.filter((p) => p.is_watched);
+		} else if (filter === "unwatched") {
+			result = result.filter((p) => !p.is_watched);
 		}
+
+		// 優先度フィルタ
+		if (priorityFilter !== "all") {
+			result = result.filter((p) => p.priority === priorityFilter);
+		}
+
+		// 並び替え
+		if (sortBy === "priority") {
+			result.sort((a, b) => getPriorityOrder(a.priority) - getPriorityOrder(b.priority));
+		}
+		// created_atの場合はすでにDBから降順で取得済み
+
+		setFilteredPodcasts(result);
 	};
 
 	const handleToggleWatched = async (id: string, currentStatus: boolean) => {
@@ -126,6 +146,7 @@ export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
 
 	return (
 		<div className="space-y-6">
+			{/* 視聴状態フィルタ */}
 			<div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
 				<div className="flex items-center gap-2 overflow-x-auto">
 					<Button variant={filter === "all" ? "default" : "outline"} onClick={() => setFilter("all")}>
@@ -146,6 +167,36 @@ export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
 					</Button>
 					<Button size="sm" variant={viewMode === "list" ? "default" : "outline"} onClick={() => handleViewModeChange("list")} title="リスト表示" aria-label="リスト表示に切り替え">
 						<List className="size-4" />
+					</Button>
+				</div>
+			</div>
+
+			{/* 優先度フィルタ・並び替え */}
+			<div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+				<div className="flex items-center gap-2 overflow-x-auto">
+					<span className="text-sm text-muted-foreground whitespace-nowrap">優先度:</span>
+					<Button size="sm" variant={priorityFilter === "all" ? "default" : "outline"} onClick={() => setPriorityFilter("all")}>
+						すべて
+					</Button>
+					<Button size="sm" variant={priorityFilter === "high" ? "default" : "outline"} onClick={() => setPriorityFilter("high")}>
+						{getPriorityLabel("high")}
+					</Button>
+					<Button size="sm" variant={priorityFilter === "medium" ? "default" : "outline"} onClick={() => setPriorityFilter("medium")}>
+						{getPriorityLabel("medium")}
+					</Button>
+					<Button size="sm" variant={priorityFilter === "low" ? "default" : "outline"} onClick={() => setPriorityFilter("low")}>
+						{getPriorityLabel("low")}
+					</Button>
+				</div>
+
+				<div className="flex items-center gap-2">
+					<span className="text-sm text-muted-foreground whitespace-nowrap">並び替え:</span>
+					<Button size="sm" variant={sortBy === "created_at" ? "default" : "outline"} onClick={() => setSortBy("created_at")}>
+						追加日順
+					</Button>
+					<Button size="sm" variant={sortBy === "priority" ? "default" : "outline"} onClick={() => setSortBy("priority")}>
+						<ArrowUpDown className="size-3 mr-1" />
+						優先度順
 					</Button>
 				</div>
 			</div>

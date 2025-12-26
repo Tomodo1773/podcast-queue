@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
+import { type Priority, getPriorityLabel } from "@/lib/utils";
 
 type AddPodcastFormProps = {
 	userId: string;
@@ -23,6 +24,7 @@ export function AddPodcastForm({ userId, onSuccess }: AddPodcastFormProps) {
 	const [description, setDescription] = useState("");
 	const [thumbnailUrl, setThumbnailUrl] = useState("");
 	const [platform, setPlatform] = useState("");
+	const [priority, setPriority] = useState<Priority>("medium");
 	const [isLoading, setIsLoading] = useState(false);
 	const [isFetchingMetadata, setIsFetchingMetadata] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -108,6 +110,7 @@ export function AddPodcastForm({ userId, onSuccess }: AddPodcastFormProps) {
 				description: description || null,
 				thumbnail_url: thumbnailUrl || null,
 				platform: platform || null,
+				priority,
 				is_watched: false,
 			};
 			console.log("[v0] 挿入データ:", podcastData);
@@ -179,6 +182,23 @@ export function AddPodcastForm({ userId, onSuccess }: AddPodcastFormProps) {
 					<div className="space-y-2">
 						<Label htmlFor="platform">プラットフォーム</Label>
 						<Input id="platform" type="text" placeholder="YouTube, Spotify等" value={platform} onChange={(e) => setPlatform(e.target.value)} />
+					</div>
+
+					<div className="space-y-2">
+						<Label>優先度</Label>
+						<div className="flex gap-2">
+							{(["high", "medium", "low"] as const).map((p) => (
+								<Button
+									key={p}
+									type="button"
+									variant={priority === p ? "default" : "outline"}
+									onClick={() => setPriority(p)}
+									className="flex-1"
+								>
+									{getPriorityLabel(p)}
+								</Button>
+							))}
+						</div>
 					</div>
 
 					{error && <p className="text-sm text-destructive">{error}</p>}

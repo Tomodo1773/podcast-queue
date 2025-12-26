@@ -13,7 +13,7 @@ import {
 import { PodcastDialog } from "@/components/podcast-dialog"
 import { Check, ExternalLink, MoreVertical, Trash2, X } from "lucide-react"
 import Image from "next/image"
-import { getPlatformColor } from "@/lib/utils"
+import { getPlatformColor, getPriorityLabel, getPriorityColor, type Priority } from "@/lib/utils"
 
 type Podcast = {
   id: string
@@ -22,6 +22,7 @@ type Podcast = {
   description: string | null
   thumbnail_url: string | null
   platform: string | null
+  priority: Priority
   is_watched: boolean
   watched_at: string | null
 }
@@ -127,12 +128,17 @@ export function PodcastListItem({ podcast, onToggleWatched, onDelete }: PodcastL
             </DropdownMenu>
           </div>
 
-          {/* Platform badge */}
-          {podcast.platform && (
-            <Badge className={`${getPlatformColor(podcast.platform)} mt-1 w-fit`} variant="default">
-              <span className="text-xs">{podcast.platform}</span>
+          {/* Platform and priority badges */}
+          <div className="flex items-center gap-1 mt-1 flex-wrap">
+            {podcast.platform && (
+              <Badge className={getPlatformColor(podcast.platform)} variant="default">
+                <span className="text-xs">{podcast.platform}</span>
+              </Badge>
+            )}
+            <Badge className={getPriorityColor(podcast.priority)} variant="default">
+              <span className="text-xs">{getPriorityLabel(podcast.priority)}</span>
             </Badge>
-          )}
+          </div>
 
           {/* Description */}
           {podcast.description && (
