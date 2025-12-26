@@ -8,12 +8,15 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { PodcastDialog } from "@/components/podcast-dialog"
-import { Check, ExternalLink, MoreVertical, Trash2, X } from "lucide-react"
+import { ArrowUpDown, Check, ExternalLink, MoreVertical, Trash2, X } from "lucide-react"
 import Image from "next/image"
-import { getPlatformColor } from "@/lib/utils"
+import { getPlatformColor, getPriorityLabel, getPriorityColor, type Priority } from "@/lib/utils"
 
 type Podcast = {
   id: string
@@ -22,6 +25,7 @@ type Podcast = {
   description: string | null
   thumbnail_url: string | null
   platform: string | null
+  priority: Priority
   is_watched: boolean
   watched_at: string | null
 }
@@ -30,9 +34,10 @@ type PodcastListItemProps = {
   podcast: Podcast
   onToggleWatched: (id: string, currentStatus: boolean) => Promise<void>
   onDelete: (id: string) => Promise<void>
+  onChangePriority: (id: string, newPriority: Priority) => Promise<void>
 }
 
-export function PodcastListItem({ podcast, onToggleWatched, onDelete }: PodcastListItemProps) {
+export function PodcastListItem({ podcast, onToggleWatched, onDelete, onChangePriority }: PodcastListItemProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
   const handleClick = () => {
@@ -118,6 +123,23 @@ export function PodcastListItem({ podcast, onToggleWatched, onDelete }: PodcastL
                     リンクを開く
                   </a>
                 </DropdownMenuItem>
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger>
+                    <ArrowUpDown className="mr-2 size-4" />
+                    優先度を変更
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent>
+                    <DropdownMenuItem onClick={() => onChangePriority(podcast.id, "high")} disabled={podcast.priority === "high"}>
+                      {getPriorityLabel("high")}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onChangePriority(podcast.id, "medium")} disabled={podcast.priority === "medium"}>
+                      {getPriorityLabel("medium")}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onChangePriority(podcast.id, "low")} disabled={podcast.priority === "low"}>
+                      {getPriorityLabel("low")}
+                    </DropdownMenuItem>
+                  </DropdownMenuSubContent>
+                </DropdownMenuSub>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleDelete} className="text-destructive focus:text-destructive">
                   <Trash2 className="mr-2 size-4" />
@@ -127,12 +149,17 @@ export function PodcastListItem({ podcast, onToggleWatched, onDelete }: PodcastL
             </DropdownMenu>
           </div>
 
-          {/* Platform badge */}
-          {podcast.platform && (
-            <Badge className={`${getPlatformColor(podcast.platform)} mt-1 w-fit`} variant="default">
-              <span className="text-xs">{podcast.platform}</span>
+          {/* Platform and priority badges */}
+          <div className="flex items-center gap-1 mt-1 flex-wrap">
+            {podcast.platform && (
+              <Badge className={getPlatformColor(podcast.platform)} variant="default">
+                <span className="text-xs">{podcast.platform}</span>
+              </Badge>
+            )}
+            <Badge className={getPriorityColor(podcast.priority)} variant="default">
+              <span className="text-xs">{getPriorityLabel(podcast.priority)}</span>
             </Badge>
-          )}
+          </div>
 
           {/* Description */}
           {podcast.description && (
@@ -149,6 +176,7 @@ export function PodcastListItem({ podcast, onToggleWatched, onDelete }: PodcastL
         onOpenChange={setIsDialogOpen}
         onToggleWatched={onToggleWatched}
         onDelete={onDelete}
+        onChangePriority={onChangePriority}
       />
     </>
   )

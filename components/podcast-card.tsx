@@ -9,12 +9,15 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { PodcastDialog } from "@/components/podcast-dialog"
-import { Check, ExternalLink, MoreVertical, Trash2, X } from "lucide-react"
+import { ArrowUpDown, Check, ExternalLink, MoreVertical, Trash2, X } from "lucide-react"
 import Image from "next/image"
-import { getPlatformColor } from "@/lib/utils"
+import { getPlatformColor, getPriorityLabel, getPriorityColor, type Priority } from "@/lib/utils"
 
 type Podcast = {
   id: string
@@ -23,6 +26,7 @@ type Podcast = {
   description: string | null
   thumbnail_url: string | null
   platform: string | null
+  priority: Priority
   is_watched: boolean
   watched_at: string | null
 }
@@ -31,9 +35,10 @@ type PodcastCardProps = {
   podcast: Podcast
   onToggleWatched: (id: string, currentStatus: boolean) => Promise<void>
   onDelete: (id: string) => Promise<void>
+  onChangePriority: (id: string, newPriority: Priority) => Promise<void>
 }
 
-export function PodcastCard({ podcast, onToggleWatched, onDelete }: PodcastCardProps) {
+export function PodcastCard({ podcast, onToggleWatched, onDelete, onChangePriority }: PodcastCardProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
   const handleDelete = async () => {
@@ -96,6 +101,23 @@ export function PodcastCard({ podcast, onToggleWatched, onDelete }: PodcastCardP
                   リンクを開く
                 </a>
               </DropdownMenuItem>
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>
+                  <ArrowUpDown className="mr-2 size-4" />
+                  優先度を変更
+                </DropdownMenuSubTrigger>
+                <DropdownMenuSubContent>
+                  <DropdownMenuItem onClick={() => onChangePriority(podcast.id, "high")} disabled={podcast.priority === "high"}>
+                    {getPriorityLabel("high")}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => onChangePriority(podcast.id, "medium")} disabled={podcast.priority === "medium"}>
+                    {getPriorityLabel("medium")}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => onChangePriority(podcast.id, "low")} disabled={podcast.priority === "low"}>
+                    {getPriorityLabel("low")}
+                  </DropdownMenuItem>
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleDelete} className="text-destructive focus:text-destructive">
                 <Trash2 className="mr-2 size-4" />
@@ -106,11 +128,16 @@ export function PodcastCard({ podcast, onToggleWatched, onDelete }: PodcastCardP
         </CardHeader>
         <CardContent className="flex-1 px-4 pt-3 pb-4">
           <h3 className="font-semibold line-clamp-2 text-pretty mb-1">{podcast.title || "タイトルなし"}</h3>
-          {podcast.platform && (
-            <Badge className={`${getPlatformColor(podcast.platform)} mb-2`} variant="default">
-              {podcast.platform}
+          <div className="flex items-center gap-1 mb-2 flex-wrap">
+            {podcast.platform && (
+              <Badge className={getPlatformColor(podcast.platform)} variant="default">
+                {podcast.platform}
+              </Badge>
+            )}
+            <Badge className={getPriorityColor(podcast.priority)} variant="default">
+              {getPriorityLabel(podcast.priority)}
             </Badge>
-          )}
+          </div>
           {podcast.description && <p className="text-sm text-muted-foreground line-clamp-3">{podcast.description}</p>}
         </CardContent>
       </Card>
@@ -121,6 +148,7 @@ export function PodcastCard({ podcast, onToggleWatched, onDelete }: PodcastCardP
         onOpenChange={setIsDialogOpen}
         onToggleWatched={onToggleWatched}
         onDelete={onDelete}
+        onChangePriority={onChangePriority}
       />
     </>
   )
