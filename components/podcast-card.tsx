@@ -62,7 +62,7 @@ export function PodcastCard({ podcast, onToggleWatched, onDelete, onChangePriori
 
   return (
     <>
-      <Card className={`flex flex-col h-full cursor-pointer hover:shadow-lg hover:border-primary/30 transition-all gap-0 ${podcast.is_watching ? "ring-2 ring-primary border-primary bg-primary/5" : ""}`} onClick={() => setIsDialogOpen(true)}>
+      <Card className={`flex flex-col h-full cursor-pointer hover:shadow-lg hover:border-primary/30 transition-all gap-0 ${podcast.is_watching ? "bg-primary/10" : ""}`} onClick={() => setIsDialogOpen(true)}>
         <CardHeader className="p-0 relative">
           {podcast.thumbnail_url ? (
             <div className="relative w-full aspect-video">
