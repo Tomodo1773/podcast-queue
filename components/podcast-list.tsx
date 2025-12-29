@@ -17,6 +17,7 @@ type Podcast = {
 	platform: string | null;
 	priority: Priority;
 	is_watched: boolean;
+	is_watching: boolean;
 	watched_at: string | null;
 	created_at: string;
 };
@@ -107,6 +108,13 @@ export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
 		}
 		// created_atの場合はすでにDBから降順で取得済み
 
+		// 視聴中を先頭に移動
+		result.sort((a, b) => {
+			if (a.is_watching && !b.is_watching) return -1;
+			if (!a.is_watching && b.is_watching) return 1;
+			return 0; // 既存の並び順を維持
+		});
+
 		setFilteredPodcasts(result);
 	};
 
@@ -115,12 +123,21 @@ export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
 		const newStatus = !currentStatus;
 		const watched_at = newStatus ? new Date().toISOString() : null;
 
-		const { error } = await supabase.from("podcasts").update({ is_watched: newStatus, watched_at }).eq("id", id);
+		// 視聴済みにする場合は視聴中も解除
+		const updateData = {
+			is_watched: newStatus,
+			watched_at,
+			...(newStatus && { is_watching: false }),
+		};
+
+		const { error } = await supabase.from("podcasts").update(updateData).eq("id", id);
 
 		if (error) {
 			console.error("[v0] ステータス更新エラー:", error);
 		} else {
-			setPodcasts((prev) => prev.map((p) => (p.id === id ? { ...p, is_watched: newStatus, watched_at } : p)));
+			setPodcasts((prev) =>
+				prev.map((p) => (p.id === id ? { ...p, is_watched: newStatus, watched_at, is_watching: newStatus ? false : p.is_watching } : p))
+			);
 		}
 	};
 
@@ -145,6 +162,28 @@ export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
 			console.error("[v0] 優先度更新エラー:", error);
 		} else {
 			setPodcasts((prev) => prev.map((p) => (p.id === id ? { ...p, priority: newPriority } : p)));
+		}
+	};
+
+	const handleStartWatching = async (id: string) => {
+		const supabase = createClient();
+
+		// 1. 現在視聴中のものをすべて解除
+		await supabase.from("podcasts").update({ is_watching: false }).eq("user_id", userId).eq("is_watching", true);
+
+		// 2. 対象を視聴中に設定
+		const { error } = await supabase.from("podcasts").update({ is_watching: true }).eq("id", id);
+
+		if (error) {
+			console.error("[v0] 視聴中設定エラー:", error);
+		} else {
+			// 3. ローカルstate更新
+			setPodcasts((prev) =>
+				prev.map((p) => ({
+					...p,
+					is_watching: p.id === id,
+				}))
+			);
 		}
 	};
 
@@ -220,13 +259,13 @@ export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
 			) : viewMode === "grid" ? (
 				<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
 					{filteredPodcasts.map((podcast) => (
-						<PodcastCard key={podcast.id} podcast={podcast} onToggleWatched={handleToggleWatched} onDelete={handleDelete} onChangePriority={handleChangePriority} />
+						<PodcastCard key={podcast.id} podcast={podcast} onToggleWatched={handleToggleWatched} onDelete={handleDelete} onChangePriority={handleChangePriority} onStartWatching={handleStartWatching} />
 					))}
 				</div>
 			) : (
 				<div className="space-y-4">
 					{filteredPodcasts.map((podcast) => (
-						<PodcastListItem key={podcast.id} podcast={podcast} onToggleWatched={handleToggleWatched} onDelete={handleDelete} onChangePriority={handleChangePriority} />
+						<PodcastListItem key={podcast.id} podcast={podcast} onToggleWatched={handleToggleWatched} onDelete={handleDelete} onChangePriority={handleChangePriority} onStartWatching={handleStartWatching} />
 					))}
 				</div>
 			)}
