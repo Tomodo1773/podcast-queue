@@ -23,6 +23,7 @@ type Podcast = {
   platform: string | null
   priority: Priority
   is_watched: boolean
+  is_watching: boolean
   watched_at: string | null
 }
 
@@ -33,13 +34,14 @@ type PodcastDialogProps = {
   onToggleWatched: (id: string, currentStatus: boolean) => Promise<void>
   onDelete: (id: string) => Promise<void>
   onChangePriority: (id: string, newPriority: Priority) => Promise<void>
+  onStartWatching: (id: string) => Promise<void>
 }
 
 const DESCRIPTION_MAX_LENGTH_MOBILE = 70
 const DESCRIPTION_MAX_LENGTH_DESKTOP = 200
 const MOBILE_BREAKPOINT = 768
 
-export function PodcastDialog({ podcast, open, onOpenChange, onToggleWatched, onDelete, onChangePriority }: PodcastDialogProps) {
+export function PodcastDialog({ podcast, open, onOpenChange, onToggleWatched, onDelete, onChangePriority, onStartWatching }: PodcastDialogProps) {
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false)
   const [maxLength, setMaxLength] = useState(DESCRIPTION_MAX_LENGTH_DESKTOP)
 
@@ -67,6 +69,12 @@ export function PodcastDialog({ podcast, open, onOpenChange, onToggleWatched, on
     onOpenChange(newOpen)
   }
 
+  const handleOpenLink = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    await onStartWatching(podcast.id)
+    window.open(podcast.url, "_blank", "noopener,noreferrer")
+  }
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -75,11 +83,10 @@ export function PodcastDialog({ podcast, open, onOpenChange, onToggleWatched, on
         </DialogHeader>
         <div className="space-y-4">
           {podcast.thumbnail_url && (
-            <a
-              href={podcast.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group relative block w-full aspect-video"
+            <button
+              type="button"
+              onClick={handleOpenLink}
+              className="group relative block w-full aspect-video cursor-pointer"
             >
               <Image
                 src={podcast.thumbnail_url}
@@ -92,7 +99,7 @@ export function PodcastDialog({ podcast, open, onOpenChange, onToggleWatched, on
                   <Play className="size-8 ml-1" fill="currentColor" />
                 </div>
               </div>
-            </a>
+            </button>
           )}
           <div className="space-y-2">
             {podcast.platform && (
@@ -169,11 +176,9 @@ export function PodcastDialog({ podcast, open, onOpenChange, onToggleWatched, on
                 </>
               )}
             </Button>
-            <Button variant="outline" asChild>
-              <a href={podcast.url} target="_blank" rel="noopener noreferrer">
-                <ExternalLink className="mr-2 size-4" />
-                開く
-              </a>
+            <Button variant="outline" onClick={handleOpenLink}>
+              <ExternalLink className="mr-2 size-4" />
+              開く
             </Button>
             <Button
               variant="destructive"

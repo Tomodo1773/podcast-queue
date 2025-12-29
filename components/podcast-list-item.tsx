@@ -27,6 +27,7 @@ type Podcast = {
   platform: string | null
   priority: Priority
   is_watched: boolean
+  is_watching: boolean
   watched_at: string | null
 }
 
@@ -35,9 +36,10 @@ type PodcastListItemProps = {
   onToggleWatched: (id: string, currentStatus: boolean) => Promise<void>
   onDelete: (id: string) => Promise<void>
   onChangePriority: (id: string, newPriority: Priority) => Promise<void>
+  onStartWatching: (id: string) => Promise<void>
 }
 
-export function PodcastListItem({ podcast, onToggleWatched, onDelete, onChangePriority }: PodcastListItemProps) {
+export function PodcastListItem({ podcast, onToggleWatched, onDelete, onChangePriority, onStartWatching }: PodcastListItemProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
   const handleClick = () => {
@@ -49,6 +51,13 @@ export function PodcastListItem({ podcast, onToggleWatched, onDelete, onChangePr
       event.preventDefault()
       setIsDialogOpen(true)
     }
+  }
+
+  const handleOpenLink = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    await onStartWatching(podcast.id)
+    window.open(podcast.url, "_blank", "noopener,noreferrer")
   }
 
   const handleDelete = async () => {
@@ -64,7 +73,7 @@ export function PodcastListItem({ podcast, onToggleWatched, onDelete, onChangePr
   return (
     <>
       <div
-        className="flex gap-3 p-3 sm:p-4 border rounded-lg cursor-pointer hover:shadow-md hover:border-primary/30 transition-all bg-card"
+        className={`flex gap-3 p-3 sm:p-4 border rounded-lg cursor-pointer hover:shadow-md hover:border-primary/30 transition-all bg-card ${podcast.is_watching ? "ring-2 ring-primary border-primary bg-primary/5" : ""}`}
         role="button"
         tabIndex={0}
         onClick={handleClick}
@@ -117,11 +126,9 @@ export function PodcastListItem({ podcast, onToggleWatched, onDelete, onChangePr
                     </>
                   )}
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <a href={podcast.url} target="_blank" rel="noopener noreferrer">
-                    <ExternalLink className="mr-2 size-4" />
-                    リンクを開く
-                  </a>
+                <DropdownMenuItem onClick={handleOpenLink}>
+                  <ExternalLink className="mr-2 size-4" />
+                  リンクを開く
                 </DropdownMenuItem>
                 <DropdownMenuSub>
                   <DropdownMenuSubTrigger>
@@ -177,6 +184,7 @@ export function PodcastListItem({ podcast, onToggleWatched, onDelete, onChangePr
         onToggleWatched={onToggleWatched}
         onDelete={onDelete}
         onChangePriority={onChangePriority}
+        onStartWatching={onStartWatching}
       />
     </>
   )

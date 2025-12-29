@@ -28,6 +28,7 @@ type Podcast = {
   platform: string | null
   priority: Priority
   is_watched: boolean
+  is_watching: boolean
   watched_at: string | null
 }
 
@@ -36,10 +37,18 @@ type PodcastCardProps = {
   onToggleWatched: (id: string, currentStatus: boolean) => Promise<void>
   onDelete: (id: string) => Promise<void>
   onChangePriority: (id: string, newPriority: Priority) => Promise<void>
+  onStartWatching: (id: string) => Promise<void>
 }
 
-export function PodcastCard({ podcast, onToggleWatched, onDelete, onChangePriority }: PodcastCardProps) {
+export function PodcastCard({ podcast, onToggleWatched, onDelete, onChangePriority, onStartWatching }: PodcastCardProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+
+  const handleOpenLink = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    await onStartWatching(podcast.id)
+    window.open(podcast.url, "_blank", "noopener,noreferrer")
+  }
 
   const handleDelete = async () => {
     const confirmed = window.confirm("このポッドキャストを削除してもよろしいですか？この操作は取り消せません。")
@@ -53,7 +62,7 @@ export function PodcastCard({ podcast, onToggleWatched, onDelete, onChangePriori
 
   return (
     <>
-      <Card className="flex flex-col h-full cursor-pointer hover:shadow-lg hover:border-primary/30 transition-all gap-0" onClick={() => setIsDialogOpen(true)}>
+      <Card className={`flex flex-col h-full cursor-pointer hover:shadow-lg hover:border-primary/30 transition-all gap-0 ${podcast.is_watching ? "ring-2 ring-primary border-primary bg-primary/5" : ""}`} onClick={() => setIsDialogOpen(true)}>
         <CardHeader className="p-0 relative">
           {podcast.thumbnail_url ? (
             <div className="relative w-full aspect-video">
@@ -95,11 +104,9 @@ export function PodcastCard({ podcast, onToggleWatched, onDelete, onChangePriori
                   </>
                 )}
               </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <a href={podcast.url} target="_blank" rel="noopener noreferrer">
-                  <ExternalLink className="mr-2 size-4" />
-                  リンクを開く
-                </a>
+              <DropdownMenuItem onClick={handleOpenLink}>
+                <ExternalLink className="mr-2 size-4" />
+                リンクを開く
               </DropdownMenuItem>
               <DropdownMenuSub>
                 <DropdownMenuSubTrigger>
@@ -149,6 +156,7 @@ export function PodcastCard({ podcast, onToggleWatched, onDelete, onChangePriori
         onToggleWatched={onToggleWatched}
         onDelete={onDelete}
         onChangePriority={onChangePriority}
+        onStartWatching={onStartWatching}
       />
     </>
   )
