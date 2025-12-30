@@ -80,7 +80,7 @@ export function PodcastListItem({ podcast, onToggleWatched, onDelete, onChangePr
         onKeyDown={handleKeyDown}
       >
         {/* Left side: Thumbnail */}
-        <div className="flex-shrink-0">
+        <div className="flex-shrink-0 relative">
           {podcast.thumbnail_url ? (
             <div className="relative w-32 sm:w-40 md:w-48 aspect-video">
               <Image
@@ -94,6 +94,12 @@ export function PodcastListItem({ podcast, onToggleWatched, onDelete, onChangePr
             <div className="w-32 sm:w-40 md:w-48 aspect-video bg-muted flex items-center justify-center rounded-lg">
               <span className="text-xs sm:text-sm text-muted-foreground">サムネイルなし</span>
             </div>
+          )}
+          {/* 視聴中ラベル */}
+          {podcast.is_watching && (
+            <Badge className="absolute top-1 left-1 bg-primary text-primary-foreground text-xs">
+              視聴中
+            </Badge>
           )}
         </div>
 
