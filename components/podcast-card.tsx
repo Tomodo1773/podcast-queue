@@ -78,6 +78,12 @@ export function PodcastCard({ podcast, onToggleWatched, onDelete, onChangePriori
               <span className="text-muted-foreground">サムネイルなし</span>
             </div>
           )}
+          {/* 視聴中ラベル */}
+          {podcast.is_watching && (
+            <Badge className="absolute top-2 left-2 bg-primary text-primary-foreground">
+              視聴中
+            </Badge>
+          )}
           {/* 3-dot menu on thumbnail */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
