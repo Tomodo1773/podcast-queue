@@ -4,13 +4,15 @@ import { NextResponse } from "next/server"
 let spotifyAccessToken: string | null = null
 let spotifyTokenExpiry: number = 0
 
-// Spotify Web APIのアクセストークンを取得する関数（Client Credentials Flow）
+// Spotify Web APIのアクセストークンを取得する関数（Refresh Token Flow）
+// 事前に取得したRefresh Tokenを使用してアクセストークンを取得
 async function getSpotifyAccessToken(): Promise<string | null> {
   const clientId = process.env.SPOTIFY_CLIENT_ID
   const clientSecret = process.env.SPOTIFY_CLIENT_SECRET
+  const refreshToken = process.env.SPOTIFY_REFRESH_TOKEN
 
-  if (!clientId || !clientSecret) {
-    console.warn("SPOTIFY_CLIENT_ID or SPOTIFY_CLIENT_SECRET is not set")
+  if (!clientId || !clientSecret || !refreshToken) {
+    console.warn("SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, or SPOTIFY_REFRESH_TOKEN is not set")
     return null
   }
 
@@ -26,7 +28,7 @@ async function getSpotifyAccessToken(): Promise<string | null> {
         "Content-Type": "application/x-www-form-urlencoded",
         Authorization: `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString("base64")}`,
       },
-      body: "grant_type=client_credentials",
+      body: `grant_type=refresh_token&refresh_token=${encodeURIComponent(refreshToken)}`,
     })
 
     if (!response.ok) {
