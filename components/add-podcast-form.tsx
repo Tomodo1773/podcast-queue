@@ -3,7 +3,7 @@
 import type React from "react";
 
 import { createClient } from "@/lib/supabase/client";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,10 +16,12 @@ import { type Priority, getPriorityLabel } from "@/lib/utils";
 type AddPodcastFormProps = {
 	userId: string;
 	onSuccess?: () => void;
+	initialUrl?: string;
+	autoFetch?: boolean;
 };
 
-export function AddPodcastForm({ userId, onSuccess }: AddPodcastFormProps) {
-	const [url, setUrl] = useState("");
+export function AddPodcastForm({ userId, onSuccess, initialUrl, autoFetch }: AddPodcastFormProps) {
+	const [url, setUrl] = useState(initialUrl || "");
 	const [title, setTitle] = useState("");
 	const [description, setDescription] = useState("");
 	const [thumbnailUrl, setThumbnailUrl] = useState("");
@@ -29,6 +31,7 @@ export function AddPodcastForm({ userId, onSuccess }: AddPodcastFormProps) {
 	const [isFetchingMetadata, setIsFetchingMetadata] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const router = useRouter();
+	const hasAutoFetched = useRef(false);
 
 	const detectPlatform = (url: string): string => {
 		if (url.includes("youtube.com") || url.includes("youtu.be")) return "YouTube";
@@ -38,6 +41,51 @@ export function AddPodcastForm({ userId, onSuccess }: AddPodcastFormProps) {
 		if (url.includes("txbiz.tv-tokyo.co.jp")) return "テレ東Biz";
 		return "その他";
 	};
+
+	// URL共有連携: 初期URLが設定されている場合、プラットフォームを検出
+	// autoFetch=true の場合は自動的にメタデータを取得
+	useEffect(() => {
+		if (initialUrl) {
+			setPlatform(detectPlatform(initialUrl));
+
+			// 自動メタデータ取得（一度だけ実行）
+			if (autoFetch && !hasAutoFetched.current) {
+				hasAutoFetched.current = true;
+				// フォームがマウントされた後に実行するため、少し遅延
+				const fetchMetadata = async () => {
+					setIsFetchingMetadata(true);
+					setError(null);
+
+					try {
+						const response = await fetch("/api/fetch-metadata", {
+							method: "POST",
+							headers: {
+								"Content-Type": "application/json",
+							},
+							body: JSON.stringify({ url: initialUrl }),
+						});
+
+						if (!response.ok) {
+							throw new Error("メタデータの取得に失敗しました");
+						}
+
+						const data = await response.json();
+
+						if (data.title) setTitle(data.title);
+						if (data.description) setDescription(data.description);
+						if (data.image) setThumbnailUrl(data.image);
+					} catch (error: unknown) {
+						console.error("自動メタデータ取得エラー:", error);
+						setError("メタデータの自動取得に失敗しました。手動で取得してください。");
+					} finally {
+						setIsFetchingMetadata(false);
+					}
+				};
+
+				fetchMetadata();
+			}
+		}
+	}, [initialUrl, autoFetch]);
 
 	const handleFetchMetadata = async () => {
 		if (!url) return;

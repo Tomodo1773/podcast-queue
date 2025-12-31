@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -12,11 +12,20 @@ import { createClient } from "@/lib/supabase/client";
 type PodcastsHeaderProps = {
 	userId: string;
 	onPodcastAdded?: () => void;
+	sharedUrl?: string | null;
+	autoFetch?: boolean;
 };
 
-export function PodcastsHeader({ userId, onPodcastAdded }: PodcastsHeaderProps) {
+export function PodcastsHeader({ userId, onPodcastAdded, sharedUrl, autoFetch }: PodcastsHeaderProps) {
 	const [open, setOpen] = useState(false);
 	const router = useRouter();
+
+	// URL共有連携: 共有URLがある場合は自動でダイアログを開く
+	useEffect(() => {
+		if (sharedUrl) {
+			setOpen(true);
+		}
+	}, [sharedUrl]);
 
 	const handleLogout = async () => {
 		const supabase = createClient();
@@ -49,10 +58,19 @@ export function PodcastsHeader({ userId, onPodcastAdded }: PodcastsHeaderProps) 
 						<DialogTitle className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">Podcastを追加</DialogTitle>
 						<DialogDescription>PodcastのURLを入力して追加できます</DialogDescription>
 					</DialogHeader>
-					<AddPodcastForm userId={userId} onSuccess={() => {
-						setOpen(false);
-						onPodcastAdded?.();
-					}} />
+					<AddPodcastForm
+						userId={userId}
+						onSuccess={() => {
+							setOpen(false);
+							onPodcastAdded?.();
+							// URL共有連携: 追加完了後、クエリパラメータをクリア
+							if (sharedUrl) {
+								router.replace("/podcasts");
+							}
+						}}
+						initialUrl={sharedUrl || undefined}
+						autoFetch={autoFetch}
+					/>
 				</DialogContent>
 			</Dialog>
 		</header>
