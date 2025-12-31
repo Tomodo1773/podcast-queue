@@ -9,12 +9,8 @@
   <!-- Circular background with gradient (smaller radius for more padding) -->
   <circle cx="50" cy="50" r="40" fill="url(#purpleBlueGradient)"/>
   
-  <!-- P letter with modern rounded style (white) -->
-  <path d="M 25 30 L 25 70 L 32 70 L 32 53 L 46 53 C 54 53 59 47.5 59 41 C 59 34.5 54 30 46 30 Z M 32 36 L 46 36 C 50 36 53 38.5 53 41 C 53 43.5 50 47 46 47 L 32 47 Z" 
-        fill="white"/>
-  
-  <!-- Three horizontal lines not overlapping with P (white) -->
-  <rect x="62" y="36" width="13" height="3" rx="1.5" fill="white"/>
-  <rect x="62" y="48" width="13" height="3" rx="1.5" fill="white"/>
-  <rect x="62" y="60" width="13" height="3" rx="1.5" fill="white"/>
+  <!-- Stacked cards representing queue (white) -->
+  <rect x="25" y="29" width="36" height="28" rx="3" fill="white" opacity="0.5"/>
+  <rect x="32" y="36" width="36" height="28" rx="3" fill="white" opacity="0.75"/>
+  <rect x="39" y="43" width="36" height="28" rx="3" fill="white"/>
 </svg>
