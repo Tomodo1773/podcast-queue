@@ -69,6 +69,78 @@ function extractSpotifyId(url: string): { type: string; id: string } | null {
   return null
 }
 
+// Spotifyアクセストークンを取得する関数（Client Credentials Flow）
+async function getSpotifyAccessToken(): Promise<string | null> {
+  const clientId = process.env.SPOTIFY_CLIENT_ID
+  const clientSecret = process.env.SPOTIFY_CLIENT_SECRET
+
+  if (!clientId || !clientSecret) {
+    console.warn("Spotify credentials not set, falling back to oEmbed")
+    return null
+  }
+
+  try {
+    const response = await fetch("https://accounts.spotify.com/api/token", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Authorization: `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString("base64")}`,
+      },
+      body: "grant_type=client_credentials",
+    })
+
+    if (!response.ok) {
+      console.error("Spotify token API error:", response.status, response.statusText)
+      return null
+    }
+
+    const data = await response.json()
+    return data.access_token
+  } catch (error) {
+    console.error("Spotify token fetch error:", error)
+    return null
+  }
+}
+
+// Spotify Web APIでエピソード/番組情報を取得する関数
+async function fetchSpotifyInfo(
+  type: "episode" | "show",
+  id: string
+): Promise<{ title: string; description: string; thumbnail: string } | null> {
+  const accessToken = await getSpotifyAccessToken()
+  if (!accessToken) {
+    return null
+  }
+
+  try {
+    const endpoint =
+      type === "episode"
+        ? `https://api.spotify.com/v1/episodes/${id}?market=JP`
+        : `https://api.spotify.com/v1/shows/${id}?market=JP`
+
+    const response = await fetch(endpoint, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    })
+
+    if (!response.ok) {
+      console.error("Spotify API error:", response.status, response.statusText)
+      return null
+    }
+
+    const data = await response.json()
+    return {
+      title: data.name || "",
+      description: data.description || data.html_description || "",
+      thumbnail: data.images?.[0]?.url || "",
+    }
+  } catch (error) {
+    console.error("Spotify API fetch error:", error)
+    return null
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const { url } = await request.json()
@@ -115,6 +187,17 @@ export async function POST(request: Request) {
 
     const spotifyInfo = extractSpotifyId(url)
     if (spotifyInfo) {
+      // Spotify Web API を優先的に使用（descriptionを取得可能）
+      const info = await fetchSpotifyInfo(spotifyInfo.type as "episode" | "show", spotifyInfo.id)
+      if (info) {
+        return NextResponse.json({
+          title: info.title,
+          description: info.description,
+          image: info.thumbnail,
+        })
+      }
+
+      // API失敗時はoEmbedにフォールバック（descriptionは取得不可）
       try {
         const oembedUrl = `https://open.spotify.com/oembed?url=${encodeURIComponent(url)}`
         const response = await fetch(oembedUrl)
