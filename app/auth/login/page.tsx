@@ -43,11 +43,11 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         <Card className="border-t-4 border-t-primary shadow-lg">
           <CardHeader className="text-center">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-blue-500">
-              <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15.536a5 5 0 001.414 1.414m2.828-9.9a9 9 0 0112.728 0" />
-              </svg>
-            </div>
+            <img
+              src="/podqueue-icon.svg"
+              alt="PodQueue"
+              className="mx-auto mb-4 h-12 w-12"
+            />
             <CardTitle className="text-2xl">ログイン</CardTitle>
             <CardDescription>メールアドレスとパスワードを入力してログインしてください</CardDescription>
           </CardHeader>
