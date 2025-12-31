@@ -80,30 +80,22 @@ async function getSpotifyAccessToken(): Promise<string | null> {
   }
 
   try {
-    // URLSearchParamsを使用してボディを構築（推奨形式）
-    const params = new URLSearchParams()
-    params.append("grant_type", "client_credentials")
-
     const response = await fetch("https://accounts.spotify.com/api/token", {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
         Authorization: `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString("base64")}`,
       },
-      body: params.toString(),
-      cache: "no-store",
+      body: "grant_type=client_credentials",
     })
 
     if (!response.ok) {
-      const errorBody = await response.text()
-      console.error("Spotify token API error:", response.status, response.statusText, errorBody)
       return null
     }
 
     const data = await response.json()
     return data.access_token
-  } catch (error) {
-    console.error("Spotify token fetch error:", error)
+  } catch {
     return null
   }
 }
@@ -131,7 +123,6 @@ async function fetchSpotifyInfo(
     })
 
     if (!response.ok) {
-      console.error("Spotify API error:", response.status, response.statusText)
       return null
     }
 
@@ -141,8 +132,7 @@ async function fetchSpotifyInfo(
       description: data.description || data.html_description || "",
       thumbnail: data.images?.[0]?.url || "",
     }
-  } catch (error) {
-    console.error("Spotify API fetch error:", error)
+  } catch {
     return null
   }
 }
