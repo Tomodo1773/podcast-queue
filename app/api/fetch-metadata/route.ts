@@ -80,17 +80,23 @@ async function getSpotifyAccessToken(): Promise<string | null> {
   }
 
   try {
+    // URLSearchParamsを使用してボディを構築（推奨形式）
+    const params = new URLSearchParams()
+    params.append("grant_type", "client_credentials")
+
     const response = await fetch("https://accounts.spotify.com/api/token", {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
         Authorization: `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString("base64")}`,
       },
-      body: "grant_type=client_credentials",
+      body: params.toString(),
+      cache: "no-store",
     })
 
     if (!response.ok) {
-      console.error("Spotify token API error:", response.status, response.statusText)
+      const errorBody = await response.text()
+      console.error("Spotify token API error:", response.status, response.statusText, errorBody)
       return null
     }
 
