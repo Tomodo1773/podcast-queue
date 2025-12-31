@@ -1,5 +1,97 @@
 import { NextResponse } from "next/server"
 
+// Spotifyアクセストークンのキャッシュ
+let spotifyAccessToken: string | null = null
+let spotifyTokenExpiry: number = 0
+
+// Spotify Web APIのアクセストークンを取得する関数（Client Credentials Flow）
+async function getSpotifyAccessToken(): Promise<string | null> {
+  const clientId = process.env.SPOTIFY_CLIENT_ID
+  const clientSecret = process.env.SPOTIFY_CLIENT_SECRET
+
+  if (!clientId || !clientSecret) {
+    console.warn("SPOTIFY_CLIENT_ID or SPOTIFY_CLIENT_SECRET is not set")
+    return null
+  }
+
+  // キャッシュされたトークンが有効な場合はそれを返す
+  if (spotifyAccessToken && Date.now() < spotifyTokenExpiry) {
+    return spotifyAccessToken
+  }
+
+  try {
+    const response = await fetch("https://accounts.spotify.com/api/token", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Authorization: `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString("base64")}`,
+      },
+      body: "grant_type=client_credentials",
+    })
+
+    if (!response.ok) {
+      console.error("Spotify token error:", response.status, response.statusText)
+      return null
+    }
+
+    const data = await response.json()
+    spotifyAccessToken = data.access_token
+    // 有効期限の少し前に期限切れとする（安全マージン）
+    spotifyTokenExpiry = Date.now() + (data.expires_in - 60) * 1000
+
+    return spotifyAccessToken
+  } catch (error) {
+    console.error("Spotify token fetch error:", error)
+    return null
+  }
+}
+
+// Spotify Web APIを使ってエピソード/ショー情報を取得する関数
+async function fetchSpotifyInfo(
+  type: string,
+  id: string
+): Promise<{
+  title: string
+  description: string
+  thumbnail: string
+} | null> {
+  const accessToken = await getSpotifyAccessToken()
+  if (!accessToken) {
+    return null
+  }
+
+  try {
+    const endpoint = type === "episode" ? "episodes" : "shows"
+    const apiUrl = `https://api.spotify.com/v1/${endpoint}/${id}?market=JP`
+
+    const response = await fetch(apiUrl, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    })
+
+    if (!response.ok) {
+      console.error("Spotify API error:", response.status, response.statusText)
+      return null
+    }
+
+    const data = await response.json()
+
+    // サムネイルは最大サイズのものを選択
+    const images = data.images || []
+    const thumbnail = images.length > 0 ? images[0].url : ""
+
+    return {
+      title: data.name || "",
+      description: data.description || data.html_description || "",
+      thumbnail,
+    }
+  } catch (error) {
+    console.error("Spotify API fetch error:", error)
+    return null
+  }
+}
+
 // YouTube Data API v3を使って動画情報を取得する関数
 async function fetchYouTubeVideoInfo(videoId: string): Promise<{
   title: string
@@ -115,6 +207,17 @@ export async function POST(request: Request) {
 
     const spotifyInfo = extractSpotifyId(url)
     if (spotifyInfo) {
+      // Spotify Web API を優先的に使用
+      const spotifyData = await fetchSpotifyInfo(spotifyInfo.type, spotifyInfo.id)
+      if (spotifyData) {
+        return NextResponse.json({
+          title: spotifyData.title,
+          description: spotifyData.description,
+          image: spotifyData.thumbnail,
+        })
+      }
+
+      // API Key がない場合や API 失敗時は oEmbed にフォールバック
       try {
         const oembedUrl = `https://open.spotify.com/oembed?url=${encodeURIComponent(url)}`
         const response = await fetch(oembedUrl)
