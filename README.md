@@ -38,13 +38,13 @@ PodQueueは、YouTube、Spotify、NewsPicksなど様々なプラットフォー�
 
 ```bash
 # 開発サーバー起動
-npm run dev
+pnpm run dev
 
 # ビルド
-npm run build
+pnpm run build
 
 # Lint
-npm run lint
+pnpm run lint
 ```
 
 ## ライセンス
