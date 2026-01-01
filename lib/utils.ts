@@ -41,3 +41,32 @@ export function getPriorityOrder(priority: Priority): number {
     case 'low': return 2
   }
 }
+
+export type Platform = 'youtube' | 'spotify' | 'newspicks' | 'pivot' | 'txbiz' | 'other'
+
+/**
+ * URLからプラットフォームを判定する
+ */
+export function detectPlatform(url: string): Platform {
+  if (url.includes("youtube.com") || url.includes("youtu.be")) return "youtube"
+  if (url.includes("spotify.com")) return "spotify"
+  if (url.includes("newspicks.com") || url.includes("npx.me")) return "newspicks"
+  if (url.includes("pivot.inc") || url.includes("pivot")) return "pivot"
+  if (url.includes("txbiz.tv-tokyo.co.jp")) return "txbiz"
+  return "other"
+}
+
+/**
+ * プラットフォームIDから表示名を取得する
+ */
+export function getPlatformLabel(platform: Platform | string | null): string {
+  if (!platform) return "その他"
+  switch (platform.toLowerCase()) {
+    case 'youtube': return 'YouTube'
+    case 'spotify': return 'Spotify'
+    case 'newspicks': return 'NewsPicks'
+    case 'pivot': return 'Pivot'
+    case 'txbiz': return 'テレ東Biz'
+    default: return 'その他'
+  }
+}

@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
-import { type Priority, getPriorityLabel } from "@/lib/utils";
+import { type Priority, getPriorityLabel, detectPlatform, getPlatformLabel } from "@/lib/utils";
 
 type AddPodcastFormProps = {
 	userId: string;
@@ -33,20 +33,11 @@ export function AddPodcastForm({ userId, onSuccess, initialUrl, autoFetch }: Add
 	const router = useRouter();
 	const hasAutoFetched = useRef(false);
 
-	const detectPlatform = (url: string): string => {
-		if (url.includes("youtube.com") || url.includes("youtu.be")) return "YouTube";
-		if (url.includes("spotify.com")) return "Spotify";
-		if (url.includes("newspicks.com") || url.includes("npx.me")) return "NewsPicks";
-		if (url.includes("pivot")) return "Pivot";
-		if (url.includes("txbiz.tv-tokyo.co.jp")) return "テレ東Biz";
-		return "その他";
-	};
-
 	// URL共有連携: 初期URLが設定されている場合、プラットフォームを検出
 	// autoFetch=true の場合は自動的にメタデータを取得
 	useEffect(() => {
 		if (initialUrl) {
-			setPlatform(detectPlatform(initialUrl));
+			setPlatform(getPlatformLabel(detectPlatform(initialUrl)));
 
 			// 自動メタデータ取得（一度だけ実行）
 			if (autoFetch && !hasAutoFetched.current) {
@@ -122,7 +113,7 @@ export function AddPodcastForm({ userId, onSuccess, initialUrl, autoFetch }: Add
 	const handleUrlChange = (newUrl: string) => {
 		setUrl(newUrl);
 		if (newUrl) {
-			setPlatform(detectPlatform(newUrl));
+			setPlatform(getPlatformLabel(detectPlatform(newUrl)));
 		}
 	};
 
