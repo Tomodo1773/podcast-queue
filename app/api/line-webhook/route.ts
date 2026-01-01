@@ -4,6 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { detectPlatform } from "@/lib/utils";
 import { fetchMetadata } from "@/lib/metadata/fetcher";
 import { replyMessage } from "@/lib/line/reply";
+import { showLoadingAnimation } from "@/lib/line/loading";
 import {
   buildSuccessFlexMessage,
   buildErrorMessage,
@@ -75,6 +76,9 @@ export async function POST(request: Request) {
       // URLを抽出（複数URLがある場合は最初のもの）
       const urlMatch = messageText.match(/https?:\/\/[^\s]+/);
       if (!urlMatch) continue;
+
+      // ローディングアニメーションを先に表示（処理中であることをユーザーに通知）
+      await showLoadingAnimation(lineUserId, 10);
 
       const url = urlMatch[0];
       const listUrl = getListUrl();
