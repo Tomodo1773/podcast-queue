@@ -27,7 +27,11 @@ function verifySignature(body: string, signature: string): boolean {
 
 // リストページのURL生成
 function getListUrl(): string {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://localhost:3000";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL;
+  if (!baseUrl) {
+    console.error("NEXT_PUBLIC_APP_URL is not set");
+    throw new Error("Application base URL is not configured");
+  }
   return `${baseUrl}/podcasts`;
 }
 
