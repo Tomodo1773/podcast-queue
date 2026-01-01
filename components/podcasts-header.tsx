@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { LogOut, PlusCircle } from "lucide-react";
 import { AddPodcastForm } from "@/components/add-podcast-form";
 import { createClient } from "@/lib/supabase/client";
@@ -54,10 +54,6 @@ export function PodcastsHeader({ userId, onPodcastAdded, sharedUrl, autoFetch }:
 
 			<Dialog open={open} onOpenChange={setOpen}>
 				<DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-					<DialogHeader className="border-b pb-4">
-						<DialogTitle className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">Podcastを追加</DialogTitle>
-						<DialogDescription>PodcastのURLを入力して追加できます</DialogDescription>
-					</DialogHeader>
 					<AddPodcastForm
 						userId={userId}
 						onSuccess={() => {
