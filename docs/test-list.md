@@ -11,9 +11,13 @@
 
 ---
 
-## ユーティリティ関数 (`lib/utils.ts`)
+## 優先度：高
 
-### `detectPlatform`
+純粋関数でモック不要、アプリのコアロジックを担うため、テスト価値が最も高い。
+
+### ユーティリティ関数 (`lib/utils.ts`)
+
+#### `detectPlatform`
 - [ ] YouTube URLを正しく判定できる (`youtube.com`, `youtu.be`)
 - [ ] Spotify URLを正しく判定できる
 - [ ] NewsPicks URLを正しく判定できる (`newspicks.com`, `npx.me`)
@@ -21,95 +25,86 @@
 - [ ] テレ東Biz URLを正しく判定できる
 - [ ] 未知のURLは `other` を返す
 
-### `getPlatformLabel`
+#### `getPlatformLabel`
 - [ ] 各プラットフォームに対応するラベルを正しく返す
 - [ ] null/undefinedの場合は「その他」を返す
 
-### `getPriorityLabel`
+#### `getPriorityLabel`
 - [ ] high/medium/lowに対応するラベル（高/中/低）を正しく返す
 
-### `getPriorityOrder`
+#### `getPriorityOrder`
 - [ ] 優先度を正しいソート順（high:0, medium:1, low:2）で返す
 
----
+### URL解析関数 (`lib/metadata/fetcher.ts`)
 
-## メタデータ取得 (`lib/metadata/fetcher.ts`)
-
-### `extractYouTubeVideoId`
+#### `extractYouTubeVideoId`
 - [ ] 標準形式 (`youtube.com/watch?v=xxx`) からIDを抽出できる
 - [ ] 短縮形式 (`youtu.be/xxx`) からIDを抽出できる
 - [ ] Shorts形式 (`youtube.com/shorts/xxx`) からIDを抽出できる
 - [ ] Live形式 (`youtube.com/live/xxx`) からIDを抽出できる
 - [ ] 無効なURLの場合はnullを返す
 
-### `extractSpotifyId`
-- [ ] エピソードURL からtype(`episode`)とIDを抽出できる
-- [ ] 番組URL からtype(`show`)とIDを抽出できる
+#### `extractSpotifyId`
+- [ ] エピソードURLからtype(`episode`)とIDを抽出できる
+- [ ] 番組URLからtype(`show`)とIDを抽出できる
 - [ ] 無効なURLの場合はnullを返す
 
-### `fetchMetadata`
-- [ ] YouTube URLからメタデータを取得できる
-- [ ] Spotify URLからメタデータを取得できる
-- [ ] 一般的なURLからOGPメタデータを取得できる
+---
+
+## 優先度：中
+
+多少のモックやセットアップが必要だが、ユーザー体験に直結する重要な機能。
+
+### コンポーネント - フィルタリング・並び替え (`components/podcast-list.tsx`)
+
+ロジック部分のみ。UI表示は手動確認やE2Eでカバー可能。
+
+- [ ] 視聴状態フィルタ（すべて/未視聴/視聴済み）が正しく動作する
+- [ ] 優先度フィルタが正しく動作する
+- [ ] 並び替え（追加日順/優先度順）が正しく動作する
 
 ---
 
-## API Route (`app/api/fetch-metadata/route.ts`)
+## 優先度：低
 
-### POST `/api/fetch-metadata`
-- [ ] 有効なURLに対してメタデータを返す
-- [ ] URLが空の場合は400エラーを返す
+以下は実装コストに対してテスト価値が低い、または他のテストでカバーされる。
 
----
+### `fetchMetadata` (`lib/metadata/fetcher.ts`)
 
-## API Route (`app/api/line-webhook/route.ts`)
+外部API（YouTube, Spotify, OGP）呼び出しが中心。ほぼモックになるため価値が薄い。
+URL解析のコアロジックは `extractYouTubeVideoId` / `extractSpotifyId` のテストでカバー済み。
 
-### POST `/api/line-webhook`
-- [ ] 署名検証が正しく動作する（正当な署名で通過、不正な署名で403）
-- [ ] テキストメッセージからURLを抽出できる
-- [ ] 連携済みユーザーのPodcast登録が成功する
+### API Route `/api/fetch-metadata`
 
----
+`fetchMetadata` を呼び出すだけの薄いラッパー。`fetchMetadata` のテストと重複するため不要。
 
-## コンポーネント
+### LINE Webhook (`/api/line-webhook`)
 
-### `PodcastList` (`components/podcast-list.tsx`)
-- [ ] Podcastリストが正しくレンダリングされる
-- [ ] 視聴状態フィルタ（すべて/未視聴/視聴済み）が機能する
-- [ ] 優先度フィルタが機能する
-- [ ] 並び替え（追加日順/優先度順）が機能する
-- [ ] グリッド/リスト表示切替が機能する
+署名検証・外部API・DB操作が複雑に絡み合う。ほとんどがモックになるためテストコストが高い割に得られる安心感が少ない。
+実際の動作確認は手動またはステージング環境で行う方が効率的。
 
-### `AddPodcastForm` (`components/add-podcast-form.tsx`)
-- [ ] URLを入力してメタデータ取得ボタンが有効になる
-- [ ] 優先度選択が機能する
-- [ ] フォーム送信時にPodcastが追加される
+### コンポーネント - UI表示・操作
 
-### `PodcastCard` / `PodcastListItem`
-- [ ] Podcastの情報が正しく表示される
-- [ ] 視聴済み/未視聴の切り替えが機能する
-- [ ] 優先度変更が機能する
-- [ ] 削除が機能する
+以下は手動確認またはE2Eテストでカバーする方が効率的。
+
+- `AddPodcastForm`: フォーム入力・送信の統合テスト
+- `PodcastCard` / `PodcastListItem`: 表示・操作のテスト
+- グリッド/リスト表示切替
+
+### 認証関連
+
+Supabase Authに依存し、ほぼモックになる。実際のログインフローは手動確認で十分。
+
+- ログインページのフォーム動作
+- 認証状態によるリダイレクト
 
 ---
 
-## 認証関連
-
-### ログインページ (`app/auth/login/page.tsx`)
-- [ ] フォームが正しくレンダリングされる
-- [ ] 有効な認証情報でログインが成功する
-
-### ルートページ (`app/page.tsx`)
-- [ ] 認証済みユーザーは `/podcasts` にリダイレクトされる
-- [ ] 未認証ユーザーは `/auth/login` にリダイレクトされる
-
----
-
-## 今後の拡張（優先度低）
+## 今後の拡張（必要に応じて）
 
 以下は現時点では実装しないが、将来的に必要になる可能性があるテスト:
 
-- [ ] E2Eテスト（Playwright等）
+- [ ] E2Eテスト（Playwright等）: ユーザーフロー全体の確認
 - [ ] アクセシビリティテスト
 - [ ] パフォーマンステスト
 - [ ] Supabase RLS（Row Level Security）のテスト
