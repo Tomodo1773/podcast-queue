@@ -34,16 +34,16 @@ PodQueueは、ポッドキャストをプラットフォーム横断で一元管
 
 ```bash
 # 開発サーバー起動
-npm run dev
+pnpm run dev
 
 # ビルド
-npm run build
+pnpm run build
 
 # Lint
-npm run lint
+pnpm run lint
 
 # 本番起動
-npm start
+pnpm start
 ```
 
 ## アーキテクチャ
