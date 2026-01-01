@@ -35,7 +35,7 @@ export function SettingsForm({ userId, initialLineUserId }: SettingsFormProps) {
     }
 
     // LINE User IDの形式チェック（Uで始まる33文字）
-    if (!/^U[a-f0-9]{32}$/.test(lineUserId.trim())) {
+    if (!/^U[a-fA-F0-9]{32}$/.test(lineUserId.trim())) {
       setMessage({
         type: "error",
         text: "LINE User IDの形式が正しくありません（Uで始まる33文字の英数字）",
