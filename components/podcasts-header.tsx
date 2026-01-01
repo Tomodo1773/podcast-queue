@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { LogOut, PlusCircle } from "lucide-react";
+import { LogOut, PlusCircle, Settings } from "lucide-react";
+import Link from "next/link";
 import { AddPodcastForm } from "@/components/add-podcast-form";
 import { createClient } from "@/lib/supabase/client";
 
@@ -40,10 +41,15 @@ export function PodcastsHeader({ userId, onPodcastAdded, sharedUrl, autoFetch }:
 					<Image src="/podqueue-icon.svg" alt="PodQueue" width={32} height={32} />
 					<h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">PodQueue</h1>
 				</div>
-				<div className="flex items-center gap-4">
+				<div className="flex items-center gap-2 sm:gap-4">
 					<Button onClick={() => setOpen(true)}>
 						<PlusCircle className="size-4" />
 						<span className="hidden sm:inline">Podcastを追加</span>
+					</Button>
+					<Button variant="ghost" size="icon" asChild>
+						<Link href="/settings">
+							<Settings className="size-4" />
+						</Link>
 					</Button>
 					<Button variant="outline" onClick={handleLogout}>
 						<LogOut className="size-4" />
