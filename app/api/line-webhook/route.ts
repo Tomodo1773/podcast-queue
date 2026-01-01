@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { detectPlatform } from "@/lib/utils";
 
 // 署名検証
 function verifySignature(body: string, signature: string): boolean {
@@ -15,16 +16,6 @@ function verifySignature(body: string, signature: string): boolean {
     .update(body)
     .digest("base64");
   return hash === signature;
-}
-
-// プラットフォーム判定
-function detectPlatform(url: string): string {
-  if (url.includes("youtube.com") || url.includes("youtu.be")) return "youtube";
-  if (url.includes("spotify.com")) return "spotify";
-  if (url.includes("newspicks.com")) return "newspicks";
-  if (url.includes("pivot.inc")) return "pivot";
-  if (url.includes("txbiz.tv-tokyo.co.jp")) return "txbiz";
-  return "other";
 }
 
 // メタデータ取得（内部APIを呼び出し）
