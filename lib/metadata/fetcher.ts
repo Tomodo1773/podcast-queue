@@ -9,6 +9,36 @@ export interface Metadata {
   image: string;
 }
 
+// サンプルエピソードのメタデータ定義
+const SAMPLE_EPISODES: Record<string, Metadata> = {
+  "1": {
+    title: "テクノロジーの未来 #42",
+    description: "AIと人間の共存について、最新の研究動向を交えながら議論します。技術の進歩がもたらす社会変革と、私たちがどう向き合うべきかを考えます。",
+    image: "/samples/episode-1.svg",
+  },
+  "2": {
+    title: "ビジネス最前線 #15",
+    description: "スタートアップ企業の成長戦略と、大企業との協業モデルについて解説。成功事例から学ぶビジネスの新しいカタチ。",
+    image: "/samples/episode-2.svg",
+  },
+  "3": {
+    title: "暮らしのヒント #28",
+    description: "忙しい毎日でも実践できる、シンプルで効果的なライフハック。時間管理から健康維持まで、すぐに使えるTipsを紹介。",
+    image: "/samples/episode-3.svg",
+  },
+};
+
+// サンプルURLからエピソードIDを抽出する関数
+function extractSampleEpisodeId(url: string): string | null {
+  const match = url.match(/podqueue\.example\.com\/sample\/episode-(\d+)/);
+  return match ? match[1] : null;
+}
+
+// サンプルURLのメタデータを取得する関数
+function getSampleMetadata(episodeId: string): Metadata | null {
+  return SAMPLE_EPISODES[episodeId] || null;
+}
+
 // YouTube Data API v3を使って動画情報を取得する関数
 async function fetchYouTubeVideoInfo(videoId: string): Promise<{
   title: string;
@@ -185,9 +215,24 @@ async function fetchOgpMetadata(url: string): Promise<Metadata> {
 
 /**
  * URLからメタデータを取得する
- * YouTube, Spotify, 一般的なOGPに対応
+ * YouTube, Spotify, サンプルURL, 一般的なOGPに対応
  */
 export async function fetchMetadata(url: string): Promise<Metadata> {
+  // サンプルURL処理
+  const sampleEpisodeId = extractSampleEpisodeId(url);
+  if (sampleEpisodeId) {
+    const sampleMetadata = getSampleMetadata(sampleEpisodeId);
+    if (sampleMetadata) {
+      return sampleMetadata;
+    }
+    // 存在しないサンプルエピソードの場合はデフォルト値を返す
+    return {
+      title: `Sample Episode #${sampleEpisodeId}`,
+      description: "This is a sample podcast episode.",
+      image: "/samples/episode-1.svg",
+    };
+  }
+
   // YouTube処理
   const youtubeVideoId = extractYouTubeVideoId(url);
   if (youtubeVideoId) {
