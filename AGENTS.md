@@ -17,6 +17,8 @@ PodQueueは、ポッドキャストをプラットフォーム横断で一元管
 - **視聴中のピックアップ表示**: 現在視聴中のコンテンツは常にリストの先頭に表示
 - **フィルタリング・並び替え**: 視聴状態・優先度でのフィルタリング、追加日順・優先度順での並び替え
 - **グリッド/リスト表示切替**: 好みに合わせて表示形式を選択可能
+- **LINE連携**: LINEにURLを送信するだけでポッドキャストを登録可能。登録結果はFlex Messageで通知
+- **サンプルポッドキャスト**: デモ用のサンプルURLを公開しており、LINE連携の動作確認に利用可能
 
 ## サービスレベル
 このアプリはユーザが自分一人で使うことを想定しています。そのため、過度な品質は不要です
@@ -55,7 +57,10 @@ Next.js 16 (App Router) + Supabase + shadcn/ui で構成されたPodcast管理We
   - `auth/` - ログイン・サインアップページ
     - `auth/sign-up-success/` - サインアップ完了ページ
   - `podcasts/` - Podcast一覧・追加ページ
+  - `settings/` - 設定ページ（LINE連携など）
+  - `samples/[id]/` - サンプルPodcastページ（OGP対応）
   - `api/fetch-metadata/` - URLからメタデータを取得するAPI Route
+  - `api/line-webhook/` - LINE Messaging API Webhookエンドポイント
 - `components/` - Reactコンポーネント
   - `ui/` - shadcn/uiベースのUIコンポーネント
   - `podcast-list.tsx` - Podcast一覧表示（クライアントコンポーネント）
@@ -65,6 +70,7 @@ Next.js 16 (App Router) + Supabase + shadcn/ui で構成されたPodcast管理We
   - `add-podcast-form.tsx` - Podcast追加フォーム
   - `podcasts-header.tsx` - Podcastページヘッダー
   - `podcasts-container.tsx` - Podcastページコンテナ
+  - `settings-form.tsx` - 設定フォーム（LINE連携）
   - `theme-provider.tsx` - テーマプロバイダー
 - `lib/` - ユーティリティ
   - `utils.ts` - 汎用ユーティリティ関数
@@ -73,6 +79,12 @@ Next.js 16 (App Router) + Supabase + shadcn/ui で構成されたPodcast管理We
     - `server.ts` - サーバー用クライアント（Server Components/Actions用）
     - `proxy.ts` - Supabaseプロキシ
 - `scripts/` - データベースマイグレーションSQL
+- `lib/line/` - LINE Messaging API関連
+  - `flex-message.ts` - Flex Message生成
+  - `reply.ts` - メッセージ返信
+  - `loading.ts` - ローディングアニメーション
+- `lib/samples/` - サンプルPodcastデータ
+  - `data.ts` - サンプルデータ定義
 
 ### 技術スタック
 
@@ -91,3 +103,33 @@ Next.js 16 (App Router) + Supabase + shadcn/ui で構成されたPodcast管理We
 ### メタデータ取得
 
 `/api/fetch-metadata` エンドポイントはURLからOGP/oEmbedでタイトル・説明・サムネイルを取得。YouTube、Spotifyは専用処理あり。
+
+### LINE連携
+
+`/api/line-webhook` エンドポイントでLINE Messaging APIのWebhookを受信。
+
+**処理フロー:**
+1. LINEからURLを含むメッセージを受信
+2. 署名検証で正当性を確認
+3. `line_user_links` テーブルでPodQueueユーザーとのマッピングを確認
+4. URLからメタデータを取得（`lib/metadata/fetcher.ts`を直接呼び出し）
+5. `podcasts` テーブルに登録
+6. Flex Messageで登録結果を返信
+
+**必要な環境変数:**
+- `LINE_MESSAGING_CHANNEL_SECRET` - 署名検証用
+- `LINE_MESSAGING_CHANNEL_ACCESS_TOKEN` - メッセージ返信用
+
+**データモデル:**
+- `line_user_links` テーブル: `user_id`（PodQueueユーザー）と `line_user_id`（LINE User ID）を紐付け
+
+### サンプルポッドキャスト
+
+LINE連携の動作確認用にサンプルURLを公開。OGPメタデータ付きのページを提供。
+
+**サンプルURL:**
+- `/samples/podcast-1` - テクノロジーの未来
+- `/samples/podcast-2` - スタートアップ成功の秘訣
+- `/samples/podcast-3` - 日々のマインドフルネス習慣
+
+これらのURLをLINEに送信することで、登録フローを試すことができる。
