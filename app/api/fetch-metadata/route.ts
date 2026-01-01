@@ -11,6 +11,13 @@ export async function POST(request: Request) {
 
     const metadata = await fetchMetadata(url);
 
+    // 相対パスの画像URLを絶対URLに変換
+    if (metadata.image && metadata.image.startsWith("/")) {
+      const host = request.headers.get("host");
+      const protocol = request.headers.get("x-forwarded-proto") || "https";
+      metadata.image = `${protocol}://${host}${metadata.image}`;
+    }
+
     return NextResponse.json(metadata);
   } catch (error: unknown) {
     console.error("メタデータ取得エラー:", error);
