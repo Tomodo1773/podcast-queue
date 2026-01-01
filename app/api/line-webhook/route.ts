@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { detectPlatform } from "@/lib/utils";
+import { fetchMetadata } from "@/lib/metadata/fetcher";
 
 // 署名検証
 function verifySignature(body: string, signature: string): boolean {
@@ -16,31 +17,6 @@ function verifySignature(body: string, signature: string): boolean {
     .update(body)
     .digest("base64");
   return hash === signature;
-}
-
-// メタデータ取得（内部APIを呼び出し）
-async function fetchMetadata(url: string): Promise<{
-  title: string;
-  description: string;
-  image: string;
-}> {
-  try {
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-    const response = await fetch(`${appUrl}/api/fetch-metadata`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url }),
-    });
-
-    if (!response.ok) {
-      throw new Error("Metadata fetch failed");
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error("Failed to fetch metadata:", error);
-    return { title: "", description: "", image: "" };
-  }
 }
 
 type LineEvent = {
@@ -98,8 +74,14 @@ export async function POST(request: Request) {
         continue;
       }
 
-      // メタデータ取得
-      const metadata = await fetchMetadata(url);
+      // メタデータ取得（共通関数を直接呼び出し - HTTPリクエスト不要）
+      let metadata = { title: "", description: "", image: "" };
+      try {
+        metadata = await fetchMetadata(url);
+      } catch (error) {
+        console.error("Failed to fetch metadata:", error);
+        // メタデータ取得失敗時は空のまま続行
+      }
 
       // Podcast登録
       const { error: insertError } = await supabase.from("podcasts").insert({
