@@ -3,6 +3,12 @@ import crypto from "crypto";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { detectPlatform } from "@/lib/utils";
 import { fetchMetadata } from "@/lib/metadata/fetcher";
+import { replyMessage } from "@/lib/line/reply";
+import {
+  buildSuccessFlexMessage,
+  buildErrorMessage,
+  buildMetadataFailedMessage,
+} from "@/lib/line/flex-message";
 
 // 署名検証
 function verifySignature(body: string, signature: string): boolean {
@@ -17,6 +23,16 @@ function verifySignature(body: string, signature: string): boolean {
     .update(body)
     .digest("base64");
   return hash === signature;
+}
+
+// リストページのURL生成
+function getListUrl(): string {
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL;
+  if (!baseUrl) {
+    console.error("NEXT_PUBLIC_APP_URL is not set");
+    throw new Error("Application base URL is not configured");
+  }
+  return `${baseUrl}/podcasts`;
 }
 
 type LineEvent = {
@@ -52,6 +68,7 @@ export async function POST(request: Request) {
 
       const lineUserId = event.source?.userId;
       const messageText = event.message.text;
+      const replyToken = event.replyToken;
 
       if (!lineUserId) continue;
 
@@ -60,6 +77,7 @@ export async function POST(request: Request) {
       if (!urlMatch) continue;
 
       const url = urlMatch[0];
+      const listUrl = getListUrl();
 
       // LINE User IDからPodQueueユーザーを検索
       const { data: link } = await supabase
@@ -69,18 +87,32 @@ export async function POST(request: Request) {
         .single();
 
       if (!link) {
-        // 未連携ユーザーはスキップ
+        // 未連携ユーザーにはエラーメッセージを返信
         console.log(`Unlinked LINE user: ${lineUserId}`);
+        if (replyToken) {
+          await replyMessage(replyToken, [
+            buildErrorMessage(
+              "PodQueueアカウントと連携されていません。PodQueueの設定画面からLINE連携を行ってください。"
+            ),
+          ]);
+        }
         continue;
       }
 
       // メタデータ取得（共通関数を直接呼び出し - HTTPリクエスト不要）
       let metadata = { title: "", description: "", image: "" };
+      let metadataFailed = false;
       try {
         metadata = await fetchMetadata(url);
       } catch (error) {
         console.error("Failed to fetch metadata:", error);
+        metadataFailed = true;
         // メタデータ取得失敗時は空のまま続行
+      }
+
+      // メタデータがすべて空の場合も失敗とみなす
+      if (!metadata.title && !metadata.description && !metadata.image) {
+        metadataFailed = true;
       }
 
       // Podcast登録
@@ -98,8 +130,33 @@ export async function POST(request: Request) {
 
       if (insertError) {
         console.error("Failed to insert podcast:", insertError);
+        // 登録失敗時はエラーメッセージを返信
+        if (replyToken) {
+          await replyMessage(replyToken, [
+            buildErrorMessage("登録に失敗しました。時間をおいて再度お試しください。"),
+          ]);
+        }
       } else {
         console.log(`Podcast added for user ${link.user_id}: ${url}`);
+        // 登録成功時は成功メッセージを返信
+        if (replyToken) {
+          if (metadataFailed) {
+            // メタデータ取得失敗時はテキストメッセージ
+            await replyMessage(replyToken, [
+              buildMetadataFailedMessage(url, listUrl),
+            ]);
+          } else {
+            // 成功時はFlex Message
+            await replyMessage(replyToken, [
+              buildSuccessFlexMessage({
+                thumbnailUrl: metadata.image,
+                title: metadata.title,
+                description: metadata.description,
+                listUrl,
+              }),
+            ]);
+          }
+        }
       }
     }
 
