@@ -45,6 +45,21 @@ pnpm run build
 
 # Lint
 pnpm run lint
+
+# Lintの自動修正
+pnpm run lint:fix
+
+# フォーマット
+pnpm run format
+
+# 型チェック
+pnpm run typecheck
+
+# 未使用コード検出
+pnpm run knip
+
+# チェック + 自動修正
+pnpm run check:fix
 ```
 
 ## ライセンス

@@ -39,11 +39,26 @@ pnpm run dev
 # ビルド
 pnpm run build
 
+# 本番起動
+pnpm start
+
 # Lint
 pnpm run lint
 
-# 本番起動
-pnpm start
+# Lintの自動修正
+pnpm run lint:fix
+
+# フォーマット
+pnpm run format
+
+# 型チェック
+pnpm run typecheck
+
+# 未使用コード検出
+pnpm run knip
+
+# チェック + 自動修正
+pnpm run check:fix
 ```
 
 ## アーキテクチャ
