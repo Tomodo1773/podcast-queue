@@ -45,9 +45,6 @@ pnpm start
 # Lint
 pnpm run lint
 
-# Lintの自動修正
-pnpm run lint:fix
-
 # フォーマット
 pnpm run format
 
@@ -57,8 +54,8 @@ pnpm run typecheck
 # 未使用コード検出
 pnpm run knip
 
-# チェック + 自動修正
-pnpm run check:fix
+# チェック（formatting + linting + typecheck + knip）
+pnpm run check
 ```
 
 ## アーキテクチャ
