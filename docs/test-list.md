@@ -18,36 +18,36 @@
 ### ユーティリティ関数 (`lib/utils.ts`)
 
 #### `detectPlatform`
-- [ ] YouTube URLを正しく判定できる (`youtube.com`, `youtu.be`)
-- [ ] Spotify URLを正しく判定できる
-- [ ] NewsPicks URLを正しく判定できる (`newspicks.com`, `npx.me`)
-- [ ] Pivot URLを正しく判定できる
-- [ ] テレ東Biz URLを正しく判定できる
-- [ ] 未知のURLは `other` を返す
+- [x] YouTube URLを正しく判定できる (`youtube.com`, `youtu.be`)
+- [x] Spotify URLを正しく判定できる
+- [x] NewsPicks URLを正しく判定できる (`newspicks.com`, `npx.me`)
+- [x] Pivot URLを正しく判定できる
+- [x] テレ東Biz URLを正しく判定できる
+- [x] 未知のURLは `other` を返す
 
 #### `getPlatformLabel`
-- [ ] 各プラットフォームに対応するラベルを正しく返す
-- [ ] null/undefinedの場合は「その他」を返す
+- [x] 各プラットフォームに対応するラベルを正しく返す
+- [x] null/undefinedの場合は「その他」を返す
 
 #### `getPriorityLabel`
-- [ ] high/medium/lowに対応するラベル（高/中/低）を正しく返す
+- [x] high/medium/lowに対応するラベル（高/中/低）を正しく返す
 
 #### `getPriorityOrder`
-- [ ] 優先度を正しいソート順（high:0, medium:1, low:2）で返す
+- [x] 優先度を正しいソート順（high:0, medium:1, low:2）で返す
 
 ### URL解析関数 (`lib/metadata/fetcher.ts`)
 
 #### `extractYouTubeVideoId`
-- [ ] 標準形式 (`youtube.com/watch?v=xxx`) からIDを抽出できる
-- [ ] 短縮形式 (`youtu.be/xxx`) からIDを抽出できる
-- [ ] Shorts形式 (`youtube.com/shorts/xxx`) からIDを抽出できる
-- [ ] Live形式 (`youtube.com/live/xxx`) からIDを抽出できる
-- [ ] 無効なURLの場合はnullを返す
+- [x] 標準形式 (`youtube.com/watch?v=xxx`) からIDを抽出できる
+- [x] 短縮形式 (`youtu.be/xxx`) からIDを抽出できる
+- [x] Shorts形式 (`youtube.com/shorts/xxx`) からIDを抽出できる
+- [x] Live形式 (`youtube.com/live/xxx`) からIDを抽出できる
+- [x] 無効なURLの場合はnullを返す
 
 #### `extractSpotifyId`
-- [ ] エピソードURLからtype(`episode`)とIDを抽出できる
-- [ ] 番組URLからtype(`show`)とIDを抽出できる
-- [ ] 無効なURLの場合はnullを返す
+- [x] エピソードURLからtype(`episode`)とIDを抽出できる
+- [x] 番組URLからtype(`show`)とIDを抽出できる
+- [x] 無効なURLの場合はnullを返す
 
 ---
 

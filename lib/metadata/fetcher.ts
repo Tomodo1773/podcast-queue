@@ -52,8 +52,11 @@ async function fetchYouTubeVideoInfo(videoId: string): Promise<{
   }
 }
 
-// YouTube動画IDを抽出する関数
-function extractYouTubeVideoId(url: string): string | null {
+/**
+ * YouTube動画IDを抽出する関数
+ * 対応形式: youtube.com/watch?v=xxx, youtu.be/xxx, youtube.com/shorts/xxx, youtube.com/live/xxx
+ */
+export function extractYouTubeVideoId(url: string): string | null {
   const patterns = [
     /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&?/]+)/,
     /youtube\.com\/shorts\/([^&?/]+)/,
@@ -70,8 +73,11 @@ function extractYouTubeVideoId(url: string): string | null {
   return null
 }
 
-// Spotify IDを抽出する関数
-function extractSpotifyId(url: string): { type: string; id: string } | null {
+/**
+ * Spotify IDを抽出する関数
+ * 対応形式: spotify.com/episode/xxx, spotify.com/show/xxx
+ */
+export function extractSpotifyId(url: string): { type: string; id: string } | null {
   const match = url.match(/spotify\.com\/(episode|show)\/([^?&/]+)/)
   if (match?.[2]) {
     return { type: match[1], id: match[2] }

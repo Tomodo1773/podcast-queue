@@ -12,5 +12,8 @@
   ],
   "next": {
     "entry": ["app/**/*.{ts,tsx}", "middleware.{ts,tsx}"]
+  },
+  "vitest": {
+    "entry": ["vitest.config.ts", "**/*.test.ts", "**/*.test.tsx"]
   }
 }
