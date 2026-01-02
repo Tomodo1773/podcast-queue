@@ -57,7 +57,6 @@ export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
 		loadPodcasts()
 	}, [userId, refreshKey])
 
-
 	useEffect(() => {
 		applyFilterAndSort()
 	}, [filter, priorityFilter, sortBy, podcasts])
