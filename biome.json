@@ -33,25 +33,28 @@
 			"recommended": true,
 			"suspicious": {
 				"noExplicitAny": "warn",
-				"noArrayIndexKey": "warn"
+				"noArrayIndexKey": "warn",
+				"useIterableCallbackReturn": "off"
 			},
 			"complexity": {
 				"noUselessFragments": "warn",
 				"noForEach": "off"
 			},
 			"style": {
-				"noNonNullAssertion": "warn",
+				"noNonNullAssertion": "off",
 				"useNodejsImportProtocol": "off",
-				"noUnusedTemplateLiteral": "warn"
+				"noUnusedTemplateLiteral": "warn",
+				"useTemplate": "off"
 			},
 			"correctness": {
-				"useExhaustiveDependencies": "warn",
+				"useExhaustiveDependencies": "off",
 				"noUnusedImports": "error",
 				"noUnusedVariables": "error"
 			},
 			"a11y": {
 				"useKeyWithClickEvents": "warn",
-				"useButtonType": "warn"
+				"useButtonType": "warn",
+				"useSemanticElements": "off"
 			}
 		}
 	},
