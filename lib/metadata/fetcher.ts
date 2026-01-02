@@ -62,7 +62,7 @@ function extractYouTubeVideoId(url: string): string | null {
 
 	for (const pattern of patterns) {
 		const match = url.match(pattern)
-		if (match && match[1]) {
+		if (match?.[1]) {
 			return match[1]
 		}
 	}
@@ -73,7 +73,7 @@ function extractYouTubeVideoId(url: string): string | null {
 // Spotify IDを抽出する関数
 function extractSpotifyId(url: string): { type: string; id: string } | null {
 	const match = url.match(/spotify\.com\/(episode|show)\/([^?&/]+)/)
-	if (match && match[2]) {
+	if (match?.[2]) {
 		return { type: match[1], id: match[2] }
 	}
 	return null

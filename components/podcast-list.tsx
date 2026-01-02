@@ -47,7 +47,6 @@ export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
 		return "grid"
 	})
 	const [isLoading, setIsLoading] = useState(true)
-	const [isMobile, setIsMobile] = useState(false)
 
 	const handleViewModeChange = (mode: "grid" | "list") => {
 		setViewMode(mode)
@@ -58,16 +57,6 @@ export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
 		loadPodcasts()
 	}, [userId, refreshKey])
 
-	useEffect(() => {
-		const checkIsMobile = () => {
-			setIsMobile(window.innerWidth < 768)
-		}
-
-		checkIsMobile()
-		window.addEventListener("resize", checkIsMobile)
-
-		return () => window.removeEventListener("resize", checkIsMobile)
-	}, [])
 
 	useEffect(() => {
 		applyFilterAndSort()
