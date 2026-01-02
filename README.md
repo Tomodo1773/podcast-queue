@@ -3,7 +3,6 @@
 ポッドキャストをプラットフォーム横断で一元管理する「あとで聴く」Webアプリ
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=flat&logo=vercel)](https://vercel.com/tomodo1773s-projects/v0-podcast)
 
 ## 概要
 
@@ -43,8 +42,20 @@ pnpm run dev
 # ビルド
 pnpm run build
 
-# Lint
-pnpm run lint
+# Lintの自動修正
+pnpm run lint:fix
+
+# フォーマット
+pnpm run format
+
+# 型チェック
+pnpm run typecheck
+
+# 未使用コード検出
+pnpm run knip
+
+# チェック + 自動修正
+pnpm run check:fix
 ```
 
 ## ライセンス

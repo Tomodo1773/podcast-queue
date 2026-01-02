@@ -1,16 +1,16 @@
-import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-import { PodcastsContainer } from "@/components/podcasts-container";
+import { redirect } from "next/navigation"
+import { PodcastsContainer } from "@/components/podcasts-container"
+import { createClient } from "@/lib/supabase/server"
 
 export default async function PodcastsPage() {
-	const supabase = await createClient();
+	const supabase = await createClient()
 
 	const {
 		data: { user },
-	} = await supabase.auth.getUser();
+	} = await supabase.auth.getUser()
 	if (!user) {
-		redirect("/auth/login");
+		redirect("/auth/login")
 	}
 
-	return <PodcastsContainer userId={user.id} />;
+	return <PodcastsContainer userId={user.id} />
 }

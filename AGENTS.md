@@ -21,6 +21,7 @@ PodQueueは、ポッドキャストをプラットフォーム横断で一元管
 - **サンプルポッドキャスト**: デモ用のサンプルURLを公開しており、LINE連携の動作確認に利用可能
 
 ## サービスレベル
+
 このアプリはユーザが自分一人で使うことを想定しています。そのため、過度な品質は不要です
 
 ## 実装方針
@@ -28,7 +29,6 @@ PodQueueは、ポッドキャストをプラットフォーム横断で一元管
 - 過度に高品質な実装は不要。
 - 必要な要件をよく考え最小のコードで要件を達成することが望ましい。
 - 開発者は1人。自分が使う上で最低限のエラーハンドリングやセキュリティ対応を行う
-
 
 ## コマンド
 
@@ -39,11 +39,26 @@ pnpm run dev
 # ビルド
 pnpm run build
 
+# 本番起動
+pnpm start
+
 # Lint
 pnpm run lint
 
-# 本番起動
-pnpm start
+# Lintの自動修正
+pnpm run lint:fix
+
+# フォーマット
+pnpm run format
+
+# 型チェック
+pnpm run typecheck
+
+# 未使用コード検出
+pnpm run knip
+
+# チェック + 自動修正
+pnpm run check:fix
 ```
 
 ## アーキテクチャ
@@ -106,30 +121,8 @@ Next.js 16 (App Router) + Supabase + shadcn/ui で構成されたPodcast管理We
 
 ### LINE連携
 
-`/api/line-webhook` エンドポイントでLINE Messaging APIのWebhookを受信。
-
-**処理フロー:**
-1. LINEからURLを含むメッセージを受信
-2. 署名検証で正当性を確認
-3. `line_user_links` テーブルでPodQueueユーザーとのマッピングを確認
-4. URLからメタデータを取得（`lib/metadata/fetcher.ts`を直接呼び出し）
-5. `podcasts` テーブルに登録
-6. Flex Messageで登録結果を返信
-
-**必要な環境変数:**
-- `LINE_MESSAGING_CHANNEL_SECRET` - 署名検証用
-- `LINE_MESSAGING_CHANNEL_ACCESS_TOKEN` - メッセージ返信用
-
-**データモデル:**
-- `line_user_links` テーブル: `user_id`（PodQueueユーザー）と `line_user_id`（LINE User ID）を紐付け
+LINEにURLを送信してポッドキャストを登録可能。`/api/line-webhook`でWebhookを受信し、`line_user_links`テーブルでユーザーを紐付け。
 
 ### サンプルポッドキャスト
 
-LINE連携の動作確認用にサンプルURLを公開。OGPメタデータ付きのページを提供。
-
-**サンプルURL:**
-- `/samples/podcast-1` - テクノロジーの未来
-- `/samples/podcast-2` - スタートアップ成功の秘訣
-- `/samples/podcast-3` - 日々のマインドフルネス習慣
-
-これらのURLをLINEに送信することで、登録フローを試すことができる。
+LINE連携の動作確認用。`/samples/{id}`でOGP対応のデモページを提供。
