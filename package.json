@@ -12,6 +12,7 @@
 		"format:check": "biome format .",
 		"typecheck": "tsc --noEmit",
 		"knip": "knip",
+		"ci": "biome ci .",
 		"check": "biome check . && tsc --noEmit && knip",
 		"check:fix": "biome check --write . && tsc --noEmit && knip"
 	},
