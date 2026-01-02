@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest"
-import { extractYouTubeVideoId, extractSpotifyId } from "@/lib/metadata/fetcher"
+import { describe, expect, it } from "vitest"
+import { extractSpotifyId, extractYouTubeVideoId } from "@/lib/metadata/fetcher"
 
 describe("extractYouTubeVideoId", () => {
   describe("標準形式", () => {

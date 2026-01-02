@@ -1,11 +1,11 @@
-import { describe, it, expect } from "vitest"
+import { describe, expect, it } from "vitest"
 import {
   detectPlatform,
   getPlatformLabel,
   getPriorityLabel,
   getPriorityOrder,
-  type Priority,
   type Platform,
+  type Priority,
 } from "@/lib/utils"
 
 describe("detectPlatform", () => {
