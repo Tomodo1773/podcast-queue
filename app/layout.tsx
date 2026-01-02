@@ -8,32 +8,32 @@ const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-	title: "PodQueue - あなたのPodcastを一元管理",
-	description:
-		"YouTube、Spotify、NewsPicks等、様々なプラットフォームのPodcastを一元管理できるWebサービス PodQueue",
-	generator: "v0.app",
-	icons: {
-		icon: [
-			{
-				url: "/podqueue-icon.svg",
-				type: "image/svg+xml",
-			},
-		],
-		apple: "/podqueue-icon.svg",
-	},
+  title: "PodQueue - あなたのPodcastを一元管理",
+  description:
+    "YouTube、Spotify、NewsPicks等、様々なプラットフォームのPodcastを一元管理できるWebサービス PodQueue",
+  generator: "v0.app",
+  icons: {
+    icon: [
+      {
+        url: "/podqueue-icon.svg",
+        type: "image/svg+xml",
+      },
+    ],
+    apple: "/podqueue-icon.svg",
+  },
 }
 
 export default function RootLayout({
-	children,
+  children,
 }: Readonly<{
-	children: React.ReactNode
+  children: React.ReactNode
 }>) {
-	return (
-		<html lang="ja">
-			<body className={"font-sans antialiased"}>
-				{children}
-				<Analytics />
-			</body>
-		</html>
-	)
+  return (
+    <html lang="ja">
+      <body className={"font-sans antialiased"}>
+        {children}
+        <Analytics />
+      </body>
+    </html>
+  )
 }
