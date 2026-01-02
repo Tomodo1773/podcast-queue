@@ -3,7 +3,7 @@
 	"entry": ["app/**/*.{ts,tsx}", "lib/**/*.{ts,tsx}", "components/**/*.{ts,tsx}"],
 	"project": ["**/*.{ts,tsx}"],
 	"ignore": ["**/*.d.ts", ".next/**", "node_modules/**"],
-	"ignoreDependencies": ["autoprefixer", "postcss", "tailwindcss", "tailwindcss-animate", "tw-animate-css"],
+	"ignoreDependencies": ["autoprefixer", "postcss-load-config", "tailwindcss", "tailwindcss-animate", "tw-animate-css"],
 	"next": {
 		"entry": ["app/**/*.{ts,tsx}", "middleware.{ts,tsx}"]
 	}
