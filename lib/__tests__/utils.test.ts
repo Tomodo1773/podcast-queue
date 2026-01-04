@@ -60,7 +60,7 @@ describe("getPlatformLabel", () => {
     { platform: "spotify", expected: "Spotify" },
     { platform: "newspicks", expected: "NewsPicks" },
     { platform: "pivot", expected: "Pivot" },
-    { platform: "txbiz", expected: "テレ東Biz" },
+    { platform: "txbiz", expected: "テレ東BIZ" },
     { platform: "other", expected: "その他" },
     { platform: "unknown", expected: "その他" },
     { platform: null, expected: "その他" },
