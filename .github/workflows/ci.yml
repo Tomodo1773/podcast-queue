@@ -37,3 +37,6 @@ jobs:
 
       - name: Run knip
         run: pnpm run knip
+
+      - name: Run tests
+        run: pnpm run test
