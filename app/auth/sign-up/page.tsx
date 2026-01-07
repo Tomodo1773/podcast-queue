@@ -64,7 +64,7 @@ export default function SignUpPage() {
       })
       if (error) throw error
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "Googleログインに失敗しました")
+      setError(error instanceof Error ? error.message : "Google登録に失敗しました")
       setIsGoogleLoading(false)
     }
   }
