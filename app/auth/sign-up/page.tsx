@@ -5,6 +5,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import type React from "react"
 import { useState } from "react"
+import { GoogleIcon } from "@/components/icons/google"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -17,6 +18,7 @@ export default function SignUpPage() {
   const [repeatPassword, setRepeatPassword] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false)
   const router = useRouter()
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -48,6 +50,25 @@ export default function SignUpPage() {
     }
   }
 
+  const handleGoogleSignUp = async () => {
+    const supabase = createClient()
+    setIsGoogleLoading(true)
+    setError(null)
+
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      })
+      if (error) throw error
+    } catch (error: unknown) {
+      setError(error instanceof Error ? error.message : "Google登録に失敗しました")
+      setIsGoogleLoading(false)
+    }
+  }
+
   return (
     <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10 bg-gradient-to-br from-purple-50 to-blue-50">
       <div className="w-full max-w-sm">
@@ -58,45 +79,67 @@ export default function SignUpPage() {
             <CardDescription>新しいアカウントを作成します</CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSignUp}>
-              <div className="flex flex-col gap-6">
-                <div className="grid gap-2">
-                  <Label htmlFor="email">メールアドレス</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="mail@example.com"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
+            <div className="flex flex-col gap-6">
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={handleGoogleSignUp}
+                disabled={isGoogleLoading || isLoading}
+              >
+                <GoogleIcon className="mr-2 h-4 w-4" />
+                {isGoogleLoading ? "登録中..." : "Googleで登録"}
+              </Button>
+
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <span className="w-full border-t" />
                 </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="password">パスワード</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-card px-2 text-muted-foreground">または</span>
                 </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="repeat-password">パスワード(確認)</Label>
-                  <Input
-                    id="repeat-password"
-                    type="password"
-                    required
-                    value={repeatPassword}
-                    onChange={(e) => setRepeatPassword(e.target.value)}
-                  />
-                </div>
-                {error && <p className="text-sm text-destructive">{error}</p>}
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "登録中..." : "新規登録"}
-                </Button>
               </div>
-              <div className="mt-4 text-center text-sm">
+
+              <form onSubmit={handleSignUp}>
+                <div className="flex flex-col gap-6">
+                  <div className="grid gap-2">
+                    <Label htmlFor="email">メールアドレス</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="mail@example.com"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="password">パスワード</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="repeat-password">パスワード(確認)</Label>
+                    <Input
+                      id="repeat-password"
+                      type="password"
+                      required
+                      value={repeatPassword}
+                      onChange={(e) => setRepeatPassword(e.target.value)}
+                    />
+                  </div>
+                  {error && <p className="text-sm text-destructive">{error}</p>}
+                  <Button type="submit" className="w-full" disabled={isLoading || isGoogleLoading}>
+                    {isLoading ? "登録中..." : "新規登録"}
+                  </Button>
+                </div>
+              </form>
+              <div className="text-center text-sm">
                 既にアカウントをお持ちの方は{" "}
                 <Link
                   href="/auth/login"
@@ -105,7 +148,7 @@ export default function SignUpPage() {
                   ログイン
                 </Link>
               </div>
-            </form>
+            </div>
           </CardContent>
         </Card>
       </div>
