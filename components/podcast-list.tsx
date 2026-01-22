@@ -157,6 +157,27 @@ export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
     }
   }
 
+  const handleUpdatePodcast = async (
+    id: string,
+    updates: {
+      title?: string | null
+      description?: string | null
+      thumbnail_url?: string | null
+      platform?: string | null
+    }
+  ) => {
+    const supabase = createClient()
+
+    const { error } = await supabase.from("podcasts").update(updates).eq("id", id)
+
+    if (error) {
+      console.error("[v0] Podcast更新エラー:", error)
+      throw error
+    } else {
+      setPodcasts((prev) => prev.map((p) => (p.id === id ? { ...p, ...updates } : p)))
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -279,6 +300,7 @@ export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
               onDelete={handleDelete}
               onChangePriority={handleChangePriority}
               onStartWatching={handleStartWatching}
+              onUpdate={handleUpdatePodcast}
             />
           ))}
         </div>
@@ -292,6 +314,7 @@ export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
               onDelete={handleDelete}
               onChangePriority={handleChangePriority}
               onStartWatching={handleStartWatching}
+              onUpdate={handleUpdatePodcast}
             />
           ))}
         </div>
