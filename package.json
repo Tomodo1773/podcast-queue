@@ -11,7 +11,7 @@
     "typecheck": "tsc --noEmit",
     "knip": "knip",
     "ci": "biome ci .",
-    "check": "biome format --write . && biome check --write . && tsc --noEmit && knip"
+    "check": "biome check --write . && tsc --noEmit && knip"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "1.1.4",
