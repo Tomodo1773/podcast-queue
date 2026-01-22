@@ -8,64 +8,60 @@
 - 正常系を中心にテストを実装
 - 異常系は必要最低限のものに限定
 - 1人開発のため、過度な品質は追求しない
+- 外部リソース中心でモック中心になるテストは見送る
 
 ---
 
-## 優先度：高
-
-純粋関数でモック不要、アプリのコアロジックを担うため、テスト価値が最も高い。
+## 実装済みテスト
 
 ### ユーティリティ関数 (`lib/utils.ts`)
 
 #### `detectPlatform`
-- [ ] YouTube URLを正しく判定できる (`youtube.com`, `youtu.be`)
-- [ ] Spotify URLを正しく判定できる
-- [ ] NewsPicks URLを正しく判定できる (`newspicks.com`, `npx.me`)
-- [ ] Pivot URLを正しく判定できる
-- [ ] テレ東Biz URLを正しく判定できる
-- [ ] 未知のURLは `other` を返す
+- [x] YouTube URLを正しく判定できる (`youtube.com`, `youtu.be`)
+- [x] Spotify URLを正しく判定できる
+- [x] NewsPicks URLを正しく判定できる (`newspicks.com`, `npx.me`)
+- [x] Pivot URLを正しく判定できる
+- [x] テレ東Biz URLを正しく判定できる
+- [x] 未知のURLは `other` を返す
 
 #### `getPlatformLabel`
-- [ ] 各プラットフォームに対応するラベルを正しく返す
-- [ ] null/undefinedの場合は「その他」を返す
+- [x] 各プラットフォームに対応するラベルを正しく返す
+- [x] null/undefinedの場合は「その他」を返す
 
 #### `getPriorityLabel`
-- [ ] high/medium/lowに対応するラベル（高/中/低）を正しく返す
+- [x] high/medium/lowに対応するラベル（高/中/低）を正しく返す
 
 #### `getPriorityOrder`
-- [ ] 優先度を正しいソート順（high:0, medium:1, low:2）で返す
+- [x] 優先度を正しいソート順（high:0, medium:1, low:2）で返す
 
 ### URL解析関数 (`lib/metadata/fetcher.ts`)
 
 #### `extractYouTubeVideoId`
-- [ ] 標準形式 (`youtube.com/watch?v=xxx`) からIDを抽出できる
-- [ ] 短縮形式 (`youtu.be/xxx`) からIDを抽出できる
-- [ ] Shorts形式 (`youtube.com/shorts/xxx`) からIDを抽出できる
-- [ ] Live形式 (`youtube.com/live/xxx`) からIDを抽出できる
-- [ ] 無効なURLの場合はnullを返す
+- [x] 標準形式 (`youtube.com/watch?v=xxx`) からIDを抽出できる
+- [x] 短縮形式 (`youtu.be/xxx`) からIDを抽出できる
+- [x] Shorts形式 (`youtube.com/shorts/xxx`) からIDを抽出できる
+- [x] Live形式 (`youtube.com/live/xxx`) からIDを抽出できる
+- [x] 無効なURLの場合はnullを返す
 
 #### `extractSpotifyId`
-- [ ] エピソードURLからtype(`episode`)とIDを抽出できる
-- [ ] 番組URLからtype(`show`)とIDを抽出できる
-- [ ] 無効なURLの場合はnullを返す
+- [x] エピソードURLからtype(`episode`)とIDを抽出できる
+- [x] 番組URLからtype(`show`)とIDを抽出できる
+- [x] 無効なURLの場合はnullを返す
 
----
 
-## 優先度：中
-
-多少のモックやセットアップが必要だが、ユーザー体験に直結する重要な機能。
-
-### コンポーネント - フィルタリング・並び替え (`components/podcast-list.tsx`)
+### コンポーネント - フィルタリング・並び替え (`lib/podcast-filters.ts`)
 
 ロジック部分のみ。UI表示は手動確認やE2Eでカバー可能。
+テスト可能にするため、フィルタリング・並び替えロジックを `lib/podcast-filters.ts` に純粋関数として抽出。
 
-- [ ] 視聴状態フィルタ（すべて/未視聴/視聴済み）が正しく動作する
-- [ ] 優先度フィルタが正しく動作する
-- [ ] 並び替え（追加日順/優先度順）が正しく動作する
+- [x] 視聴状態フィルタ（すべて/未視聴/視聴済み）が正しく動作する
+- [x] 優先度フィルタが正しく動作する
+- [x] 並び替え（追加日順/優先度順）が正しく動作する
 
 ---
 
-## 優先度：低
+
+## 見送っているテスト
 
 以下は実装コストに対してテスト価値が低い、または他のテストでカバーされる。
 
@@ -98,13 +94,3 @@ Supabase Authに依存し、ほぼモックになる。実際のログインフ�
 - ログインページのフォーム動作
 - 認証状態によるリダイレクト
 
----
-
-## 今後の拡張（必要に応じて）
-
-以下は現時点では実装しないが、将来的に必要になる可能性があるテスト:
-
-- [ ] E2Eテスト（Playwright等）: ユーザーフロー全体の確認
-- [ ] アクセシビリティテスト
-- [ ] パフォーマンステスト
-- [ ] Supabase RLS（Row Level Security）のテスト

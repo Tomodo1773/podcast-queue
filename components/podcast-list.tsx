@@ -5,22 +5,15 @@ import { useEffect, useState } from "react"
 import { PodcastCard } from "@/components/podcast-card"
 import { PodcastListItem } from "@/components/podcast-list-item"
 import { Button } from "@/components/ui/button"
+import {
+  applyFilterAndSort,
+  type Podcast,
+  type PriorityFilter,
+  type SortOption,
+  type WatchFilter,
+} from "@/lib/podcast-filters"
 import { createClient } from "@/lib/supabase/client"
-import { getPriorityLabel, getPriorityOrder, type Priority } from "@/lib/utils"
-
-type Podcast = {
-  id: string
-  url: string
-  title: string | null
-  description: string | null
-  thumbnail_url: string | null
-  platform: string | null
-  priority: Priority
-  is_watched: boolean
-  is_watching: boolean
-  watched_at: string | null
-  created_at: string
-}
+import { getPriorityLabel, type Priority } from "@/lib/utils"
 
 type PodcastListProps = {
   userId: string
@@ -29,13 +22,11 @@ type PodcastListProps = {
 
 const VIEW_MODE_STORAGE_KEY = "podcast-view-mode"
 
-type SortOption = "created_at" | "priority"
-
 export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
   const [podcasts, setPodcasts] = useState<Podcast[]>([])
   const [filteredPodcasts, setFilteredPodcasts] = useState<Podcast[]>([])
-  const [filter, setFilter] = useState<"all" | "watched" | "unwatched">("unwatched")
-  const [priorityFilter, setPriorityFilter] = useState<Priority | "all">("all")
+  const [filter, setFilter] = useState<WatchFilter>("unwatched")
+  const [priorityFilter, setPriorityFilter] = useState<PriorityFilter>("all")
   const [sortBy, setSortBy] = useState<SortOption>("created_at")
   const [viewMode, setViewMode] = useState<"grid" | "list">(() => {
     if (typeof window !== "undefined") {
@@ -58,7 +49,7 @@ export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
   }, [userId, refreshKey])
 
   useEffect(() => {
-    applyFilterAndSort()
+    updateFilteredPodcasts()
   }, [filter, priorityFilter, sortBy, podcasts])
 
   const loadPodcasts = async () => {
@@ -79,34 +70,8 @@ export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
     setIsLoading(false)
   }
 
-  const applyFilterAndSort = () => {
-    let result = [...podcasts]
-
-    // 視聴状態フィルタ
-    if (filter === "watched") {
-      result = result.filter((p) => p.is_watched)
-    } else if (filter === "unwatched") {
-      result = result.filter((p) => !p.is_watched)
-    }
-
-    // 優先度フィルタ
-    if (priorityFilter !== "all") {
-      result = result.filter((p) => p.priority === priorityFilter)
-    }
-
-    // 並び替え
-    if (sortBy === "priority") {
-      result.sort((a, b) => getPriorityOrder(a.priority) - getPriorityOrder(b.priority))
-    }
-    // created_atの場合はすでにDBから降順で取得済み
-
-    // 視聴中を先頭に移動
-    result.sort((a, b) => {
-      if (a.is_watching && !b.is_watching) return -1
-      if (!a.is_watching && b.is_watching) return 1
-      return 0 // 既存の並び順を維持
-    })
-
+  const updateFilteredPodcasts = () => {
+    const result = applyFilterAndSort(podcasts, filter, priorityFilter, sortBy)
     setFilteredPodcasts(result)
   }
 

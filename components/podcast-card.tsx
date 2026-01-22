@@ -17,7 +17,13 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { getPlatformColor, getPriorityColor, getPriorityLabel, type Priority } from "@/lib/utils"
+import {
+  getPlatformColor,
+  getPlatformLabel,
+  getPriorityColor,
+  getPriorityLabel,
+  type Priority,
+} from "@/lib/utils"
 
 type Podcast = {
   id: string
@@ -162,7 +168,7 @@ export function PodcastCard({
           <div className="flex items-center gap-1 mb-2 flex-wrap">
             {podcast.platform && (
               <Badge className={getPlatformColor(podcast.platform)} variant="default">
-                {podcast.platform}
+                {getPlatformLabel(podcast.platform)}
               </Badge>
             )}
             <Badge className={getPriorityColor(podcast.priority)} variant="default">

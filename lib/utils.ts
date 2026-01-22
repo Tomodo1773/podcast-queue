@@ -12,7 +12,7 @@ export function getPlatformColor(platform: string | null): string {
   if (platformLower.includes("spotify")) return "bg-green-500"
   if (platformLower.includes("newspicks")) return "bg-black"
   if (platformLower.includes("pivot")) return "bg-purple-500"
-  if (platformLower.includes("テレ東biz")) return "bg-red-600"
+  if (platformLower.includes("txbiz")) return "bg-red-600"
   return "bg-gray-500"
 }
 
@@ -80,7 +80,7 @@ export function getPlatformLabel(platform: Platform | string | null): string {
     case "pivot":
       return "Pivot"
     case "txbiz":
-      return "テレ東Biz"
+      return "テレ東BIZ"
     default:
       return "その他"
   }
