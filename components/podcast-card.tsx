@@ -1,9 +1,10 @@
 "use client"
 
-import { ArrowUpDown, Check, ExternalLink, MoreVertical, Trash2, X } from "lucide-react"
+import { ArrowUpDown, Check, Edit, ExternalLink, MoreVertical, Trash2, X } from "lucide-react"
 import Image from "next/image"
 import { useState } from "react"
 import { PodcastDialog } from "@/components/podcast-dialog"
+import { PodcastEditDialog } from "@/components/podcast-edit-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
@@ -44,6 +45,15 @@ type PodcastCardProps = {
   onDelete: (id: string) => Promise<void>
   onChangePriority: (id: string, newPriority: Priority) => Promise<void>
   onStartWatching: (id: string) => Promise<void>
+  onUpdate: (
+    id: string,
+    updates: {
+      title?: string | null
+      description?: string | null
+      thumbnail_url?: string | null
+      platform?: string | null
+    }
+  ) => Promise<void>
 }
 
 export function PodcastCard({
@@ -52,8 +62,10 @@ export function PodcastCard({
   onDelete,
   onChangePriority,
   onStartWatching,
+  onUpdate,
 }: PodcastCardProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
 
   const handleOpenLink = async (e: React.MouseEvent) => {
     e.preventDefault()
@@ -112,6 +124,11 @@ export function PodcastCard({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+              <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>
+                <Edit className="mr-2 size-4" />
+                編集
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => onToggleWatched(podcast.id, podcast.is_watched)}>
                 {podcast.is_watched ? (
                   <>
@@ -189,6 +206,13 @@ export function PodcastCard({
         onDelete={onDelete}
         onChangePriority={onChangePriority}
         onStartWatching={onStartWatching}
+      />
+
+      <PodcastEditDialog
+        podcast={podcast}
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        onUpdate={onUpdate}
       />
     </>
   )
