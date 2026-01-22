@@ -1,4 +1,4 @@
-name: Claude Code
+name: Claude Code（Opus）
 
 on:
   issue_comment:
@@ -28,7 +28,7 @@ jobs:
       actions: read # Required for Claude to read CI results on PRs
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
@@ -38,7 +38,7 @@ jobs:
           version: 10
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: 'pnpm'
@@ -49,11 +49,12 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           claude_args: |
+            --model claude-opus-4-5
             --system-prompt "常に日本語で回答してください。"
             --allowedTools "Bash(pnpm run lint),Bash(pnpm run format),Bash(pnpm run dev),Bash(pnpm run build),Bash(pnpm run check),Bash(pnpm install),Bash(pnpm add:*),Bash(npx shadcn@latest add:*),WebSearch,WebFetch,Skill(add-package)"
 
           # Optional: Customize the trigger phrase (default: @claude)
-          # trigger_phrase: "/claude"
+          trigger_phrase: "/opus"
 
           # Optional: Trigger when specific user is assigned to an issue
           # assignee_trigger: "claude-bot"
