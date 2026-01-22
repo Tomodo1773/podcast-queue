@@ -7,14 +7,23 @@ updates:
       interval: "weekly"
       day: "monday"
     groups:
-      # すべてのnpm依存関係を1つのPRにグループ化
-      npm-dependencies:
+      # version-updatesを1つのPRにグループ化
+      npm-version:
+        applies-to: version-updates
+        patterns:
+          - "*"
+      # security-updatesを1つのPRにグループ化
+      npm-security:
+        applies-to: security-updates
         patterns:
           - "*"
     open-pull-requests-limit: 10
     labels:
       - "dependencies"
       - "npm"
+    commit-message:
+      prefix: "deps(npm)"
+      prefix-development: "deps(npm)"
 
   # GitHub Actionsの更新設定
   - package-ecosystem: "github-actions"
@@ -23,11 +32,20 @@ updates:
       interval: "weekly"
       day: "monday"
     groups:
-      # すべてのGitHub Actionsを1つのPRにグループ化
-      github-actions:
+      # version-updatesを1つのPRにグループ化
+      github-actions-version:
+        applies-to: version-updates
+        patterns:
+          - "*"
+      # security-updatesを1つのPRにグループ化
+      github-actions-security:
+        applies-to: security-updates
         patterns:
           - "*"
     open-pull-requests-limit: 10
     labels:
       - "dependencies"
       - "github-actions"
+    commit-message:
+      prefix: "deps(github-actions)"
+      prefix-development: "deps(github-actions)"
