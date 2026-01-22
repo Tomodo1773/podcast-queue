@@ -24,7 +24,6 @@ updates:
     commit-message:
       prefix: "deps(npm)"
       prefix-development: "deps(npm)"
-      include: "scope"
 
   # GitHub Actionsの更新設定
   - package-ecosystem: "github-actions"
@@ -50,4 +49,3 @@ updates:
     commit-message:
       prefix: "deps(github-actions)"
       prefix-development: "deps(github-actions)"
-      include: "scope"
