@@ -38,7 +38,7 @@ export function PodcastsHeader({ userId, onPodcastAdded, sharedUrl, autoFetch }:
     <header className="border-b bg-gradient-to-r from-purple-50/50 to-blue-50/50">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Image src="/podqueue-icon.svg" alt="PodQueue" width={32} height={32} />
+          <Image src="/android-chrome-192x192.png" alt="PodQueue" width={32} height={32} />
           <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
             PodQueue
           </h1>
