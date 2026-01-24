@@ -19,6 +19,7 @@ PodQueueは、ポッドキャストをプラットフォーム横断で一元管
 - **グリッド/リスト表示切替**: 好みに合わせて表示形式を選択可能
 - **LINE連携**: LINEにURLを送信するだけでポッドキャストを登録可能。登録結果はFlex Messageで通知
 - **サンプルポッドキャスト**: デモ用のサンプルURLを公開しており、LINE連携の動作確認に利用可能
+- **視聴統計**: 視聴履歴を客観的に把握できる統計ページ。日別・週別・月別の視聴数推移、プラットフォーム別統計、平均視聴頻度などを表示
 
 ## サービスレベル
 
@@ -79,6 +80,7 @@ Next.js 16 (App Router) + Supabase + shadcn/ui で構成されたPodcast管理We
   - `auth/` - ログイン・サインアップページ
     - `auth/sign-up-success/` - サインアップ完了ページ
   - `podcasts/` - Podcast一覧・追加ページ
+    - `podcasts/stats/` - 視聴統計ページ
   - `settings/` - 設定ページ（LINE連携など）
   - `samples/[id]/` - サンプルPodcastページ（OGP対応）
   - `api/fetch-metadata/` - URLからメタデータを取得するAPI Route
@@ -92,6 +94,9 @@ Next.js 16 (App Router) + Supabase + shadcn/ui で構成されたPodcast管理We
   - `add-podcast-form.tsx` - Podcast追加フォーム
   - `podcasts-header.tsx` - Podcastページヘッダー
   - `podcasts-container.tsx` - Podcastページコンテナ
+  - `stats-container.tsx` - 視聴統計ページコンテナ
+  - `stats-header.tsx` - 視聴統計ページヘッダー
+  - `stats-view.tsx` - 視聴統計表示コンポーネント（グラフ・統計情報）
   - `settings-form.tsx` - 設定フォーム（LINE連携）
   - `theme-provider.tsx` - テーマプロバイダー
 - `lib/` - ユーティリティ
@@ -112,6 +117,7 @@ Next.js 16 (App Router) + Supabase + shadcn/ui で構成されたPodcast管理We
 
 - **フロントエンド**: React 19, Next.js 16, Tailwind CSS 4
 - **UI**: shadcn/ui (new-york スタイル), Radix UI, Lucide Icons
+- **グラフ**: recharts
 - **バックエンド**: Supabase (認証 + PostgreSQL)
 - **パスエイリアス**: `@/*` でルートからのインポート
 
@@ -133,3 +139,11 @@ LINEにURLを送信してポッドキャストを登録可能。`/api/line-webho
 ### サンプルポッドキャスト
 
 LINE連携の動作確認用。`/samples/{id}`でOGP対応のデモページを提供。
+
+### 視聴統計
+
+`/podcasts/stats`ページで視聴履歴の統計情報を表示。`getStats` Server Actionで統計データを取得し、rechartsでグラフを描画。以下の情報を提供：
+
+- **基本統計**: 総視聴数、今日・今週・今月の視聴数、平均視聴頻度（日/週）
+- **時系列グラフ**: 日別（過去30日）、週別（過去12週）、月別（過去12ヶ月）の視聴数推移
+- **プラットフォーム別統計**: 各プラットフォームの視聴数と割合（円グラフ）
