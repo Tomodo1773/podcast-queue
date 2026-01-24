@@ -17,6 +17,7 @@ PodQueueは、YouTube、Spotify、NewsPicksなど様々なプラットフォー�
 - **視聴中のピックアップ表示** - 現在視聴中のコンテンツは常にリストの先頭に表示
 - **フィルタリング・並び替え** - 視聴状態・優先度でのフィルタリング、追加日順・優先度順での並び替え
 - **グリッド/リスト表示切替** - 好みに合わせて表示形式を選択可能
+- **視聴統計** - 視聴履歴を客観的に把握できる統計ページ（総視聴数、日別・週別・月別の推移グラフ、プラットフォーム別統計）
 - **LINE連携** - LINEにURLを送信するだけでPodcastを自動登録（設定画面からLINE User IDを連携）
 
 ## サンプルポッドキャスト
@@ -31,6 +32,7 @@ PodQueueは、YouTube、Spotify、NewsPicksなど様々なプラットフォー�
 
 - **フロントエンド**: Next.js 16 (App Router), React 19, Tailwind CSS 4
 - **UI**: shadcn/ui, Radix UI, Lucide Icons
+- **グラフ**: recharts
 - **バックエンド**: Supabase (認証 + PostgreSQL)
 
 ## 開発
