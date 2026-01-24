@@ -74,7 +74,13 @@ export default function SignUpPage() {
       <div className="w-full max-w-sm">
         <Card className="border-t-4 border-t-primary shadow-lg">
           <CardHeader className="text-center">
-            <Image src="/podqueue-icon.svg" alt="PodQueue" width={48} height={48} className="mx-auto mb-4" />
+            <Image
+              src="/android-chrome-192x192.png"
+              alt="PodQueue"
+              width={48}
+              height={48}
+              className="mx-auto mb-4"
+            />
             <CardTitle className="text-2xl">新規登録</CardTitle>
             <CardDescription>新しいアカウントを作成します</CardDescription>
           </CardHeader>
