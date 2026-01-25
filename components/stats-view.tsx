@@ -6,7 +6,6 @@ import {
   BarChart,
   CartesianGrid,
   Cell,
-  Legend,
   Pie,
   PieChart,
   ResponsiveContainer,
@@ -167,7 +166,7 @@ export function StatsView({ stats }: StatsViewProps) {
               </div>
             </div>
             <div>
-              <ResponsiveContainer width="100%" height={200}>
+              <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
                     data={stats.platformStats}
@@ -184,12 +183,12 @@ export function StatsView({ stats }: StatsViewProps) {
                       <Cell key={item.platform} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip />
-                  <Legend
+                  <Tooltip
                     // biome-ignore lint/suspicious/noExplicitAny: recharts型定義の都合上必要
-                    formatter={(_value: any, entry: any) => {
-                      return entry.payload?.platform ?? ""
-                    }}
+                    formatter={(value: any, _name: any, props: any) => [
+                      `${value}回視聴`,
+                      props.payload?.platform ?? "",
+                    ]}
                   />
                 </PieChart>
               </ResponsiveContainer>
