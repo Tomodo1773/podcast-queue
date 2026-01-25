@@ -58,6 +58,18 @@
 - [x] 優先度フィルタが正しく動作する
 - [x] 並び替え（追加日順/優先度順）が正しく動作する
 
+### 視聴統計 (`app/podcasts/stats/actions.ts`)
+
+視聴統計の取得ロジックのテスト。Supabaseクライアントはモック化。
+
+#### `getStats`
+- [x] 統計オブジェクトが正しい構造を持つ（total, today, thisWeek, thisMonth, dailyStats, weeklyStats, monthlyStats, platformStats, averagePerDay, averagePerWeek）
+- [x] total, today, thisWeek, thisMonth, averagePerDay, averagePerWeekが数値型である
+- [x] dailyStats, weeklyStats, monthlyStats, platformStatsが配列型である
+- [x] dailyStatsが30日分のデータを返す
+- [x] weeklyStatsが12週分のデータを返す
+- [x] monthlyStatsが12ヶ月分のデータを返す
+
 ---
 
 
