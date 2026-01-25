@@ -1,6 +1,6 @@
 "use client"
 
-import { LogOut, PlusCircle, Settings } from "lucide-react"
+import { BarChart3, LogOut, PlusCircle, Settings } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -47,6 +47,11 @@ export function PodcastsHeader({ userId, onPodcastAdded, sharedUrl, autoFetch }:
           <Button onClick={() => setOpen(true)}>
             <PlusCircle className="size-4" />
             <span className="hidden sm:inline">Podcastを追加</span>
+          </Button>
+          <Button variant="ghost" size="icon" asChild>
+            <Link href="/podcasts/stats" aria-label="視聴統計">
+              <BarChart3 className="size-4" />
+            </Link>
           </Button>
           <Button variant="ghost" size="icon" asChild>
             <Link href="/settings">
