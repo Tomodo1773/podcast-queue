@@ -123,15 +123,20 @@ export async function getStats(userId: string): Promise<StatsData> {
     count,
   }))
 
-  const oldestWatchedAt = watchedPodcasts.length > 0 ? new Date(watchedPodcasts[0].watched_at!) : now
-  const daysSinceOldest = Math.max(
-    1,
-    Math.floor((now.getTime() - oldestWatchedAt.getTime()) / (1000 * 60 * 60 * 24))
-  )
-  const weeksSinceOldest = Math.max(1, Math.floor(daysSinceOldest / 7))
+  let averagePerDay = 0
+  let averagePerWeek = 0
 
-  const averagePerDay = total / daysSinceOldest
-  const averagePerWeek = total / weeksSinceOldest
+  if (watchedPodcasts.length > 0 && total > 0) {
+    const oldestWatchedAt = new Date(watchedPodcasts[0].watched_at!)
+    const daysSinceOldest = Math.max(
+      1,
+      Math.floor((now.getTime() - oldestWatchedAt.getTime()) / (1000 * 60 * 60 * 24))
+    )
+    const weeksSinceOldest = Math.max(1, Math.floor(daysSinceOldest / 7))
+
+    averagePerDay = total / daysSinceOldest
+    averagePerWeek = total / weeksSinceOldest
+  }
 
   return {
     total,

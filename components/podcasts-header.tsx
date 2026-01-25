@@ -49,7 +49,7 @@ export function PodcastsHeader({ userId, onPodcastAdded, sharedUrl, autoFetch }:
             <span className="hidden sm:inline">Podcastを追加</span>
           </Button>
           <Button variant="ghost" size="icon" asChild>
-            <Link href="/podcasts/stats">
+            <Link href="/podcasts/stats" aria-label="視聴統計">
               <BarChart3 className="size-4" />
             </Link>
           </Button>
