@@ -69,7 +69,7 @@ export default function LoginPage() {
               alt="PodQueue"
               width={48}
               height={48}
-              className="mx-auto mb-4"
+              className="mx-auto mb-4 rounded-lg"
             />
             <CardTitle className="text-2xl">ログイン</CardTitle>
             <CardDescription>メールアドレスとパスワードを入力してログインしてください</CardDescription>
