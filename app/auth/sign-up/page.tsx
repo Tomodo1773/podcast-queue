@@ -79,7 +79,7 @@ export default function SignUpPage() {
               alt="PodQueue"
               width={48}
               height={48}
-              className="mx-auto mb-4"
+              className="mx-auto mb-4 rounded-lg"
             />
             <CardTitle className="text-2xl">新規登録</CardTitle>
             <CardDescription>新しいアカウントを作成します</CardDescription>
