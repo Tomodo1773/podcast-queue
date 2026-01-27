@@ -22,6 +22,7 @@ import {
   getPlatformLabel,
   getPriorityColor,
   getPriorityLabel,
+  type Platform,
   type Priority,
 } from "@/lib/utils"
 
@@ -50,7 +51,7 @@ type PodcastListItemProps = {
       title?: string | null
       description?: string | null
       thumbnail_url?: string | null
-      platform?: string | null
+      platform?: Platform | null
     }
   ) => Promise<void>
 }
@@ -205,8 +206,8 @@ export function PodcastListItem({
           {/* Platform and priority badges */}
           <div className="flex items-center gap-1 mt-1 flex-wrap">
             {podcast.platform && (
-              <Badge className={getPlatformColor(podcast.platform)} variant="default">
-                <span className="text-xs">{getPlatformLabel(podcast.platform)}</span>
+              <Badge className={getPlatformColor(podcast.platform as Platform)} variant="default">
+                <span className="text-xs">{getPlatformLabel(podcast.platform as Platform)}</span>
               </Badge>
             )}
             <Badge className={getPriorityColor(podcast.priority)} variant="default">

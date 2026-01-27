@@ -1,4 +1,4 @@
-import { getPriorityOrder, type Priority } from "@/lib/utils"
+import { getPriorityOrder, type Platform, type Priority } from "@/lib/utils"
 
 export type Podcast = {
   id: string
@@ -6,7 +6,7 @@ export type Podcast = {
   title: string | null
   description: string | null
   thumbnail_url: string | null
-  platform: string | null
+  platform: Platform | null
   priority: Priority
   is_watched: boolean
   is_watching: boolean

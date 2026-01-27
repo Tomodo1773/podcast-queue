@@ -12,7 +12,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { getPlatformColor, getPriorityColor, getPriorityLabel, type Priority } from "@/lib/utils"
+import {
+  getPlatformColor,
+  getPlatformLabel,
+  getPriorityColor,
+  getPriorityLabel,
+  type Platform,
+  type Priority,
+} from "@/lib/utils"
 
 type Podcast = {
   id: string
@@ -114,8 +121,8 @@ export function PodcastDialog({
             {podcast.platform && (
               <div className="flex items-center gap-2">
                 <span className="text-sm font-semibold text-muted-foreground">プラットフォーム:</span>
-                <Badge className={getPlatformColor(podcast.platform)} variant="default">
-                  {podcast.platform}
+                <Badge className={getPlatformColor(podcast.platform as Platform)} variant="default">
+                  {getPlatformLabel(podcast.platform as Platform)}
                 </Badge>
               </div>
             )}
