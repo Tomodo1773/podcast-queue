@@ -121,6 +121,7 @@ Next.js 16 (App Router) + Supabase + shadcn/ui で構成されたPodcast管理We
 
 - `id`, `user_id`, `url`, `title`, `description`, `thumbnail_url`, `platform`, `is_watched`, `is_watching`, `watched_at`, `priority`, `created_at`, `updated_at`
 - Row Level Security有効（ユーザーは自分のデータのみアクセス可能）
+- `platform` は正規化したID（`youtube`/`spotify`/`newspicks`/`pivot`/`txbiz`/`other`）を保存する
 
 ### メタデータ取得
 

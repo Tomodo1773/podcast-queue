@@ -22,6 +22,7 @@ import {
   getPlatformLabel,
   getPriorityColor,
   getPriorityLabel,
+  type Platform,
   type Priority,
 } from "@/lib/utils"
 
@@ -31,7 +32,7 @@ type Podcast = {
   title: string | null
   description: string | null
   thumbnail_url: string | null
-  platform: string | null
+  platform: Platform | null
   priority: Priority
   is_watched: boolean
   is_watching: boolean
@@ -50,7 +51,7 @@ type PodcastListItemProps = {
       title?: string | null
       description?: string | null
       thumbnail_url?: string | null
-      platform?: string | null
+      platform?: Platform | null
     }
   ) => Promise<void>
 }

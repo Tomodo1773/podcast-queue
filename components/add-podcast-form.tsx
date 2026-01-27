@@ -8,9 +8,10 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { createClient } from "@/lib/supabase/client"
-import { detectPlatform, getPlatformLabel, getPriorityLabel, type Priority } from "@/lib/utils"
+import { detectPlatform, getPriorityLabel, PLATFORM_OPTIONS, type Platform, type Priority } from "@/lib/utils"
 
 type AddPodcastFormProps = {
   userId: string
@@ -24,7 +25,7 @@ export function AddPodcastForm({ userId, onSuccess, initialUrl, autoFetch }: Add
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [thumbnailUrl, setThumbnailUrl] = useState("")
-  const [platform, setPlatform] = useState("")
+  const [platform, setPlatform] = useState<Platform>("other")
   const [priority, setPriority] = useState<Priority>("medium")
   const [isLoading, setIsLoading] = useState(false)
   const [isFetchingMetadata, setIsFetchingMetadata] = useState(false)
@@ -36,7 +37,7 @@ export function AddPodcastForm({ userId, onSuccess, initialUrl, autoFetch }: Add
   // autoFetch=true の場合は自動的にメタデータを取得
   useEffect(() => {
     if (initialUrl) {
-      setPlatform(getPlatformLabel(detectPlatform(initialUrl)))
+      setPlatform(detectPlatform(initialUrl))
 
       // 自動メタデータ取得（一度だけ実行）
       if (autoFetch && !hasAutoFetched.current) {
@@ -112,7 +113,7 @@ export function AddPodcastForm({ userId, onSuccess, initialUrl, autoFetch }: Add
   const handleUrlChange = (newUrl: string) => {
     setUrl(newUrl)
     if (newUrl) {
-      setPlatform(getPlatformLabel(detectPlatform(newUrl)))
+      setPlatform(detectPlatform(newUrl))
     }
   }
 
@@ -147,7 +148,7 @@ export function AddPodcastForm({ userId, onSuccess, initialUrl, autoFetch }: Add
         title: title || null,
         description: description || null,
         thumbnail_url: thumbnailUrl || null,
-        platform: platform || null,
+        platform,
         priority,
         is_watched: false,
       }
@@ -252,13 +253,18 @@ export function AddPodcastForm({ userId, onSuccess, initialUrl, autoFetch }: Add
 
           <div className="space-y-2">
             <Label htmlFor="platform">プラットフォーム</Label>
-            <Input
-              id="platform"
-              type="text"
-              placeholder="YouTube, Spotify等"
-              value={platform}
-              onChange={(e) => setPlatform(e.target.value)}
-            />
+            <Select value={platform} onValueChange={(value) => setPlatform(value as Platform)}>
+              <SelectTrigger id="platform">
+                <SelectValue placeholder="プラットフォームを選択" />
+              </SelectTrigger>
+              <SelectContent>
+                {PLATFORM_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">
