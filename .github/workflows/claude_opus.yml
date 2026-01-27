@@ -60,7 +60,7 @@ jobs:
                   "Bash(pnpm run dev)",
                   "Bash(pnpm run build)",
                   "Bash(pnpm run check)",
-                  "Bash(pnpm install)",
+                  "Bash(pnpm install:*)",
                   "Bash(pnpm add:*)",
                   "Bash(npx shadcn@latest add:*)",
                   "WebSearch",
