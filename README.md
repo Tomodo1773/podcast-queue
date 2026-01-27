@@ -2,11 +2,36 @@
 
 ポッドキャストをプラットフォーム横断で一元管理する「あとで聴く」Webアプリ
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+<p align="center">
+  <a href="https://github.com/Tomodo1773/podcast-queue"><img alt="GitHub Last Commit" src="https://img.shields.io/github/last-commit/Tomodo1773/podcast-queue"></a>
+  <a href="https://github.com/Tomodo1773/podcast-queue"><img alt="GitHub Top Language" src="https://img.shields.io/github/languages/top/Tomodo1773/podcast-queue"></a>
+  <a href="https://github.com/Tomodo1773/podcast-queue/issues"><img alt="GitHub issues" src="https://img.shields.io/github/issues/Tomodo1773/podcast-queue"></a>
+  <a href="https://github.com/Tomodo1773/podcast-queue/blob/main/LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg"></a>
+</p>
 
 ## 概要
 
 PodQueueは、YouTube、Spotify、NewsPicksなど様々なプラットフォームの動画・音声コンテンツを「あとで聴く」リストとして一箇所で管理できるWebアプリケーションです。
+
+## 使い方イメージ
+
+### 1) URLを集約して「あとで聴く」をキュー化
+
+<img src="images/sample_podqueue_home.png" alt="PodQueueのホーム画面（キュー一覧）" width="900" />
+
+YouTube / Spotify / NewsPicks などのURLを同じリストで管理し、優先度や状態でサクッと並び替えできます。
+
+### 2) 詳細画面で内容を確認して、状態を切り替え
+
+<img src="images/sample_podcast_details.png" alt="PodQueueの詳細画面（説明・サムネイル・状態）" width="900" />
+
+タイトル・説明・サムネイルを自動取得し、未視聴/視聴済み・視聴中や優先度をその場で更新できます。
+
+### 3) LINEにURLを送るだけで登録（あとからまとめて消化）
+
+<img src="images/sample_line_integration.png" alt="LINE連携（URL送信で自動登録）" width="900" />
+
+移動中にLINEへURLを投げておけば、あとでPodQueueを開いたときに「聴くもの」が揃っています。
 
 ## 主な機能
 
