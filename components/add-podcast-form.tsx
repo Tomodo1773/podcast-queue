@@ -253,11 +253,15 @@ export function AddPodcastForm({ userId, onSuccess, initialUrl, autoFetch }: Add
 
           <div className="space-y-2">
             <Label htmlFor="platform">プラットフォーム</Label>
-            <Select value={platform || undefined} onValueChange={(value) => setPlatform(value as Platform)}>
+            <Select
+              value={platform || "none"}
+              onValueChange={(value) => setPlatform(value === "none" ? null : (value as Platform))}
+            >
               <SelectTrigger id="platform">
                 <SelectValue placeholder="プラットフォームを選択" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="none">未選択</SelectItem>
                 {PLATFORM_OPTIONS.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     {option.label}

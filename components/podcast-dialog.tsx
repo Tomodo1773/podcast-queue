@@ -27,7 +27,7 @@ type Podcast = {
   title: string | null
   description: string | null
   thumbnail_url: string | null
-  platform: string | null
+  platform: Platform | null
   priority: Priority
   is_watched: boolean
   is_watching: boolean
@@ -121,8 +121,8 @@ export function PodcastDialog({
             {podcast.platform && (
               <div className="flex items-center gap-2">
                 <span className="text-sm font-semibold text-muted-foreground">プラットフォーム:</span>
-                <Badge className={getPlatformColor(podcast.platform as Platform)} variant="default">
-                  {getPlatformLabel(podcast.platform as Platform)}
+                <Badge className={getPlatformColor(podcast.platform)} variant="default">
+                  {getPlatformLabel(podcast.platform)}
                 </Badge>
               </div>
             )}

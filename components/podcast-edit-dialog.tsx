@@ -25,7 +25,7 @@ type PodcastEditDialogProps = {
     title: string | null
     description: string | null
     thumbnail_url: string | null
-    platform: string | null
+    platform: Platform | null
   }
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -44,7 +44,7 @@ export function PodcastEditDialog({ podcast, open, onOpenChange, onUpdate }: Pod
   const [title, setTitle] = useState(podcast.title || "")
   const [description, setDescription] = useState(podcast.description || "")
   const [thumbnailUrl, setThumbnailUrl] = useState(podcast.thumbnail_url || "")
-  const [platform, setPlatform] = useState<Platform | null>(podcast.platform as Platform | null)
+  const [platform, setPlatform] = useState<Platform | null>(podcast.platform)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -54,7 +54,7 @@ export function PodcastEditDialog({ podcast, open, onOpenChange, onUpdate }: Pod
       setTitle(podcast.title || "")
       setDescription(podcast.description || "")
       setThumbnailUrl(podcast.thumbnail_url || "")
-      setPlatform((podcast.platform as Platform | null) || null)
+      setPlatform(podcast.platform)
       setError(null)
     }
   }, [open, podcast])
@@ -128,11 +128,15 @@ export function PodcastEditDialog({ podcast, open, onOpenChange, onUpdate }: Pod
 
           <div className="space-y-2">
             <Label htmlFor="edit-platform">プラットフォーム</Label>
-            <Select value={platform || undefined} onValueChange={(value) => setPlatform(value as Platform)}>
+            <Select
+              value={platform || "none"}
+              onValueChange={(value) => setPlatform(value === "none" ? null : (value as Platform))}
+            >
               <SelectTrigger id="edit-platform">
                 <SelectValue placeholder="プラットフォームを選択" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="none">未選択</SelectItem>
                 {PLATFORM_OPTIONS.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     {option.label}

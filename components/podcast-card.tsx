@@ -33,7 +33,7 @@ type Podcast = {
   title: string | null
   description: string | null
   thumbnail_url: string | null
-  platform: string | null
+  platform: Platform | null
   priority: Priority
   is_watched: boolean
   is_watching: boolean
@@ -185,8 +185,8 @@ export function PodcastCard({
           <h3 className="font-semibold line-clamp-2 text-pretty mb-1">{podcast.title || "タイトルなし"}</h3>
           <div className="flex items-center gap-1 mb-2 flex-wrap">
             {podcast.platform && (
-              <Badge className={getPlatformColor(podcast.platform as Platform)} variant="default">
-                {getPlatformLabel(podcast.platform as Platform)}
+              <Badge className={getPlatformColor(podcast.platform)} variant="default">
+                {getPlatformLabel(podcast.platform)}
               </Badge>
             )}
             <Badge className={getPriorityColor(podcast.priority)} variant="default">

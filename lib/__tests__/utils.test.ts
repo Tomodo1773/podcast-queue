@@ -68,6 +68,11 @@ describe("getPlatformLabel", () => {
   it.each(testCases)("$platform のラベルは $expected を返す", ({ platform, expected }) => {
     expect(getPlatformLabel(platform)).toBe(expected)
   })
+
+  it("未知のプラットフォーム値は「その他」を返す", () => {
+    // 型アサーションを使用して未知のプラットフォーム値をテスト
+    expect(getPlatformLabel("unknown" as Platform)).toBe("その他")
+  })
 })
 
 describe("getPriorityLabel", () => {
