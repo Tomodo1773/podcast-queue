@@ -55,19 +55,23 @@ describe("detectPlatform", () => {
 })
 
 describe("getPlatformLabel", () => {
-  const testCases: { platform: Platform | string | null; expected: string }[] = [
+  const testCases: { platform: Platform | null; expected: string }[] = [
     { platform: "youtube", expected: "YouTube" },
     { platform: "spotify", expected: "Spotify" },
     { platform: "newspicks", expected: "NewsPicks" },
     { platform: "pivot", expected: "Pivot" },
     { platform: "txbiz", expected: "テレ東BIZ" },
     { platform: "other", expected: "その他" },
-    { platform: "unknown", expected: "その他" },
     { platform: null, expected: "その他" },
   ]
 
   it.each(testCases)("$platform のラベルは $expected を返す", ({ platform, expected }) => {
     expect(getPlatformLabel(platform)).toBe(expected)
+  })
+
+  it("未知のプラットフォーム値は「その他」を返す", () => {
+    // 型アサーションを使用して未知のプラットフォーム値をテスト
+    expect(getPlatformLabel("unknown" as Platform)).toBe("その他")
   })
 })
 

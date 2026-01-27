@@ -5,15 +5,33 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function getPlatformColor(platform: string | null): string {
+export type Platform = "youtube" | "spotify" | "newspicks" | "pivot" | "txbiz" | "other"
+
+export const PLATFORM_OPTIONS: { value: Platform; label: string }[] = [
+  { value: "youtube", label: "YouTube" },
+  { value: "spotify", label: "Spotify" },
+  { value: "newspicks", label: "NewsPicks" },
+  { value: "pivot", label: "Pivot" },
+  { value: "txbiz", label: "テレ東BIZ" },
+  { value: "other", label: "その他" },
+]
+
+export function getPlatformColor(platform: Platform | null): string {
   if (!platform) return "bg-gray-500"
-  const platformLower = platform.toLowerCase()
-  if (platformLower.includes("youtube")) return "bg-red-500"
-  if (platformLower.includes("spotify")) return "bg-green-500"
-  if (platformLower.includes("newspicks")) return "bg-black"
-  if (platformLower.includes("pivot")) return "bg-purple-500"
-  if (platformLower.includes("txbiz")) return "bg-red-600"
-  return "bg-gray-500"
+  switch (platform) {
+    case "youtube":
+      return "bg-red-500"
+    case "spotify":
+      return "bg-green-500"
+    case "newspicks":
+      return "bg-black"
+    case "pivot":
+      return "bg-purple-500"
+    case "txbiz":
+      return "bg-red-600"
+    default:
+      return "bg-gray-500"
+  }
 }
 
 export type Priority = "high" | "medium" | "low"
@@ -51,8 +69,6 @@ export function getPriorityOrder(priority: Priority): number {
   }
 }
 
-export type Platform = "youtube" | "spotify" | "newspicks" | "pivot" | "txbiz" | "other"
-
 /**
  * URLからプラットフォームを判定する
  */
@@ -68,20 +84,8 @@ export function detectPlatform(url: string): Platform {
 /**
  * プラットフォームIDから表示名を取得する
  */
-export function getPlatformLabel(platform: Platform | string | null): string {
+export function getPlatformLabel(platform: Platform | null): string {
   if (!platform) return "その他"
-  switch (platform.toLowerCase()) {
-    case "youtube":
-      return "YouTube"
-    case "spotify":
-      return "Spotify"
-    case "newspicks":
-      return "NewsPicks"
-    case "pivot":
-      return "Pivot"
-    case "txbiz":
-      return "テレ東BIZ"
-    default:
-      return "その他"
-  }
+  const option = PLATFORM_OPTIONS.find((opt) => opt.value === platform)
+  return option ? option.label : "その他"
 }

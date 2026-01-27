@@ -14,7 +14,9 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
+import { PLATFORM_OPTIONS, type Platform } from "@/lib/utils"
 
 type PodcastEditDialogProps = {
   podcast: {
@@ -23,7 +25,7 @@ type PodcastEditDialogProps = {
     title: string | null
     description: string | null
     thumbnail_url: string | null
-    platform: string | null
+    platform: Platform | null
   }
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -33,7 +35,7 @@ type PodcastEditDialogProps = {
       title?: string | null
       description?: string | null
       thumbnail_url?: string | null
-      platform?: string | null
+      platform?: Platform | null
     }
   ) => Promise<void>
 }
@@ -42,7 +44,7 @@ export function PodcastEditDialog({ podcast, open, onOpenChange, onUpdate }: Pod
   const [title, setTitle] = useState(podcast.title || "")
   const [description, setDescription] = useState(podcast.description || "")
   const [thumbnailUrl, setThumbnailUrl] = useState(podcast.thumbnail_url || "")
-  const [platform, setPlatform] = useState(podcast.platform || "")
+  const [platform, setPlatform] = useState<Platform | null>(podcast.platform)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -52,7 +54,7 @@ export function PodcastEditDialog({ podcast, open, onOpenChange, onUpdate }: Pod
       setTitle(podcast.title || "")
       setDescription(podcast.description || "")
       setThumbnailUrl(podcast.thumbnail_url || "")
-      setPlatform(podcast.platform || "")
+      setPlatform(podcast.platform)
       setError(null)
     }
   }, [open, podcast])
@@ -126,13 +128,22 @@ export function PodcastEditDialog({ podcast, open, onOpenChange, onUpdate }: Pod
 
           <div className="space-y-2">
             <Label htmlFor="edit-platform">プラットフォーム</Label>
-            <Input
-              id="edit-platform"
-              type="text"
-              placeholder="YouTube, Spotify等"
-              value={platform}
-              onChange={(e) => setPlatform(e.target.value)}
-            />
+            <Select
+              value={platform || "none"}
+              onValueChange={(value) => setPlatform(value === "none" ? null : (value as Platform))}
+            >
+              <SelectTrigger id="edit-platform">
+                <SelectValue placeholder="プラットフォームを選択" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">未選択</SelectItem>
+                {PLATFORM_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {error && <p className="text-sm text-destructive">{error}</p>}

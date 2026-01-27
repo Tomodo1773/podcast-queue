@@ -13,7 +13,7 @@ import {
   type WatchFilter,
 } from "@/lib/podcast-filters"
 import { createClient } from "@/lib/supabase/client"
-import { getPriorityLabel, type Priority } from "@/lib/utils"
+import { getPriorityLabel, type Platform, type Priority } from "@/lib/utils"
 
 type PodcastListProps = {
   userId: string
@@ -163,7 +163,7 @@ export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
       title?: string | null
       description?: string | null
       thumbnail_url?: string | null
-      platform?: string | null
+      platform?: Platform | null
     }
   ) => {
     const supabase = createClient()
