@@ -178,9 +178,7 @@ export function StatsView({ stats }: StatsViewProps) {
                     cy="50%"
                     labelLine={false}
                     // biome-ignore lint/suspicious/noExplicitAny: recharts型定義の都合上必要
-                    label={(entry: any) =>
-                      `${getPlatformLabel(entry.platform as Platform)}: ${entry.count}`
-                    }
+                    label={(entry: any) => `${getPlatformLabel(entry.platform as Platform)}: ${entry.count}`}
                     outerRadius={80}
                     fill="#8884d8"
                     dataKey="count"
