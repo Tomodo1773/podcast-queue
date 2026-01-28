@@ -23,7 +23,7 @@ type StatsViewProps = {
   stats: StatsData
 }
 
-const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#a28ddb", "#ff6b9d"]
+const COLORS = ["#6f6ae6", "#4d8bf9", "#82ca9d", "#ffc658", "#ff8042", "#ff6b9d"]
 
 export function StatsView({ stats }: StatsViewProps) {
   const [period, setPeriod] = useState<"daily" | "weekly" | "monthly">("daily")
