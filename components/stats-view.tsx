@@ -14,8 +14,10 @@ import {
   YAxis,
 } from "recharts"
 import type { StatsData } from "@/app/podcasts/stats/actions"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { getPlatformColor, getPlatformLabel, type Platform } from "@/lib/utils"
 
 type StatsViewProps = {
   stats: StatsData
@@ -158,8 +160,10 @@ export function StatsView({ stats }: StatsViewProps) {
             <div>
               <div className="space-y-2">
                 {stats.platformStats.map((stat) => (
-                  <div key={stat.platform} className="flex justify-between">
-                    <span className="font-medium">{stat.platform}</span>
+                  <div key={stat.platform} className="flex items-center justify-between gap-2">
+                    <Badge className={getPlatformColor(stat.platform as Platform)} variant="default">
+                      {getPlatformLabel(stat.platform as Platform)}
+                    </Badge>
                     <span>{stat.count}</span>
                   </div>
                 ))}
@@ -174,7 +178,9 @@ export function StatsView({ stats }: StatsViewProps) {
                     cy="50%"
                     labelLine={false}
                     // biome-ignore lint/suspicious/noExplicitAny: recharts型定義の都合上必要
-                    label={(entry: any) => `${entry.platform}: ${entry.count}`}
+                    label={(entry: any) =>
+                      `${getPlatformLabel(entry.platform as Platform)}: ${entry.count}`
+                    }
                     outerRadius={80}
                     fill="#8884d8"
                     dataKey="count"
@@ -187,7 +193,7 @@ export function StatsView({ stats }: StatsViewProps) {
                     // biome-ignore lint/suspicious/noExplicitAny: recharts型定義の都合上必要
                     formatter={(value: any, _name: any, props: any) => [
                       `${value}回視聴`,
-                      props.payload?.platform ?? "",
+                      getPlatformLabel((props.payload?.platform ?? "other") as Platform),
                     ]}
                   />
                 </PieChart>
