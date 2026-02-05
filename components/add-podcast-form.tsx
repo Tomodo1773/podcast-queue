@@ -163,18 +163,6 @@ export function AddPodcastForm({ userId, onSuccess, initialUrl, autoFetch }: Add
         throw insertError
       }
 
-      // Google Driveファイル作成（バックグラウンド、失敗してもPodcast登録は成功）
-      fetch("/api/google-drive/create-file", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: title || url,
-          url,
-          description: description || "",
-          platform: platform || "その他",
-        }),
-      }).catch((err) => console.error("Google Driveファイル作成エラー:", err))
-
       console.log("[v0] Podcast追加成功、リダイレクト開始")
       if (onSuccess) {
         onSuccess()

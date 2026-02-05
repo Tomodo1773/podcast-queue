@@ -154,6 +154,35 @@ export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
           is_watching: p.id === id,
         }))
       )
+
+      // 4. Google Driveファイル作成（まだ作成していない場合のみ）
+      const podcast = podcasts.find((p) => p.id === id)
+      if (podcast && !podcast.google_drive_file_created) {
+        try {
+          const response = await fetch("/api/google-drive/create-file", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              title: podcast.title || podcast.url,
+              url: podcast.url,
+              description: podcast.description || "",
+              platform: podcast.platform || "その他",
+            }),
+          })
+
+          if (response.ok) {
+            // Google Driveファイル作成成功時、フラグを更新
+            await supabase.from("podcasts").update({ google_drive_file_created: true }).eq("id", id)
+
+            setPodcasts((prev) =>
+              prev.map((p) => (p.id === id ? { ...p, google_drive_file_created: true } : p))
+            )
+          }
+        } catch (err) {
+          console.error("Google Driveファイル作成エラー:", err)
+          // エラーでも視聴中操作自体は成功させる
+        }
+      }
     }
   }
 

@@ -1,6 +1,5 @@
 import crypto from "crypto"
 import { NextResponse } from "next/server"
-import { createPodcastFileInDrive } from "@/lib/google/create-podcast-file"
 import {
   buildErrorMessage,
   buildMetadataFailedMessage,
@@ -140,15 +139,6 @@ export async function POST(request: Request) {
         }
       } else {
         console.log(`Podcast added for user ${link.user_id}: ${url}`)
-
-        // Google Driveファイル作成（バックグラウンド、失敗してもPodcast登録は成功）
-        const platform = detectPlatform(url)
-        createPodcastFileInDrive(supabase, link.user_id, {
-          title: metadata.title || url,
-          url,
-          description: metadata.description || "",
-          platform: platform || "その他",
-        })
 
         // 登録成功時は成功メッセージを返信
         if (replyToken) {

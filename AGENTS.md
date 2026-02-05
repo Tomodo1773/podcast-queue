@@ -18,7 +18,7 @@ PodQueueは、ポッドキャストをプラットフォーム横断で一元管
 - **フィルタリング・並び替え**: 視聴状態・優先度でのフィルタリング、追加日順・優先度順での並び替え
 - **グリッド/リスト表示切替**: 好みに合わせて表示形式を選択可能
 - **LINE連携**: LINEにURLを送信するだけでポッドキャストを登録可能。登録結果はFlex Messageで通知
-- **Google Drive連携**: ポッドキャスト登録時にGoogle Driveへマークダウンファイルを自動生成。視聴後の学びを記録するのに活用可能
+- **Google Drive連携**: ポッドキャストを視聴中に設定した際、Google Driveへマークダウンファイルを自動生成。視聴後の学びを記録するのに活用可能
 - **サンプルポッドキャスト**: デモ用のサンプルURLを公開しており、LINE連携の動作確認に利用可能
 
 ## サービスレベル
@@ -111,7 +111,6 @@ Next.js 16 (App Router) + Supabase + shadcn/ui で構成されたPodcast管理We
 - `lib/google/` - Google API関連
   - `oauth.ts` - OAuth認証ユーティリティ
   - `drive.ts` - Google Drive APIファイル操作
-  - `create-podcast-file.ts` - Podcast用マークダウンファイル作成
 - `lib/samples/` - サンプルPodcastデータ
   - `data.ts` - サンプルデータ定義
 
@@ -126,7 +125,7 @@ Next.js 16 (App Router) + Supabase + shadcn/ui で構成されたPodcast管理We
 
 `podcasts` テーブル:
 
-- `id`, `user_id`, `url`, `title`, `description`, `thumbnail_url`, `platform`, `is_watched`, `is_watching`, `watched_at`, `priority`, `created_at`, `updated_at`
+- `id`, `user_id`, `url`, `title`, `description`, `thumbnail_url`, `platform`, `is_watched`, `is_watching`, `watched_at`, `priority`, `google_drive_file_created`, `created_at`, `updated_at`
 - Row Level Security有効（ユーザーは自分のデータのみアクセス可能）
 
 ### メタデータ取得
@@ -139,11 +138,12 @@ LINEにURLを送信してポッドキャストを登録可能。`/api/line-webho
 
 ### Google Drive連携
 
-ポッドキャスト登録時にGoogle Driveへマークダウンファイルを自動生成。
+ポッドキャストを視聴中に設定した際、Google Driveへマークダウンファイルを自動生成。
 
 - OAuth認証でGoogle Driveアクセス権限を取得
 - `google_drive_settings`テーブルでアクセストークン・リフレッシュトークン・保存先フォルダIDを管理
 - マークダウンファイルにはタイトル、プラットフォーム、URL、説明、学びセクション（空欄）を含む
+- `google_drive_file_created`フラグで重複作成を防止（一度作成したPodcastは再度視聴中にしても作成しない）
 
 ### サンプルポッドキャスト
 
