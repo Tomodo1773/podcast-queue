@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation"
 import type React from "react"
 import { useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -179,134 +178,124 @@ export function AddPodcastForm({ userId, onSuccess, initialUrl, autoFetch }: Add
   }
 
   return (
-    <Card className="border-t-4 border-t-primary">
-      <CardHeader>
-        <CardTitle className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-          新しいPodcastを追加
-        </CardTitle>
-        <CardDescription>PodcastのURLを入力して、自動的にメタデータを取得できます</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="url">URL *</Label>
-            <div className="flex gap-2">
-              <Input
-                id="url"
-                type="url"
-                placeholder="https://..."
-                required
-                value={url}
-                onChange={(e) => handleUrlChange(e.target.value)}
-                className="flex-1"
-              />
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleFetchMetadata}
-                disabled={!url || isFetchingMetadata}
-              >
-                {isFetchingMetadata ? (
-                  <>
-                    <Loader2 className="mr-2 size-4 animate-spin" />
-                    取得中
-                  </>
-                ) : (
-                  "メタデータ取得"
-                )}
-              </Button>
-            </div>
-          </div>
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="space-y-2">
+        <Label htmlFor="url">URL *</Label>
+        <div className="flex gap-2">
+          <Input
+            id="url"
+            type="url"
+            placeholder="https://..."
+            required
+            value={url}
+            onChange={(e) => handleUrlChange(e.target.value)}
+            className="flex-1"
+          />
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleFetchMetadata}
+            disabled={!url || isFetchingMetadata}
+          >
+            {isFetchingMetadata ? (
+              <>
+                <Loader2 className="mr-2 size-4 animate-spin" />
+                取得中
+              </>
+            ) : (
+              "メタデータ取得"
+            )}
+          </Button>
+        </div>
+      </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="title">タイトル</Label>
-            <Input
-              id="title"
-              type="text"
-              placeholder="Podcastのタイトル"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-          </div>
+      <div className="space-y-2">
+        <Label htmlFor="title">タイトル</Label>
+        <Input
+          id="title"
+          type="text"
+          placeholder="Podcastのタイトル"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+      </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="description">説明</Label>
-            <Textarea
-              id="description"
-              placeholder="Podcastの説明"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={4}
-            />
-          </div>
+      <div className="space-y-2">
+        <Label htmlFor="description">説明</Label>
+        <Textarea
+          id="description"
+          placeholder="Podcastの説明"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          rows={4}
+        />
+      </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="thumbnail">サムネイルURL</Label>
-            <Input
-              id="thumbnail"
-              type="url"
-              placeholder="https://..."
-              value={thumbnailUrl}
-              onChange={(e) => setThumbnailUrl(e.target.value)}
-            />
-          </div>
+      <div className="space-y-2">
+        <Label htmlFor="thumbnail">サムネイルURL</Label>
+        <Input
+          id="thumbnail"
+          type="url"
+          placeholder="https://..."
+          value={thumbnailUrl}
+          onChange={(e) => setThumbnailUrl(e.target.value)}
+        />
+      </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="platform">プラットフォーム</Label>
-            <Select
-              value={platform || "none"}
-              onValueChange={(value) => setPlatform(value === "none" ? null : (value as Platform))}
+      <div className="space-y-2">
+        <Label htmlFor="platform">プラットフォーム</Label>
+        <Select
+          value={platform || "none"}
+          onValueChange={(value) => setPlatform(value === "none" ? null : (value as Platform))}
+        >
+          <SelectTrigger id="platform">
+            <SelectValue placeholder="プラットフォームを選択" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="none">未選択</SelectItem>
+            {PLATFORM_OPTIONS.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Label>優先度</Label>
+        <div className="flex gap-2">
+          {(["high", "medium", "low"] as const).map((p) => (
+            <Button
+              key={p}
+              type="button"
+              variant={priority === p ? "default" : "outline"}
+              onClick={() => setPriority(p)}
+              className="flex-1"
             >
-              <SelectTrigger id="platform">
-                <SelectValue placeholder="プラットフォームを選択" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">未選択</SelectItem>
-                {PLATFORM_OPTIONS.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label>優先度</Label>
-            <div className="flex gap-2">
-              {(["high", "medium", "low"] as const).map((p) => (
-                <Button
-                  key={p}
-                  type="button"
-                  variant={priority === p ? "default" : "outline"}
-                  onClick={() => setPriority(p)}
-                  className="flex-1"
-                >
-                  {getPriorityLabel(p)}
-                </Button>
-              ))}
-            </div>
-          </div>
-
-          {error && <p className="text-sm text-destructive">{error}</p>}
-
-          <div className="flex gap-2">
-            <Button type="submit" disabled={isLoading} className="flex-1">
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 size-4 animate-spin" />
-                  追加中...
-                </>
-              ) : (
-                "追加"
-              )}
+              {getPriorityLabel(p)}
             </Button>
-            <Button type="button" variant="outline" onClick={() => router.push("/podcasts")}>
-              キャンセル
-            </Button>
-          </div>
-        </form>
-      </CardContent>
-    </Card>
+          ))}
+        </div>
+      </div>
+
+      {error && <p className="text-sm text-destructive">{error}</p>}
+
+      <div className="flex gap-2">
+        <Button type="submit" disabled={isLoading} className="flex-1">
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 size-4 animate-spin" />
+              追加中...
+            </>
+          ) : (
+            "追加"
+          )}
+        </Button>
+        <Button type="button" variant="outline" onClick={() => router.push("/podcasts")}>
+          キャンセル
+        </Button>
+      </div>
+    </form>
   )
 }

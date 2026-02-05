@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { AddPodcastForm } from "@/components/add-podcast-form"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { createClient } from "@/lib/supabase/client"
 
 type PodcastsHeaderProps = {
@@ -72,8 +72,13 @@ export function PodcastsHeader({ userId, onPodcastAdded, sharedUrl, autoFetch }:
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogTitle className="sr-only">Podcastを追加</DialogTitle>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto border-t-4 border-t-primary">
+          <DialogHeader>
+            <DialogTitle className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+              新しいPodcastを追加
+            </DialogTitle>
+            <DialogDescription>PodcastのURLを入力して、自動的にメタデータを取得できます</DialogDescription>
+          </DialogHeader>
           <AddPodcastForm
             userId={userId}
             onSuccess={() => {
