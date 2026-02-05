@@ -18,6 +18,7 @@ PodQueueは、ポッドキャストをプラットフォーム横断で一元管
 - **フィルタリング・並び替え**: 視聴状態・優先度でのフィルタリング、追加日順・優先度順での並び替え
 - **グリッド/リスト表示切替**: 好みに合わせて表示形式を選択可能
 - **LINE連携**: LINEにURLを送信するだけでポッドキャストを登録可能。登録結果はFlex Messageで通知
+- **Google Drive連携**: ポッドキャスト登録時にGoogle Driveへマークダウンファイルを自動生成。視聴後の学びを記録するのに活用可能
 - **サンプルポッドキャスト**: デモ用のサンプルURLを公開しており、LINE連携の動作確認に利用可能
 
 ## サービスレベル
@@ -79,10 +80,12 @@ Next.js 16 (App Router) + Supabase + shadcn/ui で構成されたPodcast管理We
   - `auth/` - ログイン・サインアップページ
     - `auth/sign-up-success/` - サインアップ完了ページ
   - `podcasts/` - Podcast一覧・追加ページ
-  - `settings/` - 設定ページ（LINE連携など）
+  - `settings/` - 設定ページ（LINE連携、Google Drive連携）
   - `samples/[id]/` - サンプルPodcastページ（OGP対応）
   - `api/fetch-metadata/` - URLからメタデータを取得するAPI Route
   - `api/line-webhook/` - LINE Messaging API Webhookエンドポイント
+  - `api/auth/google/` - Google OAuth認証（認証開始・コールバック）
+  - `api/google-drive/` - Google Driveファイル作成API
 - `components/` - Reactコンポーネント
   - `ui/` - shadcn/uiベースのUIコンポーネント
   - `podcast-list.tsx` - Podcast一覧表示（クライアントコンポーネント）
@@ -92,7 +95,7 @@ Next.js 16 (App Router) + Supabase + shadcn/ui で構成されたPodcast管理We
   - `add-podcast-form.tsx` - Podcast追加フォーム
   - `podcasts-header.tsx` - Podcastページヘッダー
   - `podcasts-container.tsx` - Podcastページコンテナ
-  - `settings-form.tsx` - 設定フォーム（LINE連携）
+  - `settings-form.tsx` - 設定フォーム（LINE連携、Google Drive連携）
   - `theme-provider.tsx` - テーマプロバイダー
 - `lib/` - ユーティリティ
   - `utils.ts` - 汎用ユーティリティ関数
@@ -105,6 +108,10 @@ Next.js 16 (App Router) + Supabase + shadcn/ui で構成されたPodcast管理We
   - `flex-message.ts` - Flex Message生成
   - `reply.ts` - メッセージ返信
   - `loading.ts` - ローディングアニメーション
+- `lib/google/` - Google API関連
+  - `oauth.ts` - OAuth認証ユーティリティ
+  - `drive.ts` - Google Drive APIファイル操作
+  - `create-podcast-file.ts` - Podcast用マークダウンファイル作成
 - `lib/samples/` - サンプルPodcastデータ
   - `data.ts` - サンプルデータ定義
 
@@ -129,6 +136,14 @@ Next.js 16 (App Router) + Supabase + shadcn/ui で構成されたPodcast管理We
 ### LINE連携
 
 LINEにURLを送信してポッドキャストを登録可能。`/api/line-webhook`でWebhookを受信し、`line_user_links`テーブルでユーザーを紐付け。
+
+### Google Drive連携
+
+ポッドキャスト登録時にGoogle Driveへマークダウンファイルを自動生成。
+
+- OAuth認証でGoogle Driveアクセス権限を取得
+- `google_drive_settings`テーブルでアクセストークン・リフレッシュトークン・保存先フォルダIDを管理
+- マークダウンファイルにはタイトル、プラットフォーム、URL、説明、学びセクション（空欄）を含む
 
 ### サンプルポッドキャスト
 
