@@ -78,11 +78,13 @@ export function PodcastListItem({
     }
   }
 
-  const handleOpenLink = async (e: React.MouseEvent) => {
+  const handleOpenLink = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    await onStartWatching(podcast.id)
+    // 先に動画を開く
     window.open(podcast.url, "_blank", "noopener,noreferrer")
+    // バックグラウンドで視聴中処理を実行（awaitしない）
+    onStartWatching(podcast.id)
   }
 
   const handleDelete = async () => {
