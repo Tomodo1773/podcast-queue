@@ -1,3 +1,4 @@
+import { cookies } from "next/headers"
 import { type NextRequest, NextResponse } from "next/server"
 import { encrypt } from "@/lib/crypto"
 import { exchangeCodeForTokens } from "@/lib/google/oauth"
@@ -33,12 +34,20 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL("/auth/login", baseUrl))
   }
 
-  // CSRFチェック: stateがユーザーIDと一致するか確認
-  if (state !== user.id) {
+  // CSRFチェック: クッキーのトークンとstateパラメータを比較
+  const cookieStore = await cookies()
+  const storedState = cookieStore.get("oauth_state")?.value
+
+  if (!storedState || state !== storedState) {
+    // 検証失敗時はクッキーを削除
+    cookieStore.delete("oauth_state")
     return NextResponse.redirect(
       new URL(`/settings?error=${encodeURIComponent("認証状態が不正です")}`, baseUrl)
     )
   }
+
+  // 検証成功後、クッキーを削除（ワンタイム使用）
+  cookieStore.delete("oauth_state")
 
   try {
     const tokens = await exchangeCodeForTokens(code)
