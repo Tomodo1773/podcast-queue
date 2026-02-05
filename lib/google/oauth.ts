@@ -6,11 +6,13 @@ const SCOPES = ["https://www.googleapis.com/auth/drive.file"]
 
 export function getGoogleAuthUrl(state: string): string {
   const clientId = process.env.GOOGLE_OAUTH_CLIENT_ID
-  const redirectUri = process.env.GOOGLE_OAUTH_REDIRECT_URI
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL
 
-  if (!clientId || !redirectUri) {
+  if (!clientId || !appUrl) {
     throw new Error("Google OAuth環境変数が設定されていません")
   }
+
+  const redirectUri = `${appUrl}/api/auth/google/callback`
 
   const params = new URLSearchParams({
     client_id: clientId,
@@ -36,11 +38,13 @@ export interface GoogleTokenResponse {
 export async function exchangeCodeForTokens(code: string): Promise<GoogleTokenResponse> {
   const clientId = process.env.GOOGLE_OAUTH_CLIENT_ID
   const clientSecret = process.env.GOOGLE_OAUTH_CLIENT_SECRET
-  const redirectUri = process.env.GOOGLE_OAUTH_REDIRECT_URI
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL
 
-  if (!clientId || !clientSecret || !redirectUri) {
+  if (!clientId || !clientSecret || !appUrl) {
     throw new Error("Google OAuth環境変数が設定されていません")
   }
+
+  const redirectUri = `${appUrl}/api/auth/google/callback`
 
   const response = await fetch(GOOGLE_TOKEN_URL, {
     method: "POST",
