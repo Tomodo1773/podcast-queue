@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { AddPodcastForm } from "@/components/add-podcast-form"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { createClient } from "@/lib/supabase/client"
 
 type PodcastsHeaderProps = {
@@ -73,6 +73,7 @@ export function PodcastsHeader({ userId, onPodcastAdded, sharedUrl, autoFetch }:
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogTitle className="sr-only">Podcastを追加</DialogTitle>
           <AddPodcastForm
             userId={userId}
             onSuccess={() => {
