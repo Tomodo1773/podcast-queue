@@ -178,6 +178,19 @@ export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
     }
   }
 
+  const handleUpdateNotes = async (id: string, notes: string) => {
+    const supabase = createClient()
+
+    const { error } = await supabase.from("podcasts").update({ notes }).eq("id", id)
+
+    if (error) {
+      console.error("[v0] メモ更新エラー:", error)
+      throw error
+    } else {
+      setPodcasts((prev) => prev.map((p) => (p.id === id ? { ...p, notes } : p)))
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -301,6 +314,7 @@ export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
               onChangePriority={handleChangePriority}
               onStartWatching={handleStartWatching}
               onUpdate={handleUpdatePodcast}
+              onUpdateNotes={handleUpdateNotes}
             />
           ))}
         </div>
@@ -315,6 +329,7 @@ export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
               onChangePriority={handleChangePriority}
               onStartWatching={handleStartWatching}
               onUpdate={handleUpdatePodcast}
+              onUpdateNotes={handleUpdateNotes}
             />
           ))}
         </div>

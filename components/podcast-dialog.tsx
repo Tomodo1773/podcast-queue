@@ -1,10 +1,11 @@
 "use client"
 
-import { Check, ChevronDown, ExternalLink, Play, Trash2, X } from "lucide-react"
+import { Check, ChevronDown, ChevronUp, ExternalLink, Play, Trash2, X } from "lucide-react"
 import Image from "next/image"
 import { useEffect, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import {
   DropdownMenu,
@@ -12,6 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { Textarea } from "@/components/ui/textarea"
 import {
   getPlatformColor,
   getPlatformLabel,
@@ -32,6 +34,7 @@ type Podcast = {
   is_watched: boolean
   is_watching: boolean
   watched_at: string | null
+  notes: string | null
 }
 
 type PodcastDialogProps = {
@@ -42,6 +45,7 @@ type PodcastDialogProps = {
   onDelete: (id: string) => Promise<void>
   onChangePriority: (id: string, newPriority: Priority) => Promise<void>
   onStartWatching: (id: string) => Promise<void>
+  onUpdateNotes: (id: string, notes: string) => Promise<void>
 }
 
 const DESCRIPTION_MAX_LENGTH_MOBILE = 70
@@ -56,9 +60,14 @@ export function PodcastDialog({
   onDelete,
   onChangePriority,
   onStartWatching,
+  onUpdateNotes,
 }: PodcastDialogProps) {
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false)
   const [maxLength, setMaxLength] = useState(DESCRIPTION_MAX_LENGTH_DESKTOP)
+  const [isNotesOpen, setIsNotesOpen] = useState(false)
+  const [notesValue, setNotesValue] = useState(podcast.notes || "")
+  const [isSaving, setIsSaving] = useState(false)
+  const [saveTimeout, setSaveTimeout] = useState<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
     const updateMaxLength = () => {
@@ -71,6 +80,43 @@ export function PodcastDialog({
     return () => window.removeEventListener("resize", updateMaxLength)
   }, [])
 
+  // メモが存在する場合は初期状態で展開
+  useEffect(() => {
+    if (podcast.notes) {
+      setIsNotesOpen(true)
+    }
+    setNotesValue(podcast.notes || "")
+  }, [podcast.notes])
+
+  // メモの自動保存（debounce）
+  useEffect(() => {
+    if (saveTimeout) {
+      clearTimeout(saveTimeout)
+    }
+
+    const timeout = setTimeout(async () => {
+      if (notesValue !== podcast.notes) {
+        setIsSaving(true)
+        try {
+          await onUpdateNotes(podcast.id, notesValue)
+        } catch (error) {
+          console.error("メモの保存に失敗しました:", error)
+        } finally {
+          setIsSaving(false)
+        }
+      }
+    }, 1000)
+
+    setSaveTimeout(timeout)
+
+    return () => {
+      if (timeout) {
+        clearTimeout(timeout)
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [notesValue])
+
   const description = podcast.description || ""
   const isLongDescription = description.length > maxLength
   const displayedDescription =
@@ -79,6 +125,7 @@ export function PodcastDialog({
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
       setIsDescriptionExpanded(false)
+      setIsNotesOpen(false)
     }
     onOpenChange(newOpen)
   }
@@ -187,6 +234,34 @@ export function PodcastDialog({
               )}
             </div>
           )}
+          <Collapsible open={isNotesOpen} onOpenChange={setIsNotesOpen} className="space-y-2">
+            <CollapsibleTrigger asChild>
+              <button
+                type="button"
+                className="flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {isNotesOpen ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+                学びのメモ
+                {podcast.notes && !isNotesOpen && (
+                  <Badge variant="secondary" className="ml-1">
+                    あり
+                  </Badge>
+                )}
+              </button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="space-y-2">
+              <Textarea
+                placeholder="動画から学んだことや気づきをメモしましょう..."
+                value={notesValue}
+                onChange={(e) => setNotesValue(e.target.value)}
+                className="min-h-[120px] resize-y"
+              />
+              {isSaving && <p className="text-xs text-muted-foreground">保存中...</p>}
+              {!isSaving && notesValue !== podcast.notes && (
+                <p className="text-xs text-muted-foreground">変更を保存しています...</p>
+              )}
+            </CollapsibleContent>
+          </Collapsible>
           <div className="flex items-center gap-2 pt-4">
             <Button
               variant={podcast.is_watched ? "default" : "outline"}
