@@ -139,6 +139,7 @@ export async function POST(request: Request) {
         }
       } else {
         console.log(`Podcast added for user ${link.user_id}: ${url}`)
+
         // 登録成功時は成功メッセージを返信
         if (replyToken) {
           if (metadataFailed) {

@@ -50,6 +50,7 @@ YouTube / Spotify / NewsPicks などのURLを同じリストで管理し、優�
 - **グリッド/リスト表示切替** - 好みに合わせて表示形式を選択可能
 - **視聴統計** - 視聴履歴を客観的に把握できる統計ページ（総視聴数、日別・週別・月別の推移グラフ、プラットフォーム別統計）
 - **LINE連携** - LINEにURLを送信するだけでPodcastを自動登録（設定画面からLINE User IDを連携）
+- **Google Drive連携** - ポッドキャストを視聴中に設定した際、Google Driveへマークダウンファイルを自動生成し、視聴後の学びを記録可能（リフレッシュトークンはAES-256-GCMで暗号化保存）
 
 ## サンプルポッドキャスト
 
@@ -65,6 +66,25 @@ YouTube / Spotify / NewsPicks などのURLを同じリストで管理し、優�
 - **UI**: shadcn/ui, Radix UI, Lucide Icons
 - **グラフ**: recharts
 - **バックエンド**: Supabase (認証 + PostgreSQL)
+
+## セットアップ
+
+### 環境変数
+
+Google Drive連携を使用する場合、暗号化キーの生成が必要です。
+
+```bash
+# 暗号化キーを生成
+node scripts/generate-encryption-key.mjs
+```
+
+生成されたキーを `.env.local` に追加してください：
+
+```bash
+ENCRYPTION_KEY=生成されたキー
+```
+
+本番環境では、Supabaseの環境変数に設定してください。
 
 ## 開発
 

@@ -12,7 +12,7 @@ export type Podcast = {
   is_watching: boolean
   watched_at: string | null
   created_at: string
-  notes: string | null
+  google_drive_file_created: boolean
 }
 
 export type WatchFilter = "all" | "watched" | "unwatched"

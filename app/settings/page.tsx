@@ -22,6 +22,13 @@ export default async function SettingsPage() {
     .eq("user_id", user.id)
     .single()
 
+  // Google Drive連携情報を取得
+  const { data: driveSettings } = await supabase
+    .from("google_drive_settings")
+    .select("folder_id")
+    .eq("user_id", user.id)
+    .single()
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50/30 to-blue-50/30">
       <header className="border-b bg-white/80 backdrop-blur-sm">
@@ -38,7 +45,12 @@ export default async function SettingsPage() {
       </header>
 
       <main className="container mx-auto px-4 py-8 max-w-2xl">
-        <SettingsForm userId={user.id} initialLineUserId={lineLink?.line_user_id || ""} />
+        <SettingsForm
+          userId={user.id}
+          initialLineUserId={lineLink?.line_user_id || ""}
+          initialDriveFolderId={driveSettings?.folder_id || ""}
+          isDriveLinked={!!driveSettings}
+        />
       </main>
     </div>
   )
