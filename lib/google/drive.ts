@@ -56,20 +56,34 @@ export async function createMarkdownFile(
     `--${boundary}--`,
   ].join("\r\n")
 
-  const response = await fetch(`${GOOGLE_DRIVE_API_URL}?uploadType=multipart`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      "Content-Type": `multipart/related; boundary=${boundary}`,
-    },
-    body,
-  })
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), 30000) // 30秒
 
-  if (!response.ok) {
-    const error = await response.text()
-    throw new Error(`Google Driveファイル作成に失敗しました: ${error}`)
+  try {
+    const response = await fetch(`${GOOGLE_DRIVE_API_URL}?uploadType=multipart`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": `multipart/related; boundary=${boundary}`,
+      },
+      body,
+      signal: controller.signal,
+    })
+
+    clearTimeout(timeoutId)
+
+    if (!response.ok) {
+      const error = await response.text()
+      throw new Error(`Google Driveファイル作成に失敗しました: ${error}`)
+    }
+
+    const result = await response.json()
+    return result.id
+  } catch (error) {
+    clearTimeout(timeoutId)
+    if (error instanceof Error && error.name === "AbortError") {
+      throw new Error("Google Driveファイル作成リクエストがタイムアウトしました")
+    }
+    throw error
   }
-
-  const result = await response.json()
-  return result.id
 }

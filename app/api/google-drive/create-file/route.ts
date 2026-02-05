@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
+import { decrypt } from "@/lib/crypto"
 import { createMarkdownFile, type PodcastData } from "@/lib/google/drive"
 import { refreshAccessToken } from "@/lib/google/oauth"
 import { createClient } from "@/lib/supabase/server"
@@ -32,24 +33,12 @@ export async function POST(request: NextRequest) {
   try {
     const body: PodcastData = await request.json()
 
-    let accessToken = settings.access_token
-    const tokenExpiresAt = new Date(settings.token_expires_at)
+    // 暗号化されたリフレッシュトークンを復号化
+    const refreshToken = decrypt(settings.encrypted_refresh_token)
 
-    // トークンが期限切れの場合は更新
-    if (tokenExpiresAt < new Date()) {
-      const newTokens = await refreshAccessToken(settings.refresh_token)
-      accessToken = newTokens.access_token
-
-      // 新しいトークンを保存
-      await supabase
-        .from("google_drive_settings")
-        .update({
-          access_token: newTokens.access_token,
-          token_expires_at: new Date(Date.now() + newTokens.expires_in * 1000).toISOString(),
-          updated_at: new Date().toISOString(),
-        })
-        .eq("user_id", user.id)
-    }
+    // 毎回リフレッシュトークンからアクセストークンを取得
+    const tokens = await refreshAccessToken(refreshToken)
+    const accessToken = tokens.access_token
 
     const fileId = await createMarkdownFile(accessToken, settings.folder_id, body)
 

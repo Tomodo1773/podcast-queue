@@ -99,6 +99,7 @@ Next.js 16 (App Router) + Supabase + shadcn/ui で構成されたPodcast管理We
   - `theme-provider.tsx` - テーマプロバイダー
 - `lib/` - ユーティリティ
   - `utils.ts` - 汎用ユーティリティ関数
+  - `crypto.ts` - 暗号化・復号化ユーティリティ（AES-256-GCM）
   - `supabase/` - Supabaseクライアント
     - `client.ts` - ブラウザ用クライアント
     - `server.ts` - サーバー用クライアント（Server Components/Actions用）
@@ -141,7 +142,9 @@ LINEにURLを送信してポッドキャストを登録可能。`/api/line-webho
 ポッドキャストを視聴中に設定した際、Google Driveへマークダウンファイルを自動生成。
 
 - OAuth認証でGoogle Driveアクセス権限を取得
-- `google_drive_settings`テーブルでアクセストークン・リフレッシュトークン・保存先フォルダIDを管理
+- `google_drive_settings`テーブルで暗号化されたリフレッシュトークン・保存先フォルダIDを管理
+- リフレッシュトークンはAES-256-GCMで暗号化保存（アクセストークンは保存せず毎回リフレッシュ）
+- 暗号化キーは環境変数`ENCRYPTION_KEY`で管理
 - マークダウンファイルにはタイトル、プラットフォーム、URL、説明、学びセクション（空欄）を含む
 - `google_drive_file_created`フラグで重複作成を防止（一度作成したPodcastは再度視聴中にしても作成しない）
 

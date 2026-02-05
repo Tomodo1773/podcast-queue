@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
+import { encrypt } from "@/lib/crypto"
 import { exchangeCodeForTokens } from "@/lib/google/oauth"
 import { createClient } from "@/lib/supabase/server"
 
@@ -42,17 +43,15 @@ export async function GET(request: NextRequest) {
   try {
     const tokens = await exchangeCodeForTokens(code)
 
-    // トークンの有効期限を計算
-    const expiresAt = new Date(Date.now() + tokens.expires_in * 1000)
+    // リフレッシュトークンを暗号化
+    const encryptedRefreshToken = encrypt(tokens.refresh_token)
 
     // 既存の設定があれば更新、なければ挿入
     const { error: upsertError } = await supabase.from("google_drive_settings").upsert(
       {
         user_id: user.id,
-        access_token: tokens.access_token,
-        refresh_token: tokens.refresh_token,
-        token_expires_at: expiresAt.toISOString(),
-        folder_id: "", // フォルダIDは後から設定
+        encrypted_refresh_token: encryptedRefreshToken,
+        folder_id: null,
         updated_at: new Date().toISOString(),
       },
       { onConflict: "user_id" }
