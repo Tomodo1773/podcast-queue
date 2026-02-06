@@ -1,6 +1,6 @@
 "use client"
 
-import { ArrowUpDown, Check, Edit, ExternalLink, MoreVertical, Trash2, X } from "lucide-react"
+import { ArrowUpDown, Check, Copy, Edit, ExternalLink, MoreVertical, Trash2, X } from "lucide-react"
 import Image from "next/image"
 import { useState } from "react"
 import { PodcastDialog } from "@/components/podcast-dialog"
@@ -70,6 +70,7 @@ export function PodcastCard({
 }: PodcastCardProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [isCopied, setIsCopied] = useState(false)
 
   const handleOpenLink = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -89,6 +90,16 @@ export function PodcastCard({
       await onDelete(podcast.id)
     } catch (error) {
       console.error("ポッドキャストの削除に失敗しました:", error)
+    }
+  }
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(podcast.url)
+      setIsCopied(true)
+      setTimeout(() => setIsCopied(false), 1500)
+    } catch (error) {
+      console.error("クリップボードへのコピーに失敗しました:", error)
     }
   }
 
@@ -151,6 +162,10 @@ export function PodcastCard({
               <DropdownMenuItem onClick={handleOpenLink}>
                 <ExternalLink className="mr-2 size-4" />
                 リンクを開く
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleCopyLink}>
+                {isCopied ? <Check className="mr-2 size-4" /> : <Copy className="mr-2 size-4" />}
+                リンクをコピー
               </DropdownMenuItem>
               <DropdownMenuSub>
                 <DropdownMenuSubTrigger>

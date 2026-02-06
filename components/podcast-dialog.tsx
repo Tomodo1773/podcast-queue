@@ -1,6 +1,6 @@
 "use client"
 
-import { Check, ChevronDown, ExternalLink, Play, Trash2, X } from "lucide-react"
+import { Check, ChevronDown, Copy, ExternalLink, Play, Trash2, X } from "lucide-react"
 import Image from "next/image"
 import { useEffect, useState } from "react"
 import { PodcastTags } from "@/components/podcast-tags"
@@ -62,6 +62,7 @@ export function PodcastDialog({
 }: PodcastDialogProps) {
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false)
   const [maxLength, setMaxLength] = useState(DESCRIPTION_MAX_LENGTH_DESKTOP)
+  const [isCopied, setIsCopied] = useState(false)
 
   useEffect(() => {
     const updateMaxLength = () => {
@@ -90,6 +91,16 @@ export function PodcastDialog({
     e.preventDefault()
     await onStartWatching(podcast.id)
     window.open(podcast.url, "_blank", "noopener,noreferrer")
+  }
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(podcast.url)
+      setIsCopied(true)
+      setTimeout(() => setIsCopied(false), 1500)
+    } catch (error) {
+      console.error("クリップボードへのコピーに失敗しました:", error)
+    }
   }
 
   return (
@@ -217,6 +228,10 @@ export function PodcastDialog({
             <Button variant="outline" onClick={handleOpenLink}>
               <ExternalLink className="mr-2 size-4" />
               開く
+            </Button>
+            <Button variant="outline" onClick={handleCopyLink}>
+              {isCopied ? <Check className="mr-2 size-4" /> : <Copy className="mr-2 size-4" />}
+              コピー
             </Button>
             <Button
               variant="destructive"
