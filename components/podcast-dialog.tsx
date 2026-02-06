@@ -208,28 +208,31 @@ export function PodcastDialog({
               )}
             </div>
           )}
-          <div className="flex items-center gap-2 pt-4">
+          <div className="grid grid-cols-2 sm:flex sm:flex-row gap-2 pt-4">
             <Button
               variant={podcast.is_watched ? "default" : "outline"}
               onClick={() => onToggleWatched(podcast.id, podcast.is_watched)}
+              className="w-full sm:w-auto"
             >
               {podcast.is_watched ? (
                 <>
                   <Check className="mr-2 size-4" />
-                  視聴済み
+                  <span className="hidden sm:inline">視聴済み</span>
+                  <span className="sm:hidden">済</span>
                 </>
               ) : (
                 <>
                   <X className="mr-2 size-4" />
-                  未視聴
+                  <span className="hidden sm:inline">未視聴</span>
+                  <span className="sm:hidden">未</span>
                 </>
               )}
             </Button>
-            <Button variant="outline" onClick={handleOpenLink}>
+            <Button variant="outline" onClick={handleOpenLink} className="w-full sm:w-auto">
               <ExternalLink className="mr-2 size-4" />
               開く
             </Button>
-            <Button variant="outline" onClick={handleCopyLink}>
+            <Button variant="outline" onClick={handleCopyLink} className="w-full sm:w-auto">
               {isCopied ? <Check className="mr-2 size-4" /> : <Copy className="mr-2 size-4" />}
               コピー
             </Button>
@@ -243,6 +246,7 @@ export function PodcastDialog({
                   console.error("ポッドキャストの削除に失敗しました:", error)
                 }
               }}
+              className="w-full sm:w-auto"
             >
               <Trash2 className="mr-2 size-4" />
               削除
