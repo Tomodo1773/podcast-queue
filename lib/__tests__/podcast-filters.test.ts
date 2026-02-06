@@ -24,6 +24,7 @@ function createPodcast(overrides: Partial<Podcast> = {}): Podcast {
     created_at: "2024-01-01T00:00:00Z",
     google_drive_file_created: false,
     show_name: null,
+    tags: [],
     ...overrides,
   }
 }

@@ -117,18 +117,21 @@ export async function POST(request: Request) {
       }
 
       // Podcast登録
-      const { error: insertError } = await supabase.from("podcasts").insert({
-        user_id: link.user_id,
-        url,
-        title: metadata.title || url,
-        description: metadata.description || "",
-        thumbnail_url: metadata.image || "",
-        platform: detectPlatform(url),
-        priority: "medium",
-        is_watched: false,
-        is_watching: false,
-        show_name: metadata.showName || null,
-      })
+      const { data: insertData, error: insertError } = await supabase
+        .from("podcasts")
+        .insert({
+          user_id: link.user_id,
+          url,
+          title: metadata.title || url,
+          description: metadata.description || "",
+          thumbnail_url: metadata.image || "",
+          platform: detectPlatform(url),
+          priority: "medium",
+          is_watched: false,
+          is_watching: false,
+          show_name: metadata.showName || null,
+        })
+        .select()
 
       if (insertError) {
         console.error("Failed to insert podcast:", insertError)
@@ -140,6 +143,24 @@ export async function POST(request: Request) {
         }
       } else {
         console.log(`Podcast added for user ${link.user_id}: ${url}`)
+
+        // タグ生成をバックグラウンドで実行（ユーザーを待たせない）
+        if (insertData?.[0]) {
+          const baseUrl = process.env.NEXT_PUBLIC_APP_URL
+          if (baseUrl) {
+            fetch(`${baseUrl}/api/generate-tags`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                podcastId: insertData[0].id,
+                title: metadata.title || url,
+                description: metadata.description || "",
+              }),
+            }).catch((error) => {
+              console.error("Failed to trigger tag generation:", error)
+            })
+          }
+        }
 
         // 登録成功時は成功メッセージを返信
         if (replyToken) {

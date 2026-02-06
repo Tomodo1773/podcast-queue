@@ -5,6 +5,7 @@ import Image from "next/image"
 import { useState } from "react"
 import { PodcastDialog } from "@/components/podcast-dialog"
 import { PodcastEditDialog } from "@/components/podcast-edit-dialog"
+import { PodcastTags } from "@/components/podcast-tags"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
@@ -39,6 +40,7 @@ type Podcast = {
   is_watching: boolean
   watched_at: string | null
   show_name: string | null
+  tags: string[]
 }
 
 type PodcastCardProps = {
@@ -198,8 +200,9 @@ export function PodcastCard({
             </Badge>
           </div>
           {podcast.description && (
-            <p className="text-sm text-muted-foreground line-clamp-3">{podcast.description}</p>
+            <p className="text-sm text-muted-foreground line-clamp-3 mb-2">{podcast.description}</p>
           )}
+          <PodcastTags tags={podcast.tags} maxTags={5} />
         </CardContent>
       </Card>
 
