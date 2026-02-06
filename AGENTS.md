@@ -166,6 +166,6 @@ LINE連携の動作確認用。`/samples/{id}`でOGP対応のデモページを�
 Gemini APIを使用してポッドキャストのタイトル・説明から検索用タグを自動生成。
 
 - **使用SDK**: Vercel AI SDK (`ai`, `@ai-sdk/google`)
-- **モデル**: `gemini-2.0-flash-exp`
+- **モデル**: `gemini`
 - **生成数**: 6〜12個のタグ
 - **LangSmithトレーシング**: 環境変数で有効化可能（`LANGCHAIN_TRACING_V2=true`、`LANGSMITH_PROJECT`でプロジェクト名を設定）
