@@ -4,10 +4,10 @@ import { generateMarkdownContent, type PodcastData } from "../drive"
 describe("generateMarkdownContent", () => {
   it("YAML形式のフロントマターを含むマークダウンを生成する", () => {
     const podcast: PodcastData = {
-      title: "単なるメモから知的資産へ：Obsidian in Cursorで構築する知的生産システム｜松濤Vimmer",
+      title: "サンプルポッドキャストタイトル",
       platform: "youtube",
-      url: "https://note.com/shotovim/n/n5833578984bf#12a56e87-d8ba-49af-8695-da09d173f5ea",
-      description: "Obsidianを使った知的生産システムの構築について",
+      url: "https://example.com/podcast/123",
+      description: "これはサンプルの説明文です",
     }
 
     const result = generateMarkdownContent(podcast)
