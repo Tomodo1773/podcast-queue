@@ -5,13 +5,17 @@ export interface PodcastData {
   url: string
   description: string
   platform: string
+  show_name?: string
+  tags?: string[]
 }
 
 export function generateMarkdownContent(podcast: PodcastData): string {
+  const showNameLine = podcast.show_name ? `\nshow_name: ${podcast.show_name}` : ""
+  const tagsLine = podcast.tags && podcast.tags.length > 0 ? `\ntags: [${podcast.tags.join(", ")}]` : ""
   return `---
 title: ${podcast.title}
 platform: ${podcast.platform}
-source: ${podcast.url}
+source: ${podcast.url}${showNameLine}${tagsLine}
 ---
 
 ## 説明
