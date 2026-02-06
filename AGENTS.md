@@ -114,12 +114,16 @@ Next.js 16 (App Router) + Supabase + shadcn/ui で構成されたPodcast管理We
   - `drive.ts` - Google Drive APIファイル操作
 - `lib/samples/` - サンプルPodcastデータ
   - `data.ts` - サンプルデータ定義
+- `lib/gemini/` - Gemini AI関連
+  - `generate-tags.ts` - タグ自動生成機能
 
 ### 技術スタック
 
 - **フロントエンド**: React 19, Next.js 16, Tailwind CSS 4
 - **UI**: shadcn/ui (new-york スタイル), Radix UI, Lucide Icons
 - **バックエンド**: Supabase (認証 + PostgreSQL)
+- **AI**: Vercel AI SDK + Google Gemini (タグ生成)
+- **Observability**: LangSmith (オプション、AIトレーシング)
 - **パスエイリアス**: `@/*` でルートからのインポート
 
 ### データモデル
@@ -156,3 +160,12 @@ LINEにURLを送信してポッドキャストを登録可能。`/api/line-webho
 ### サンプルポッドキャスト
 
 LINE連携の動作確認用。`/samples/{id}`でOGP対応のデモページを提供。
+
+### タグ自動生成
+
+Gemini APIを使用してポッドキャストのタイトル・説明から検索用タグを自動生成。
+
+- **使用SDK**: Vercel AI SDK (`ai`, `@ai-sdk/google`)
+- **モデル**: `gemini`
+- **生成数**: 6〜12個のタグ
+- **LangSmithトレーシング**: 環境変数で有効化可能（`LANGCHAIN_TRACING_V2=true`、`LANGSMITH_PROJECT`でプロジェクト名を設定）

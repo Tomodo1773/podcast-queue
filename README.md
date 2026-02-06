@@ -51,6 +51,7 @@ YouTube / Spotify / NewsPicks などのURLを同じリストで管理し、優�
 - **視聴統計** - 視聴履歴を客観的に把握できる統計ページ（総視聴数、日別・週別・月別の推移グラフ、プラットフォーム別統計）
 - **LINE連携** - LINEにURLを送信するだけでPodcastを自動登録（設定画面からLINE User IDを連携）
 - **Google Drive連携** - ポッドキャストを視聴中に設定した際、Google Driveへマークダウンファイル（YAMLフロントマター形式）を自動生成し、視聴後の学びを記録可能（リフレッシュトークンはAES-256-GCMで暗号化保存）
+- **タグ自動生成** - Gemini APIを使用してポッドキャストのタイトル・説明から検索用タグを自動生成（6〜12個）
 
 ## サンプルポッドキャスト
 
@@ -66,25 +67,49 @@ YouTube / Spotify / NewsPicks などのURLを同じリストで管理し、優�
 - **UI**: shadcn/ui, Radix UI, Lucide Icons
 - **グラフ**: recharts
 - **バックエンド**: Supabase (認証 + PostgreSQL)
+- **AI**: Vercel AI SDK + Google Gemini (タグ生成)
+- **Observability**: LangSmith (オプション、AIトレーシング)
 
 ## セットアップ
 
 ### 環境変数
 
+`.env.example`を参考に`.env.local`を作成してください。
+
+```bash
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+
+# Gemini API
+GEMINI_API_KEY=your-gemini-api-key
+
+# LINE Messaging API
+LINE_CHANNEL_SECRET=your-line-channel-secret
+LINE_CHANNEL_ACCESS_TOKEN=your-line-channel-access-token
+
+# Google OAuth & Drive
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+
+# 暗号化キー（32バイトの16進数文字列）
+ENCRYPTION_KEY=your-encryption-key
+
+# LangSmith トレーシング（オプション）
+LANGCHAIN_TRACING_V2=false
+LANGCHAIN_API_KEY=your-langsmith-api-key
+LANGSMITH_PROJECT=your-project-name
+```
+
+**暗号化キーの生成**
+
 Google Drive連携を使用する場合、暗号化キーの生成が必要です。
 
 ```bash
-# 暗号化キーを生成
 node scripts/generate-encryption-key.mjs
 ```
 
-生成されたキーを `.env.local` に追加してください：
-
-```bash
-ENCRYPTION_KEY=生成されたキー
-```
-
-本番環境では、Supabaseの環境変数に設定してください。
+生成されたキーを `.env.local` に追加してください。本番環境では、Supabaseの環境変数に設定してください。
 
 ## 開発
 
