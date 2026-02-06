@@ -106,7 +106,7 @@ export async function generateTags(title: string, description: string): Promise<
     )
 
     const result = await generateObject({
-      model: google("gemini-3-flash-preview"),
+      model: google("gemini-3-flash-preview", { apiKey }),
       schema: TagResponseSchema,
       prompt,
     })
