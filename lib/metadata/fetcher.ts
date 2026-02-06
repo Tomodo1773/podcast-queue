@@ -7,6 +7,7 @@ export interface Metadata {
   title: string
   description: string
   image: string
+  showName: string | null
 }
 
 // YouTube Data API v3を使って動画情報を取得する関数
@@ -14,6 +15,7 @@ async function fetchYouTubeVideoInfo(videoId: string): Promise<{
   title: string
   description: string
   thumbnail: string
+  channelTitle: string | null
 } | null> {
   const apiKey = process.env.YOUTUBE_API_KEY
   if (!apiKey) {
@@ -45,6 +47,7 @@ async function fetchYouTubeVideoInfo(videoId: string): Promise<{
         snippet.thumbnails?.high?.url ||
         snippet.thumbnails?.medium?.url ||
         `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`,
+      channelTitle: snippet.channelTitle || null,
     }
   } catch (error) {
     console.error("YouTube Data API fetch error:", error)
@@ -120,7 +123,7 @@ async function getSpotifyAccessToken(): Promise<string | null> {
 async function fetchSpotifyInfo(
   type: "episode" | "show",
   id: string
-): Promise<{ title: string; description: string; thumbnail: string } | null> {
+): Promise<{ title: string; description: string; thumbnail: string; showName: string | null } | null> {
   const accessToken = await getSpotifyAccessToken()
   if (!accessToken) {
     return null
@@ -143,10 +146,15 @@ async function fetchSpotifyInfo(
     }
 
     const data = await response.json()
+
+    // エピソードの場合はshowオブジェクトから番組名を取得、番組ページの場合は番組名自体を取得
+    const showName = type === "episode" ? data.show?.name || null : type === "show" ? data.name || null : null
+
     return {
       title: data.name || "",
       description: data.description || data.html_description || "",
       thumbnail: data.images?.[0]?.url || "",
+      showName,
     }
   } catch {
     return null
@@ -186,7 +194,7 @@ async function fetchOgpMetadata(url: string): Promise<Metadata> {
     html.match(/<meta name="twitter:image" content="([^"]*)">/)
   const image = imageMatch ? imageMatch[1] : ""
 
-  return { title, description, image }
+  return { title, description, image, showName: null }
 }
 
 /**
@@ -204,6 +212,7 @@ export async function fetchMetadata(url: string): Promise<Metadata> {
         title: videoInfo.title,
         description: videoInfo.description,
         image: videoInfo.thumbnail,
+        showName: videoInfo.channelTitle,
       }
     }
 
@@ -218,6 +227,7 @@ export async function fetchMetadata(url: string): Promise<Metadata> {
           title: data.title || "",
           description: data.author_name ? `by ${data.author_name}` : "",
           image: data.thumbnail_url || `https://img.youtube.com/vi/${youtubeVideoId}/maxresdefault.jpg`,
+          showName: null,
         }
       }
     } catch (error) {
@@ -229,6 +239,7 @@ export async function fetchMetadata(url: string): Promise<Metadata> {
       title: "",
       description: "",
       image: `https://img.youtube.com/vi/${youtubeVideoId}/maxresdefault.jpg`,
+      showName: null,
     }
   }
 
@@ -242,6 +253,7 @@ export async function fetchMetadata(url: string): Promise<Metadata> {
         title: info.title,
         description: info.description,
         image: info.thumbnail,
+        showName: info.showName,
       }
     }
 
@@ -256,13 +268,14 @@ export async function fetchMetadata(url: string): Promise<Metadata> {
           title: data.title || "",
           description: "",
           image: data.thumbnail_url || "",
+          showName: null,
         }
       }
     } catch (error) {
       console.error("Spotify oEmbed API error:", error)
     }
 
-    return { title: "", description: "", image: "" }
+    return { title: "", description: "", image: "", showName: null }
   }
 
   // その他のURLの場合はOGPで取得

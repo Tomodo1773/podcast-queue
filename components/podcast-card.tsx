@@ -38,6 +38,7 @@ type Podcast = {
   is_watched: boolean
   is_watching: boolean
   watched_at: string | null
+  show_name: string | null
 }
 
 type PodcastCardProps = {
@@ -185,6 +186,7 @@ export function PodcastCard({
         </CardHeader>
         <CardContent className="flex-1 px-4 pt-3 pb-4">
           <h3 className="font-semibold line-clamp-2 text-pretty mb-1">{podcast.title || "タイトルなし"}</h3>
+          {podcast.show_name && <p className="text-xs text-muted-foreground mb-1">{podcast.show_name}</p>}
           <div className="flex items-center gap-1 mb-2 flex-wrap">
             {podcast.platform && (
               <Badge className={getPlatformColor(podcast.platform)} variant="default">

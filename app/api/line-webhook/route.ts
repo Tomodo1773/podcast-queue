@@ -101,7 +101,7 @@ export async function POST(request: Request) {
       }
 
       // メタデータ取得（共通関数を直接呼び出し - HTTPリクエスト不要）
-      let metadata = { title: "", description: "", image: "" }
+      let metadata = { title: "", description: "", image: "", showName: null as string | null }
       let metadataFailed = false
       try {
         metadata = await fetchMetadata(url)
@@ -127,6 +127,7 @@ export async function POST(request: Request) {
         priority: "medium",
         is_watched: false,
         is_watching: false,
+        show_name: metadata.showName || null,
       })
 
       if (insertError) {

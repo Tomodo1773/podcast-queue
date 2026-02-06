@@ -37,6 +37,7 @@ type Podcast = {
   is_watched: boolean
   is_watching: boolean
   watched_at: string | null
+  show_name: string | null
 }
 
 type PodcastListItemProps = {
@@ -138,6 +139,9 @@ export function PodcastListItem({
               <h3 className="font-semibold line-clamp-2 text-pretty text-sm sm:text-base">
                 {podcast.title || "タイトルなし"}
               </h3>
+              {podcast.show_name && (
+                <p className="text-xs text-muted-foreground mt-0.5">{podcast.show_name}</p>
+              )}
             </div>
             {/* 3-dot menu */}
             <DropdownMenu>

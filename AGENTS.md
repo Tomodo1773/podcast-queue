@@ -10,7 +10,7 @@ PodQueueは、ポッドキャストをプラットフォーム横断で一元管
 
 ## 主な機能
 
-- **URLからメタデータ自動取得**: URLを入力するだけで、タイトル・説明・サムネイルを自動取得（OGP/oEmbed対応）
+- **URLからメタデータ自動取得**: URLを入力するだけで、タイトル・説明・サムネイル・番組名を自動取得（OGP/oEmbed対応、YouTube/Spotify専用API対応）
 - **プラットフォーム横断管理**: YouTube、Spotify、NewsPicks、Pivot、テレ東Bizなど複数プラットフォームのコンテンツを一箇所で管理
 - **優先度による管理**: 高・中・低の3段階で優先度を設定し、優先度順でソート可能
 - **視聴ステータス管理**: 未視聴/視聴済みのステータスを切り替え可能
@@ -126,12 +126,17 @@ Next.js 16 (App Router) + Supabase + shadcn/ui で構成されたPodcast管理We
 
 `podcasts` テーブル:
 
-- `id`, `user_id`, `url`, `title`, `description`, `thumbnail_url`, `platform`, `is_watched`, `is_watching`, `watched_at`, `priority`, `google_drive_file_created`, `created_at`, `updated_at`
+- `id`, `user_id`, `url`, `title`, `description`, `thumbnail_url`, `platform`, `is_watched`, `is_watching`, `watched_at`, `priority`, `google_drive_file_created`, `show_name`, `created_at`, `updated_at`
+- `show_name`: 番組名またはチャンネル名（YouTubeはチャンネル名、Spotifyは番組名）
 - Row Level Security有効（ユーザーは自分のデータのみアクセス可能）
 
 ### メタデータ取得
 
-`/api/fetch-metadata` エンドポイントはURLからOGP/oEmbedでタイトル・説明・サムネイルを取得。YouTube、Spotifyは専用処理あり。
+`/api/fetch-metadata` エンドポイントはURLからOGP/oEmbedでタイトル・説明・サムネイル・番組名を取得。
+
+- **YouTube**: YouTube Data API v3の`videos.list`エンドポイントで`snippet.channelTitle`からチャンネル名を取得
+- **Spotify**: Spotify Web APIのエピソード取得エンドポイントで`show.name`から番組名を取得
+- **その他**: OGPベースの取得（番組名は未登録）
 
 ### LINE連携
 

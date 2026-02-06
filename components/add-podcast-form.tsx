@@ -24,6 +24,7 @@ export function AddPodcastForm({ userId, onSuccess, initialUrl, autoFetch }: Add
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [thumbnailUrl, setThumbnailUrl] = useState("")
+  const [showName, setShowName] = useState<string | null>(null)
   const [platform, setPlatform] = useState<Platform | null>(null)
   const [priority, setPriority] = useState<Priority>("medium")
   const [isLoading, setIsLoading] = useState(false)
@@ -64,6 +65,7 @@ export function AddPodcastForm({ userId, onSuccess, initialUrl, autoFetch }: Add
             if (data.title) setTitle(data.title)
             if (data.description) setDescription(data.description)
             if (data.image) setThumbnailUrl(data.image)
+            if (data.showName) setShowName(data.showName)
           } catch (error: unknown) {
             console.error("自動メタデータ取得エラー:", error)
             setError("メタデータの自動取得に失敗しました。手動で取得してください。")
@@ -101,6 +103,7 @@ export function AddPodcastForm({ userId, onSuccess, initialUrl, autoFetch }: Add
       if (data.title) setTitle(data.title)
       if (data.description) setDescription(data.description)
       if (data.image) setThumbnailUrl(data.image)
+      if (data.showName) setShowName(data.showName)
     } catch (error: unknown) {
       console.error("メタデータ取得エラー:", error)
       setError("メタデータの取得に失敗しました。手動で入力してください。")
@@ -150,6 +153,7 @@ export function AddPodcastForm({ userId, onSuccess, initialUrl, autoFetch }: Add
         platform: platform || null,
         priority,
         is_watched: false,
+        show_name: showName || null,
       }
       console.log("[v0] 挿入データ:", podcastData)
 
@@ -239,6 +243,17 @@ export function AddPodcastForm({ userId, onSuccess, initialUrl, autoFetch }: Add
           placeholder="https://..."
           value={thumbnailUrl}
           onChange={(e) => setThumbnailUrl(e.target.value)}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="showName">番組名</Label>
+        <Input
+          id="showName"
+          type="text"
+          placeholder="番組名またはチャンネル名"
+          value={showName || ""}
+          onChange={(e) => setShowName(e.target.value)}
         />
       </div>
 
