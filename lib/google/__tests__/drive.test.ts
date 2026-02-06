@@ -35,7 +35,7 @@ describe("generateMarkdownContent", () => {
     expect(result).toContain("（説明なし）")
   })
 
-  it("フロントマターが正しいYAML形式である", () => {
+  it("フロントマターが正しいYAML形式である（show_name・tagsなし）", () => {
     const podcast: PodcastData = {
       title: "テストタイトル",
       platform: "youtube",
@@ -46,13 +46,74 @@ describe("generateMarkdownContent", () => {
     const result = generateMarkdownContent(podcast)
     const lines = result.split("\n")
 
-    // 最初の行は --- で始まる
     expect(lines[0]).toBe("---")
-    // title, platform, sourceの行を含む
     expect(lines[1]).toBe(`title: ${podcast.title}`)
     expect(lines[2]).toBe(`platform: ${podcast.platform}`)
     expect(lines[3]).toBe(`source: ${podcast.url}`)
-    // フロントマター終了行は --- で終わる
     expect(lines[4]).toBe("---")
+  })
+
+  it("show_nameがある場合はフロントマターに含まれる", () => {
+    const podcast: PodcastData = {
+      title: "テストタイトル",
+      platform: "youtube",
+      url: "https://example.com/video",
+      description: "テスト説明",
+      show_name: "テスト番組",
+    }
+
+    const result = generateMarkdownContent(podcast)
+
+    expect(result).toContain("show_name: テスト番組")
+  })
+
+  it("tagsがある場合はフロントマターに含まれる", () => {
+    const podcast: PodcastData = {
+      title: "テストタイトル",
+      platform: "youtube",
+      url: "https://example.com/video",
+      description: "テスト説明",
+      tags: ["AI", "テクノロジー", "投資"],
+    }
+
+    const result = generateMarkdownContent(podcast)
+
+    expect(result).toContain("tags: [AI, テクノロジー, 投資]")
+  })
+
+  it("show_nameとtagsの両方がある場合はフロントマターに含まれる", () => {
+    const podcast: PodcastData = {
+      title: "テストタイトル",
+      platform: "spotify",
+      url: "https://example.com/episode",
+      description: "テスト説明",
+      show_name: "テスト番組",
+      tags: ["経済", "金融"],
+    }
+
+    const result = generateMarkdownContent(podcast)
+    const lines = result.split("\n")
+
+    expect(lines[0]).toBe("---")
+    expect(lines[1]).toBe("title: テストタイトル")
+    expect(lines[2]).toBe("platform: spotify")
+    expect(lines[3]).toBe("source: https://example.com/episode")
+    expect(lines[4]).toBe("show_name: テスト番組")
+    expect(lines[5]).toBe("tags: [経済, 金融]")
+    expect(lines[6]).toBe("---")
+  })
+
+  it("tagsが空配列の場合はフロントマターに含まれない", () => {
+    const podcast: PodcastData = {
+      title: "テストタイトル",
+      platform: "youtube",
+      url: "https://example.com/video",
+      description: "テスト説明",
+      tags: [],
+    }
+
+    const result = generateMarkdownContent(podcast)
+
+    expect(result).not.toContain("tags:")
   })
 })

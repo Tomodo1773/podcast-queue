@@ -5,14 +5,29 @@ export interface PodcastData {
   url: string
   description: string
   platform: string
+  show_name?: string
+  tags?: string[]
 }
 
 export function generateMarkdownContent(podcast: PodcastData): string {
-  return `---
-title: ${podcast.title}
-platform: ${podcast.platform}
-source: ${podcast.url}
----
+  const frontmatterLines = [
+    "---",
+    `title: ${podcast.title}`,
+    `platform: ${podcast.platform}`,
+    `source: ${podcast.url}`,
+  ]
+
+  if (podcast.show_name) {
+    frontmatterLines.push(`show_name: ${podcast.show_name}`)
+  }
+
+  if (podcast.tags && podcast.tags.length > 0) {
+    frontmatterLines.push(`tags: [${podcast.tags.join(", ")}]`)
+  }
+
+  frontmatterLines.push("---")
+
+  return `${frontmatterLines.join("\n")}
 
 ## 説明
 ${podcast.description || "（説明なし）"}

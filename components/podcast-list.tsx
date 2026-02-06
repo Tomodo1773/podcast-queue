@@ -178,6 +178,8 @@ export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
           url: podcast.url,
           description: podcast.description || "",
           platform: podcast.platform || "その他",
+          show_name: podcast.show_name || undefined,
+          tags: podcast.tags.length > 0 ? podcast.tags : undefined,
         }),
       })
 
