@@ -118,3 +118,54 @@ describe("extractNewsPicksShowName", () => {
     })
   })
 })
+
+describe("NewsPicksのURL検証", () => {
+  // fetchMetadata関数のURL検証ロジックのテスト
+  // 実際のfetchMetadataはモックが必要なため、ここでは検証ロジックを個別に確認
+  const isNewsPicksUrl = (url: string): boolean => {
+    try {
+      const urlObj = new URL(url)
+      return (
+        urlObj.hostname === "newspicks.com" ||
+        urlObj.hostname.endsWith(".newspicks.com") ||
+        urlObj.hostname === "npx.me"
+      )
+    } catch {
+      return false
+    }
+  }
+
+  describe("正規のNewsPicksドメイン", () => {
+    it("newspicks.comを正しく検出", () => {
+      expect(isNewsPicksUrl("https://newspicks.com/news/123")).toBe(true)
+    })
+
+    it("サブドメイン付きを正しく検出", () => {
+      expect(isNewsPicksUrl("https://app.newspicks.com/news/123")).toBe(true)
+    })
+
+    it("npx.meを正しく検出", () => {
+      expect(isNewsPicksUrl("https://npx.me/abc123")).toBe(true)
+    })
+  })
+
+  describe("悪意のあるURL", () => {
+    it("パス内にnewspicks.comが含まれるURLを除外", () => {
+      expect(isNewsPicksUrl("https://evil.com/newspicks.com")).toBe(false)
+    })
+
+    it("サブドメイン風の偽装URLを除外", () => {
+      expect(isNewsPicksUrl("https://newspicks.com.evil.com")).toBe(false)
+    })
+
+    it("クエリパラメータ内にnewspicks.comが含まれるURLを除外", () => {
+      expect(isNewsPicksUrl("https://example.com/?redirect=newspicks.com")).toBe(false)
+    })
+  })
+
+  describe("無効なURL", () => {
+    it("URLパースに失敗した場合はfalseを返す", () => {
+      expect(isNewsPicksUrl("not-a-url")).toBe(false)
+    })
+  })
+})

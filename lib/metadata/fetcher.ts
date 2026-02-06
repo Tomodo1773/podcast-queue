@@ -288,10 +288,19 @@ export async function fetchMetadata(url: string): Promise<Metadata> {
   }
 
   // NewsPicks処理
-  if (url.includes("newspicks.com") || url.includes("npx.me")) {
-    const ogpData = await fetchOgpMetadata(url)
-    const showName = extractNewsPicksShowName(ogpData.title)
-    return { ...ogpData, showName }
+  try {
+    const urlObj = new URL(url)
+    if (
+      urlObj.hostname === "newspicks.com" ||
+      urlObj.hostname.endsWith(".newspicks.com") ||
+      urlObj.hostname === "npx.me"
+    ) {
+      const ogpData = await fetchOgpMetadata(url)
+      const showName = extractNewsPicksShowName(ogpData.title)
+      return { ...ogpData, showName }
+    }
+  } catch {
+    // URLのパースに失敗した場合は無視してOGP取得へ
   }
 
   // その他のURLの場合はOGPで取得
