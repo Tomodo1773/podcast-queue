@@ -7,11 +7,12 @@ export interface PodcastData {
   platform: string
 }
 
-function generateMarkdownContent(podcast: PodcastData): string {
-  return `## 概要
-- **タイトル**: ${podcast.title}
-- **プラットフォーム**: ${podcast.platform}
-- **URL**: ${podcast.url}
+export function generateMarkdownContent(podcast: PodcastData): string {
+  return `---
+title: ${podcast.title}
+platform: ${podcast.platform}
+source: ${podcast.url}
+---
 
 ## 説明
 ${podcast.description || "（説明なし）"}
