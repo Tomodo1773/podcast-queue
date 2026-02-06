@@ -147,8 +147,8 @@ async function fetchSpotifyInfo(
 
     const data = await response.json()
 
-    // エピソードの場合はshowオブジェクトから番組名を取得
-    const showName = type === "episode" && data.show?.name ? data.show.name : null
+    // エピソードの場合はshowオブジェクトから番組名を取得、番組ページの場合は番組名自体を取得
+    const showName = type === "episode" ? data.show?.name || null : type === "show" ? data.name || null : null
 
     return {
       title: data.name || "",

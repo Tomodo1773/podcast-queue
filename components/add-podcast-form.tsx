@@ -253,7 +253,7 @@ export function AddPodcastForm({ userId, onSuccess, initialUrl, autoFetch }: Add
           type="text"
           placeholder="番組名またはチャンネル名"
           value={showName || ""}
-          onChange={(e) => setShowName(e.target.value || null)}
+          onChange={(e) => setShowName(e.target.value)}
         />
       </div>
 
