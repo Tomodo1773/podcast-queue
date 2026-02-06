@@ -107,6 +107,37 @@ export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
     }
   }
 
+  const handleChangeWatchedStatus = async (id: string, newStatus: boolean) => {
+    const supabase = createClient()
+    const watched_at = newStatus ? new Date().toISOString() : null
+
+    // 視聴済みにする場合は視聴中も解除
+    const updateData = {
+      is_watched: newStatus,
+      watched_at,
+      ...(newStatus && { is_watching: false }),
+    }
+
+    const { error } = await supabase.from("podcasts").update(updateData).eq("id", id)
+
+    if (error) {
+      console.error("[v0] ステータス更新エラー:", error)
+    } else {
+      setPodcasts((prev) =>
+        prev.map((p) =>
+          p.id === id
+            ? {
+                ...p,
+                is_watched: newStatus,
+                watched_at,
+                is_watching: newStatus ? false : p.is_watching,
+              }
+            : p
+        )
+      )
+    }
+  }
+
   const handleDelete = async (id: string) => {
     const supabase = createClient()
 
@@ -339,6 +370,7 @@ export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
               onChangePriority={handleChangePriority}
               onStartWatching={handleStartWatching}
               onUpdate={handleUpdatePodcast}
+              onChangeWatchedStatus={handleChangeWatchedStatus}
             />
           ))}
         </div>
@@ -353,6 +385,7 @@ export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
               onChangePriority={handleChangePriority}
               onStartWatching={handleStartWatching}
               onUpdate={handleUpdatePodcast}
+              onChangeWatchedStatus={handleChangeWatchedStatus}
             />
           ))}
         </div>

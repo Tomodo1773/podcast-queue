@@ -1,6 +1,6 @@
 "use client"
 
-import { ArrowUpDown, Check, Edit, ExternalLink, MoreVertical, Trash2, X } from "lucide-react"
+import { ArrowUpDown, Check, Copy, Edit, ExternalLink, MoreVertical, Trash2, X } from "lucide-react"
 import Image from "next/image"
 import { useState } from "react"
 import { PodcastDialog } from "@/components/podcast-dialog"
@@ -18,6 +18,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard"
 import {
   getPlatformColor,
   getPlatformLabel,
@@ -57,6 +58,7 @@ type PodcastListItemProps = {
       platform?: Platform | null
     }
   ) => Promise<void>
+  onChangeWatchedStatus: (id: string, newStatus: boolean) => Promise<void>
 }
 
 export function PodcastListItem({
@@ -66,9 +68,11 @@ export function PodcastListItem({
   onChangePriority,
   onStartWatching,
   onUpdate,
+  onChangeWatchedStatus,
 }: PodcastListItemProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const { isCopied, copyToClipboard } = useCopyToClipboard()
 
   const handleClick = () => {
     setIsDialogOpen(true)
@@ -100,6 +104,10 @@ export function PodcastListItem({
     } catch (error) {
       console.error("ポッドキャストの削除に失敗しました:", error)
     }
+  }
+
+  const handleCopyLink = () => {
+    copyToClipboard(podcast.url)
   }
 
   return (
@@ -176,6 +184,10 @@ export function PodcastListItem({
                   <ExternalLink className="mr-2 size-4" />
                   リンクを開く
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleCopyLink}>
+                  {isCopied ? <Check className="mr-2 size-4" /> : <Copy className="mr-2 size-4" />}
+                  リンクをコピー
+                </DropdownMenuItem>
                 <DropdownMenuSub>
                   <DropdownMenuSubTrigger>
                     <ArrowUpDown className="mr-2 size-4" />
@@ -239,10 +251,10 @@ export function PodcastListItem({
         podcast={podcast}
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
-        onToggleWatched={onToggleWatched}
         onDelete={onDelete}
         onChangePriority={onChangePriority}
         onStartWatching={onStartWatching}
+        onChangeWatchedStatus={onChangeWatchedStatus}
       />
 
       <PodcastEditDialog
