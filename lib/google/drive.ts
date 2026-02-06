@@ -8,9 +8,8 @@ export interface PodcastData {
 }
 
 function generateMarkdownContent(podcast: PodcastData): string {
-  return `# ${podcast.title}
-
-## 概要
+  return `## 概要
+- **タイトル**: ${podcast.title}
 - **プラットフォーム**: ${podcast.platform}
 - **URL**: ${podcast.url}
 
