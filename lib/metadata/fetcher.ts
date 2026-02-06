@@ -88,6 +88,15 @@ export function extractSpotifyId(url: string): { type: string; id: string } | nu
   return null
 }
 
+/**
+ * NewsPicksのタイトルから番組名を抽出する関数
+ * タイトル形式: "番組名 | エピソード名 - NewsPicks"
+ */
+export function extractNewsPicksShowName(title: string): string | null {
+  const match = title.match(/^(.+?)\s*\|\s*/)
+  return match?.[1]?.trim() || null
+}
+
 // Spotifyアクセストークンを取得する関数（Client Credentials Flow）
 async function getSpotifyAccessToken(): Promise<string | null> {
   const clientId = process.env.SPOTIFY_CLIENT_ID
@@ -276,6 +285,13 @@ export async function fetchMetadata(url: string): Promise<Metadata> {
     }
 
     return { title: "", description: "", image: "", showName: null }
+  }
+
+  // NewsPicks処理
+  if (url.includes("newspicks.com") || url.includes("npx.me")) {
+    const ogpData = await fetchOgpMetadata(url)
+    const showName = extractNewsPicksShowName(ogpData.title)
+    return { ...ogpData, showName }
   }
 
   // その他のURLの場合はOGPで取得
