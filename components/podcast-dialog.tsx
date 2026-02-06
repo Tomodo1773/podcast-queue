@@ -3,6 +3,7 @@
 import { Check, ChevronDown, ExternalLink, Play, Trash2, X } from "lucide-react"
 import Image from "next/image"
 import { useEffect, useState } from "react"
+import { PodcastTags } from "@/components/podcast-tags"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -33,6 +34,7 @@ type Podcast = {
   is_watching: boolean
   watched_at: string | null
   show_name: string | null
+  tags: string[]
 }
 
 type PodcastDialogProps = {
@@ -170,6 +172,12 @@ export function PodcastDialog({
                 {podcast.is_watched ? "視聴済み" : "未視聴"}
               </Badge>
             </div>
+            {podcast.tags && podcast.tags.length > 0 && (
+              <div className="space-y-2">
+                <span className="text-sm font-semibold text-muted-foreground">タグ:</span>
+                <PodcastTags tags={podcast.tags} />
+              </div>
+            )}
           </div>
           {podcast.description && (
             <div className="space-y-2">

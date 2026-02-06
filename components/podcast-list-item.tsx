@@ -5,6 +5,7 @@ import Image from "next/image"
 import { useState } from "react"
 import { PodcastDialog } from "@/components/podcast-dialog"
 import { PodcastEditDialog } from "@/components/podcast-edit-dialog"
+import { PodcastTags } from "@/components/podcast-tags"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -38,6 +39,7 @@ type Podcast = {
   is_watching: boolean
   watched_at: string | null
   show_name: string | null
+  tags: string[]
 }
 
 type PodcastListItemProps = {
@@ -227,6 +229,9 @@ export function PodcastListItem({
               {podcast.description}
             </p>
           )}
+
+          {/* Tags */}
+          <PodcastTags tags={podcast.tags} maxTags={6} className="mt-2" />
         </div>
       </div>
 
