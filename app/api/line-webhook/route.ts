@@ -159,6 +159,11 @@ export async function POST(request: Request) {
             }).catch((error) => {
               console.error("Failed to trigger tag generation:", error)
             })
+          } else {
+            console.warn(
+              "NEXT_PUBLIC_APP_URL is not set. Skipping tag generation for podcast:",
+              insertData[0].id
+            )
           }
         }
 

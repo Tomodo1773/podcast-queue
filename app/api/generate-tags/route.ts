@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { generateTags } from "@/lib/gemini/generate-tags"
-import { createAdminClient } from "@/lib/supabase/admin"
+import { createClient } from "@/lib/supabase/server"
 
 /**
  * ポッドキャストのタグを生成するAPIエンドポイント
@@ -8,10 +8,33 @@ import { createAdminClient } from "@/lib/supabase/admin"
  */
 export async function POST(request: Request) {
   try {
+    // 認証チェック
+    const supabase = await createClient()
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
     const { podcastId, title, description } = await request.json()
 
     if (!podcastId || !title) {
       return NextResponse.json({ error: "podcastId and title are required" }, { status: 400 })
+    }
+
+    // ユーザーが対象のポッドキャストにアクセス権限を持っているか確認
+    const { data: podcast, error: fetchError } = await supabase
+      .from("podcasts")
+      .select("id")
+      .eq("id", podcastId)
+      .eq("user_id", user.id)
+      .single()
+
+    if (fetchError || !podcast) {
+      return NextResponse.json({ error: "Podcast not found or access denied" }, { status: 403 })
     }
 
     // タグ生成（Gemini API）
@@ -19,7 +42,6 @@ export async function POST(request: Request) {
 
     // タグが生成された場合のみDBを更新
     if (tags.length > 0) {
-      const supabase = createAdminClient()
       const { error: updateError } = await supabase.from("podcasts").update({ tags }).eq("id", podcastId)
 
       if (updateError) {

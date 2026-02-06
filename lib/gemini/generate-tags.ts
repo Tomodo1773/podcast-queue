@@ -111,7 +111,21 @@ export async function generateTags(title: string, description: string): Promise<
       },
     })
 
-    const parsed = JSON.parse(res.text ?? "{}")
+    // 空レスポンスの場合は空配列を返す
+    const text = res.text
+    if (!text) {
+      console.warn("Gemini API returned empty response text")
+      return []
+    }
+
+    let parsed: unknown
+    try {
+      parsed = JSON.parse(text)
+    } catch (parseError) {
+      console.error("Failed to parse Gemini API response as JSON:", parseError)
+      return []
+    }
+
     const validated = TagResponseSchema.parse(parsed)
     return validated.tags
   } catch (error) {
