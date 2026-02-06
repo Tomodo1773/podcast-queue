@@ -1,4 +1,4 @@
-import { google } from "@ai-sdk/google"
+import { createGoogleGenerativeAI } from "@ai-sdk/google"
 import * as ai from "ai"
 import { wrapAISDK } from "langsmith/experimental/vercel"
 import { z } from "zod"
@@ -105,8 +105,13 @@ export async function generateTags(title: string, description: string): Promise<
       description || "（説明なし）"
     )
 
+    // API Keyを使用してGoogleクライアントを作成
+    const google = createGoogleGenerativeAI({
+      apiKey,
+    })
+
     const result = await generateObject({
-      model: google("gemini-3-flash-preview", { apiKey }),
+      model: google("gemini-3-flash-preview"),
       schema: TagResponseSchema,
       prompt,
     })
