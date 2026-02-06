@@ -32,6 +32,7 @@ type Podcast = {
   is_watched: boolean
   is_watching: boolean
   watched_at: string | null
+  show_name: string | null
 }
 
 type PodcastDialogProps = {
@@ -96,6 +97,7 @@ export function PodcastDialog({
           <DialogTitle className="text-xl pr-8 line-clamp-3 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
             {podcast.title || "タイトルなし"}
           </DialogTitle>
+          {podcast.show_name && <p className="text-sm text-muted-foreground mt-1">{podcast.show_name}</p>}
         </DialogHeader>
         <div className="space-y-4">
           {podcast.thumbnail_url && (
