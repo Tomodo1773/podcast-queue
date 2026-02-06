@@ -43,6 +43,30 @@ describe("extractYouTubeVideoId", () => {
       expect(extractYouTubeVideoId("https://vimeo.com/123456")).toBeNull()
     })
   })
+
+  describe("セキュリティ検証", () => {
+    it("パス内にyoutube.comが含まれるURLを除外", () => {
+      expect(extractYouTubeVideoId("https://evil.com/youtube.com/watch?v=dQw4w9WgXcQ")).toBeNull()
+    })
+
+    it("偽装サブドメインを除外", () => {
+      expect(extractYouTubeVideoId("https://youtube.com.evil.com/watch?v=dQw4w9WgXcQ")).toBeNull()
+    })
+
+    it("クエリパラメータ内にyoutube.comが含まれるURLを除外", () => {
+      expect(
+        extractYouTubeVideoId("https://example.com/?redirect=youtube.com/watch?v=dQw4w9WgXcQ")
+      ).toBeNull()
+    })
+
+    it("youtu.beの偽装URLを除外", () => {
+      expect(extractYouTubeVideoId("https://youtu.be.evil.com/dQw4w9WgXcQ")).toBeNull()
+    })
+
+    it("URLパースに失敗した場合はnullを返す", () => {
+      expect(extractYouTubeVideoId("not-a-url")).toBeNull()
+    })
+  })
 })
 
 describe("extractSpotifyId", () => {
@@ -77,6 +101,28 @@ describe("extractSpotifyId", () => {
     it("artistやplaylistなど対象外のSpotify URLの場合はnullを返す", () => {
       expect(extractSpotifyId("https://open.spotify.com/artist/abc123")).toBeNull()
       expect(extractSpotifyId("https://open.spotify.com/playlist/abc123")).toBeNull()
+    })
+  })
+
+  describe("セキュリティ検証", () => {
+    it("パス内にspotify.comが含まれるURLを除外", () => {
+      expect(extractSpotifyId("https://evil.com/spotify.com/episode/4rOoJ6Egrf8K2IrywzwOMk")).toBeNull()
+    })
+
+    it("偽装サブドメインを除外", () => {
+      expect(extractSpotifyId("https://spotify.com.evil.com/episode/4rOoJ6Egrf8K2IrywzwOMk")).toBeNull()
+    })
+
+    it("クエリパラメータ内にspotify.comが含まれるURLを除外", () => {
+      expect(extractSpotifyId("https://example.com/?url=spotify.com/show/abc123")).toBeNull()
+    })
+
+    it("open.spotify.comの偽装URLを除外", () => {
+      expect(extractSpotifyId("https://open.spotify.com.attacker.com/episode/abc123")).toBeNull()
+    })
+
+    it("URLパースに失敗した場合はnullを返す", () => {
+      expect(extractSpotifyId("not-a-url")).toBeNull()
     })
   })
 })
