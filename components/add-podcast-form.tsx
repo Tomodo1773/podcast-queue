@@ -247,6 +247,17 @@ export function AddPodcastForm({ userId, onSuccess, initialUrl, autoFetch }: Add
       </div>
 
       <div className="space-y-2">
+        <Label htmlFor="showName">番組名</Label>
+        <Input
+          id="showName"
+          type="text"
+          placeholder="番組名またはチャンネル名"
+          value={showName || ""}
+          onChange={(e) => setShowName(e.target.value || null)}
+        />
+      </div>
+
+      <div className="space-y-2">
         <Label htmlFor="platform">プラットフォーム</Label>
         <Select
           value={platform || "none"}
