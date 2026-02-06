@@ -1,7 +1,7 @@
-import { GoogleGenAI } from "@google/genai"
+import { google } from "@ai-sdk/google"
+import * as ai from "ai"
+import { wrapAISDK } from "langsmith/experimental/vercel"
 import { z } from "zod"
-import type { JsonSchema7Type } from "zod-to-json-schema"
-import { zodToJsonSchema } from "zod-to-json-schema"
 
 const TagResponseSchema = z.object({
   tags: z.array(z.string().min(1).max(30)).min(6).max(12).describe("重要度順に並べる。重複は禁止。"),
@@ -77,6 +77,14 @@ const PROMPT_TEMPLATE = `
 }
 `.trim()
 
+// LangSmithトレーシングが有効な場合はAI SDKをラップ
+const { generateObject } =
+  process.env.LANGCHAIN_TRACING_V2 === "true"
+    ? wrapAISDK(ai, {
+        project_name: process.env.LANGSMITH_PROJECT,
+      })
+    : ai
+
 /**
  * Gemini APIを使用してタグを生成する
  * @param title ポッドキャストのタイトル
@@ -91,43 +99,19 @@ export async function generateTags(title: string, description: string): Promise<
   }
 
   try {
-    const ai = new GoogleGenAI({ apiKey })
-
     // プロンプトにタイトルと説明を埋め込む
     const prompt = PROMPT_TEMPLATE.replace("{title}", title).replace(
       "{description}",
       description || "（説明なし）"
     )
 
-    // biome-ignore lint/suspicious/noExplicitAny: zodToJsonSchemaの型定義との互換性のため
-    const jsonSchema = zodToJsonSchema(TagResponseSchema as any) as JsonSchema7Type
-
-    const res = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-        responseJsonSchema: jsonSchema as Record<string, unknown>,
-      },
+    const result = await generateObject({
+      model: google("gemini-2.0-flash-exp"),
+      schema: TagResponseSchema,
+      prompt,
     })
 
-    // 空レスポンスの場合は空配列を返す
-    const text = res.text
-    if (!text) {
-      console.warn("Gemini API returned empty response text")
-      return []
-    }
-
-    let parsed: unknown
-    try {
-      parsed = JSON.parse(text)
-    } catch (parseError) {
-      console.error("Failed to parse Gemini API response as JSON:", parseError)
-      return []
-    }
-
-    const validated = TagResponseSchema.parse(parsed)
-    return validated.tags
+    return result.object.tags
   } catch (error) {
     console.error("Failed to generate tags:", error)
     return []
