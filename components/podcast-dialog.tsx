@@ -1,6 +1,6 @@
 "use client"
 
-import { Check, ChevronDown, Copy, ExternalLink, Play, Trash2, X } from "lucide-react"
+import { Check, ChevronDown, Copy, Play, Trash2 } from "lucide-react"
 import Image from "next/image"
 import { useEffect, useState } from "react"
 import { PodcastTags } from "@/components/podcast-tags"
@@ -41,10 +41,10 @@ type PodcastDialogProps = {
   podcast: Podcast
   open: boolean
   onOpenChange: (open: boolean) => void
-  onToggleWatched: (id: string, currentStatus: boolean) => Promise<void>
   onDelete: (id: string) => Promise<void>
   onChangePriority: (id: string, newPriority: Priority) => Promise<void>
   onStartWatching: (id: string) => Promise<void>
+  onChangeWatchedStatus: (id: string, newStatus: boolean) => Promise<void>
 }
 
 const DESCRIPTION_MAX_LENGTH_MOBILE = 70
@@ -55,10 +55,10 @@ export function PodcastDialog({
   podcast,
   open,
   onOpenChange,
-  onToggleWatched,
   onDelete,
   onChangePriority,
   onStartWatching,
+  onChangeWatchedStatus,
 }: PodcastDialogProps) {
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false)
   const [maxLength, setMaxLength] = useState(DESCRIPTION_MAX_LENGTH_DESKTOP)
@@ -179,9 +179,33 @@ export function PodcastDialog({
             </div>
             <div className="flex items-center gap-2">
               <span className="text-sm font-semibold text-muted-foreground">ステータス:</span>
-              <Badge variant={podcast.is_watched ? "default" : "outline"}>
-                {podcast.is_watched ? "視聴済み" : "未視聴"}
-              </Badge>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="flex items-center gap-1 hover:opacity-80 transition-opacity focus:outline-none"
+                  >
+                    <Badge variant={podcast.is_watched ? "default" : "outline"}>
+                      {podcast.is_watched ? "視聴済み" : "未視聴"}
+                    </Badge>
+                    <ChevronDown className="size-3 text-muted-foreground" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem
+                    onClick={() => onChangeWatchedStatus(podcast.id, false)}
+                    disabled={!podcast.is_watched}
+                  >
+                    未視聴
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => onChangeWatchedStatus(podcast.id, true)}
+                    disabled={podcast.is_watched}
+                  >
+                    視聴済み
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
             {podcast.tags && podcast.tags.length > 0 && (
               <div className="space-y-2">
@@ -208,31 +232,8 @@ export function PodcastDialog({
               )}
             </div>
           )}
-          <div className="grid grid-cols-2 sm:flex sm:flex-row gap-2 pt-4">
-            <Button
-              variant={podcast.is_watched ? "default" : "outline"}
-              onClick={() => onToggleWatched(podcast.id, podcast.is_watched)}
-              className="w-full sm:w-auto"
-            >
-              {podcast.is_watched ? (
-                <>
-                  <Check className="mr-2 size-4" />
-                  <span className="hidden sm:inline">視聴済み</span>
-                  <span className="sm:hidden">済</span>
-                </>
-              ) : (
-                <>
-                  <X className="mr-2 size-4" />
-                  <span className="hidden sm:inline">未視聴</span>
-                  <span className="sm:hidden">未</span>
-                </>
-              )}
-            </Button>
-            <Button variant="outline" onClick={handleOpenLink} className="w-full sm:w-auto">
-              <ExternalLink className="mr-2 size-4" />
-              開く
-            </Button>
-            <Button variant="outline" onClick={handleCopyLink} className="w-full sm:w-auto">
+          <div className="flex flex-row gap-2 pt-4">
+            <Button variant="outline" onClick={handleCopyLink} className="flex-1">
               {isCopied ? <Check className="mr-2 size-4" /> : <Copy className="mr-2 size-4" />}
               コピー
             </Button>
@@ -246,7 +247,7 @@ export function PodcastDialog({
                   console.error("ポッドキャストの削除に失敗しました:", error)
                 }
               }}
-              className="w-full sm:w-auto"
+              className="flex-1"
             >
               <Trash2 className="mr-2 size-4" />
               削除

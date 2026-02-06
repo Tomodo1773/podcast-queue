@@ -58,6 +58,7 @@ type PodcastCardProps = {
       platform?: Platform | null
     }
   ) => Promise<void>
+  onChangeWatchedStatus: (id: string, newStatus: boolean) => Promise<void>
 }
 
 export function PodcastCard({
@@ -67,6 +68,7 @@ export function PodcastCard({
   onChangePriority,
   onStartWatching,
   onUpdate,
+  onChangeWatchedStatus,
 }: PodcastCardProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
@@ -225,10 +227,10 @@ export function PodcastCard({
         podcast={podcast}
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
-        onToggleWatched={onToggleWatched}
         onDelete={onDelete}
         onChangePriority={onChangePriority}
         onStartWatching={onStartWatching}
+        onChangeWatchedStatus={onChangeWatchedStatus}
       />
 
       <PodcastEditDialog
