@@ -13,6 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard"
 import {
   getPlatformColor,
   getPlatformLabel,
@@ -62,7 +63,7 @@ export function PodcastDialog({
 }: PodcastDialogProps) {
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false)
   const [maxLength, setMaxLength] = useState(DESCRIPTION_MAX_LENGTH_DESKTOP)
-  const [isCopied, setIsCopied] = useState(false)
+  const { isCopied, copyToClipboard } = useCopyToClipboard()
 
   useEffect(() => {
     const updateMaxLength = () => {
@@ -93,14 +94,8 @@ export function PodcastDialog({
     window.open(podcast.url, "_blank", "noopener,noreferrer")
   }
 
-  const handleCopyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(podcast.url)
-      setIsCopied(true)
-      setTimeout(() => setIsCopied(false), 1500)
-    } catch (error) {
-      console.error("クリップボードへのコピーに失敗しました:", error)
-    }
+  const handleCopyLink = () => {
+    copyToClipboard(podcast.url)
   }
 
   return (
