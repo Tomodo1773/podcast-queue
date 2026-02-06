@@ -60,20 +60,37 @@ async function fetchYouTubeVideoInfo(videoId: string): Promise<{
  * 対応形式: youtube.com/watch?v=xxx, youtu.be/xxx, youtube.com/shorts/xxx, youtube.com/live/xxx
  */
 export function extractYouTubeVideoId(url: string): string | null {
-  const patterns = [
-    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&?/]+)/,
-    /youtube\.com\/shorts\/([^&?/]+)/,
-    /youtube\.com\/live\/([^&?/]+)/,
-  ]
+  try {
+    const urlObj = new URL(url)
 
-  for (const pattern of patterns) {
-    const match = url.match(pattern)
-    if (match?.[1]) {
-      return match[1]
+    // ホスト名を厳密に検証
+    const isYouTube =
+      urlObj.hostname === "youtube.com" ||
+      urlObj.hostname === "www.youtube.com" ||
+      urlObj.hostname.endsWith(".youtube.com") ||
+      urlObj.hostname === "youtu.be"
+
+    if (!isYouTube) return null
+
+    // youtube.com/watch?v=xxx
+    if (urlObj.pathname === "/watch") {
+      return urlObj.searchParams.get("v")
     }
-  }
 
-  return null
+    // youtube.com/shorts/xxx, youtube.com/live/xxx, youtube.com/embed/xxx
+    const match = urlObj.pathname.match(/^\/(shorts|live|embed)\/([^/?]+)$/)
+    if (match) return match[2]
+
+    // youtu.be/xxx
+    if (urlObj.hostname === "youtu.be") {
+      const match = urlObj.pathname.match(/^\/([^/?]+)$/)
+      return match?.[1] || null
+    }
+
+    return null
+  } catch {
+    return null
+  }
 }
 
 /**
@@ -81,11 +98,35 @@ export function extractYouTubeVideoId(url: string): string | null {
  * 対応形式: spotify.com/episode/xxx, spotify.com/show/xxx
  */
 export function extractSpotifyId(url: string): { type: string; id: string } | null {
-  const match = url.match(/spotify\.com\/(episode|show)\/([^?&/]+)/)
-  if (match?.[2]) {
-    return { type: match[1], id: match[2] }
+  try {
+    const urlObj = new URL(url)
+
+    // ホスト名を厳密に検証
+    const isSpotify =
+      urlObj.hostname === "spotify.com" ||
+      urlObj.hostname === "open.spotify.com" ||
+      urlObj.hostname.endsWith(".spotify.com")
+
+    if (!isSpotify) return null
+
+    const match = urlObj.pathname.match(/^\/(episode|show)\/([^/?]+)$/)
+    if (match) {
+      return { type: match[1], id: match[2] }
+    }
+
+    return null
+  } catch {
+    return null
   }
-  return null
+}
+
+/**
+ * NewsPicksのタイトルから番組名を抽出する関数
+ * タイトル形式: "番組名 | エピソード名 - NewsPicks"
+ */
+export function extractNewsPicksShowName(title: string): string | null {
+  const match = title.match(/^(.+?)\s*\|\s*/)
+  return match?.[1]?.trim() || null
 }
 
 // Spotifyアクセストークンを取得する関数（Client Credentials Flow）
@@ -276,6 +317,22 @@ export async function fetchMetadata(url: string): Promise<Metadata> {
     }
 
     return { title: "", description: "", image: "", showName: null }
+  }
+
+  // NewsPicks処理
+  try {
+    const urlObj = new URL(url)
+    if (
+      urlObj.hostname === "newspicks.com" ||
+      urlObj.hostname.endsWith(".newspicks.com") ||
+      urlObj.hostname === "npx.me"
+    ) {
+      const ogpData = await fetchOgpMetadata(url)
+      const showName = extractNewsPicksShowName(ogpData.title)
+      return { ...ogpData, showName }
+    }
+  } catch {
+    // URLのパースに失敗した場合は無視してOGP取得へ
   }
 
   // その他のURLの場合はOGPで取得

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { extractSpotifyId, extractYouTubeVideoId } from "@/lib/metadata/fetcher"
+import { extractNewsPicksShowName, extractSpotifyId, extractYouTubeVideoId } from "@/lib/metadata/fetcher"
 
 describe("extractYouTubeVideoId", () => {
   describe("標準形式", () => {
@@ -43,6 +43,30 @@ describe("extractYouTubeVideoId", () => {
       expect(extractYouTubeVideoId("https://vimeo.com/123456")).toBeNull()
     })
   })
+
+  describe("セキュリティ検証", () => {
+    it("パス内にyoutube.comが含まれるURLを除外", () => {
+      expect(extractYouTubeVideoId("https://evil.com/youtube.com/watch?v=dQw4w9WgXcQ")).toBeNull()
+    })
+
+    it("偽装サブドメインを除外", () => {
+      expect(extractYouTubeVideoId("https://youtube.com.evil.com/watch?v=dQw4w9WgXcQ")).toBeNull()
+    })
+
+    it("クエリパラメータ内にyoutube.comが含まれるURLを除外", () => {
+      expect(
+        extractYouTubeVideoId("https://example.com/?redirect=youtube.com/watch?v=dQw4w9WgXcQ")
+      ).toBeNull()
+    })
+
+    it("youtu.beの偽装URLを除外", () => {
+      expect(extractYouTubeVideoId("https://youtu.be.evil.com/dQw4w9WgXcQ")).toBeNull()
+    })
+
+    it("URLパースに失敗した場合はnullを返す", () => {
+      expect(extractYouTubeVideoId("not-a-url")).toBeNull()
+    })
+  })
 })
 
 describe("extractSpotifyId", () => {
@@ -77,6 +101,117 @@ describe("extractSpotifyId", () => {
     it("artistやplaylistなど対象外のSpotify URLの場合はnullを返す", () => {
       expect(extractSpotifyId("https://open.spotify.com/artist/abc123")).toBeNull()
       expect(extractSpotifyId("https://open.spotify.com/playlist/abc123")).toBeNull()
+    })
+  })
+
+  describe("セキュリティ検証", () => {
+    it("パス内にspotify.comが含まれるURLを除外", () => {
+      expect(extractSpotifyId("https://evil.com/spotify.com/episode/4rOoJ6Egrf8K2IrywzwOMk")).toBeNull()
+    })
+
+    it("偽装サブドメインを除外", () => {
+      expect(extractSpotifyId("https://spotify.com.evil.com/episode/4rOoJ6Egrf8K2IrywzwOMk")).toBeNull()
+    })
+
+    it("クエリパラメータ内にspotify.comが含まれるURLを除外", () => {
+      expect(extractSpotifyId("https://example.com/?url=spotify.com/show/abc123")).toBeNull()
+    })
+
+    it("open.spotify.comの偽装URLを除外", () => {
+      expect(extractSpotifyId("https://open.spotify.com.attacker.com/episode/abc123")).toBeNull()
+    })
+
+    it("URLパースに失敗した場合はnullを返す", () => {
+      expect(extractSpotifyId("not-a-url")).toBeNull()
+    })
+  })
+})
+
+describe("extractNewsPicksShowName", () => {
+  describe("番組名を抽出できる", () => {
+    it("週刊ジョーホー番組の形式", () => {
+      expect(
+        extractNewsPicksShowName(
+          "週刊ジョーホー番組 | 【最強ツール】文系素人が「凄いアプリ」を量産中 - NewsPicks"
+        )
+      ).toBe("週刊ジョーホー番組")
+    })
+
+    it("デューデリだん！の形式", () => {
+      expect(
+        extractNewsPicksShowName("デューデリだん！ | 採用爆増「SmartHR」はコンサルを食いに行く - NewsPicks")
+      ).toBe("デューデリだん！")
+    })
+
+    it("HORIE ONE＋の形式", () => {
+      expect(
+        extractNewsPicksShowName('HORIE ONE＋ | データの力で新市場"手料理サブスク"を開拓せよ - NewsPicks')
+      ).toBe("HORIE ONE＋")
+    })
+
+    it("スペースが多い場合も正しく抽出", () => {
+      expect(extractNewsPicksShowName("番組名   |   エピソード名 - NewsPicks")).toBe("番組名")
+    })
+  })
+
+  describe("無効な形式", () => {
+    it("| が含まれないタイトルの場合はnullを返す", () => {
+      expect(extractNewsPicksShowName("タイトルのみ")).toBeNull()
+    })
+
+    it("空文字列の場合はnullを返す", () => {
+      expect(extractNewsPicksShowName("")).toBeNull()
+    })
+  })
+})
+
+describe("NewsPicksのURL検証", () => {
+  // fetchMetadata関数のURL検証ロジックのテスト
+  // 実際のfetchMetadataはモックが必要なため、ここでは検証ロジックを個別に確認
+  const isNewsPicksUrl = (url: string): boolean => {
+    try {
+      const urlObj = new URL(url)
+      return (
+        urlObj.hostname === "newspicks.com" ||
+        urlObj.hostname.endsWith(".newspicks.com") ||
+        urlObj.hostname === "npx.me"
+      )
+    } catch {
+      return false
+    }
+  }
+
+  describe("正規のNewsPicksドメイン", () => {
+    it("newspicks.comを正しく検出", () => {
+      expect(isNewsPicksUrl("https://newspicks.com/news/123")).toBe(true)
+    })
+
+    it("サブドメイン付きを正しく検出", () => {
+      expect(isNewsPicksUrl("https://app.newspicks.com/news/123")).toBe(true)
+    })
+
+    it("npx.meを正しく検出", () => {
+      expect(isNewsPicksUrl("https://npx.me/abc123")).toBe(true)
+    })
+  })
+
+  describe("悪意のあるURL", () => {
+    it("パス内にnewspicks.comが含まれるURLを除外", () => {
+      expect(isNewsPicksUrl("https://evil.com/newspicks.com")).toBe(false)
+    })
+
+    it("サブドメイン風の偽装URLを除外", () => {
+      expect(isNewsPicksUrl("https://newspicks.com.evil.com")).toBe(false)
+    })
+
+    it("クエリパラメータ内にnewspicks.comが含まれるURLを除外", () => {
+      expect(isNewsPicksUrl("https://example.com/?redirect=newspicks.com")).toBe(false)
+    })
+  })
+
+  describe("無効なURL", () => {
+    it("URLパースに失敗した場合はfalseを返す", () => {
+      expect(isNewsPicksUrl("not-a-url")).toBe(false)
     })
   })
 })
