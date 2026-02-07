@@ -1,6 +1,5 @@
-import { createGoogleGenerativeAI } from "@ai-sdk/google"
-import * as ai from "ai"
-import { wrapAISDK } from "langsmith/experimental/vercel"
+import { GoogleGenAI } from "@google/genai"
+import { traceable } from "langsmith/traceable"
 
 const YOUTUBE_SUMMARY_PROMPT = `提供されたYoutube動画について内容を確認した上で内容を詳細に教えてください。
 
@@ -23,20 +22,12 @@ const YOUTUBE_SUMMARY_PROMPT = `提供されたYoutube動画について内容�
 - オープニングやエンディング、告知、番組自体に関する説明といった本編に関係ない内容は含めない
 - Youtubeのタイトルやディスクリプションだけでなく、実際の動画の内容に基づいてかく`
 
-// LangSmithトレーシングが有効な場合はAI SDKをラップ
-const { generateText } =
-  process.env.LANGCHAIN_TRACING_V2 === "true"
-    ? wrapAISDK(ai, {
-        project_name: process.env.LANGSMITH_PROJECT,
-      })
-    : ai
-
 /**
- * Gemini APIを使用してYouTube動画の内容を要約する
+ * Gemini APIを使用してYouTube動画の内容を要約する（内部実装）
  * @param url YouTube動画のURL
  * @returns 動画内容の要約テキスト（セクション別箇条書き形式）、生成失敗時はnull
  */
-export async function generateYoutubeSummary(url: string): Promise<string | null> {
+async function generateYoutubeSummaryImpl(url: string): Promise<string | null> {
   const apiKey = process.env.GEMINI_API_KEY
   if (!apiKey) {
     console.warn("GEMINI_API_KEY is not set, skipping YouTube summary generation")
@@ -44,22 +35,48 @@ export async function generateYoutubeSummary(url: string): Promise<string | null
   }
 
   try {
-    // API Keyを使用してGoogleクライアントを作成
-    const google = createGoogleGenerativeAI({
-      apiKey,
+    // GoogleGenAIクライアントを作成
+    const genAI = new GoogleGenAI({ apiKey })
+
+    // fileDataを使用してYouTube動画を直接処理
+    const response = await genAI.models.generateContent({
+      model: "gemini-3-pro-preview",
+      contents: [
+        {
+          role: "user",
+          parts: [
+            {
+              fileData: {
+                fileUri: url,
+                mimeType: "video/*",
+              },
+            },
+            {
+              text: YOUTUBE_SUMMARY_PROMPT,
+            },
+          ],
+        },
+      ],
     })
 
-    const result = await generateText({
-      model: google("gemini-3-pro-preview"),
-      prompt: `${YOUTUBE_SUMMARY_PROMPT}
-
-## Youtubeリンク
-${url}`,
-    })
-
-    return result.text
+    return response.text ?? null
   } catch (error) {
     console.error("Failed to generate YouTube summary:", error)
     return null
   }
 }
+
+/**
+ * Gemini APIを使用してYouTube動画の内容を要約する
+ * LangSmithトレーシングが有効な場合は自動的にトレースされる
+ * @param url YouTube動画のURL
+ * @returns 動画内容の要約テキスト（セクション別箇条書き形式）、生成失敗時はnull
+ */
+export const generateYoutubeSummary =
+  process.env.LANGCHAIN_TRACING_V2 === "true"
+    ? traceable(generateYoutubeSummaryImpl, {
+        name: "generate-youtube-summary",
+        run_type: "llm",
+        project_name: process.env.LANGSMITH_PROJECT,
+      })
+    : generateYoutubeSummaryImpl
