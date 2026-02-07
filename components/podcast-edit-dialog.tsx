@@ -26,6 +26,7 @@ type PodcastEditDialogProps = {
     description: string | null
     thumbnail_url: string | null
     platform: Platform | null
+    show_name: string | null
   }
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -36,6 +37,7 @@ type PodcastEditDialogProps = {
       description?: string | null
       thumbnail_url?: string | null
       platform?: Platform | null
+      show_name?: string | null
     }
   ) => Promise<void>
 }
@@ -45,6 +47,7 @@ export function PodcastEditDialog({ podcast, open, onOpenChange, onUpdate }: Pod
   const [description, setDescription] = useState(podcast.description || "")
   const [thumbnailUrl, setThumbnailUrl] = useState(podcast.thumbnail_url || "")
   const [platform, setPlatform] = useState<Platform | null>(podcast.platform)
+  const [showName, setShowName] = useState(podcast.show_name || "")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -55,6 +58,7 @@ export function PodcastEditDialog({ podcast, open, onOpenChange, onUpdate }: Pod
       setDescription(podcast.description || "")
       setThumbnailUrl(podcast.thumbnail_url || "")
       setPlatform(podcast.platform)
+      setShowName(podcast.show_name || "")
       setError(null)
     }
   }, [open, podcast])
@@ -70,6 +74,7 @@ export function PodcastEditDialog({ podcast, open, onOpenChange, onUpdate }: Pod
         description: description || null,
         thumbnail_url: thumbnailUrl || null,
         platform: platform || null,
+        show_name: showName || null,
       })
       onOpenChange(false)
     } catch (error: unknown) {
@@ -85,7 +90,9 @@ export function PodcastEditDialog({ podcast, open, onOpenChange, onUpdate }: Pod
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Podcastを編集</DialogTitle>
-          <DialogDescription>タイトル、説明、サムネイル、プラットフォームを編集できます</DialogDescription>
+          <DialogDescription>
+            タイトル、番組名、説明、サムネイル、プラットフォームを編集できます
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="min-w-0 space-y-6">
           <div className="space-y-2">
@@ -101,6 +108,17 @@ export function PodcastEditDialog({ podcast, open, onOpenChange, onUpdate }: Pod
               placeholder="Podcastのタイトル"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="edit-show-name">番組名</Label>
+            <Input
+              id="edit-show-name"
+              type="text"
+              placeholder="番組名またはチャンネル名"
+              value={showName}
+              onChange={(e) => setShowName(e.target.value)}
             />
           </div>
 

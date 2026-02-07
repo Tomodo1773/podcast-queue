@@ -233,6 +233,7 @@ export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
       description?: string | null
       thumbnail_url?: string | null
       platform?: Platform | null
+      show_name?: string | null
     }
   ) => {
     const supabase = createClient()
