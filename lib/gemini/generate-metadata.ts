@@ -4,10 +4,20 @@ import { wrapAISDK } from "langsmith/experimental/vercel"
 import { z } from "zod"
 
 export const MetadataResponseSchema = z.object({
-  tags: z.array(z.string().min(1).max(30)).min(6).max(12).describe("重要度順に並べる。重複は禁止。"),
+  tags: z
+    .array(z.string().min(1).max(30))
+    .min(6)
+    .max(12)
+    .refine((tags) => new Set(tags).size === tags.length, {
+      message: "タグは重複しないようにしてください。",
+    })
+    .describe("重要度順に並べる。重複は禁止。"),
   speakers: z
     .array(z.string().min(1).max(50))
     .max(20)
+    .refine((speakers) => new Set(speakers).size === speakers.length, {
+      message: "出演者名は重複しないようにしてください。",
+    })
     .describe("出演者のフルネーム。抽出できない場合は空配列。"),
 })
 

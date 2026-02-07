@@ -1,5 +1,5 @@
 -- Add speakers column to podcasts table
-ALTER TABLE podcasts ADD COLUMN speakers TEXT[] DEFAULT '{}';
+ALTER TABLE public.podcasts ADD COLUMN IF NOT EXISTS speakers TEXT[] DEFAULT '{}';
 
 -- Create GIN index for efficient array searching
-CREATE INDEX podcasts_speakers_idx ON podcasts USING GIN (speakers);
+CREATE INDEX IF NOT EXISTS podcasts_speakers_idx ON public.podcasts USING GIN (speakers);
