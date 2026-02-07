@@ -134,7 +134,7 @@ export function extractNewsPicksShowName(title: string): string | null {
  * OGPメタタグに含まれる主要なHTMLエンティティ（&quot;、&amp;、&lt;、&gt;、&apos;など）をデコード
  */
 export function decodeHtmlEntities(text: string): string {
-  // &amp; は最後に処理することで二重アンエスケープを防ぐ
+  // &amp; や &#38; は最後にまとめて処理することで二重アンエスケープを防ぐ
   return text
     .replace(/&quot;/g, '"')
     .replace(/&#34;/g, '"')
@@ -145,8 +145,7 @@ export function decodeHtmlEntities(text: string): string {
     .replace(/&apos;/g, "'")
     .replace(/&#39;/g, "'")
     .replace(/&#x27;/g, "'")
-    .replace(/&amp;/g, "&")
-    .replace(/&#38;/g, "&")
+    .replace(/(&amp;|&#38;)/g, "&")
 }
 
 // Spotifyアクセストークンを取得する関数（Client Credentials Flow）
