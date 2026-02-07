@@ -141,6 +141,7 @@ Next.js 16 (App Router) + Supabase + shadcn/ui で構成されたPodcast管理We
 - **YouTube**: YouTube Data API v3の`videos.list`エンドポイントで`snippet.channelTitle`からチャンネル名を取得
 - **Spotify**: Spotify Web APIのエピソード取得エンドポイントで`show.name`から番組名を取得
 - **その他**: OGPベースの取得（番組名は未登録）
+- **HTMLエンティティのデコード**: OGP取得時にHTMLエンティティ（`&quot;`、`&amp;`など）を自動的にデコードして正しい文字列に変換
 
 ### LINE連携
 

@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest"
-import { extractNewsPicksShowName, extractSpotifyId, extractYouTubeVideoId } from "@/lib/metadata/fetcher"
+import {
+  decodeHtmlEntities,
+  extractNewsPicksShowName,
+  extractSpotifyId,
+  extractYouTubeVideoId,
+} from "@/lib/metadata/fetcher"
 
 describe("extractYouTubeVideoId", () => {
   describe("標準形式", () => {
@@ -161,6 +166,127 @@ describe("extractNewsPicksShowName", () => {
 
     it("空文字列の場合はnullを返す", () => {
       expect(extractNewsPicksShowName("")).toBeNull()
+    })
+  })
+})
+
+describe("decodeHtmlEntities", () => {
+  describe("名前付きHTMLエンティティのデコード", () => {
+    it('&quot; を " にデコード', () => {
+      expect(decodeHtmlEntities("NO RULES 〜企業変革の&quot;今&quot;に迫る〜")).toBe(
+        'NO RULES 〜企業変革の"今"に迫る〜'
+      )
+    })
+
+    it("&amp; を & にデコード", () => {
+      expect(decodeHtmlEntities("A &amp; B")).toBe("A & B")
+    })
+
+    it("&lt; を < にデコード", () => {
+      expect(decodeHtmlEntities("x &lt; 10")).toBe("x < 10")
+    })
+
+    it("&gt; を > にデコード", () => {
+      expect(decodeHtmlEntities("x &gt; 5")).toBe("x > 5")
+    })
+
+    it("&apos; を ' にデコード", () => {
+      expect(decodeHtmlEntities("It&apos;s a test")).toBe("It's a test")
+    })
+  })
+
+  describe("数値文字参照のデコード", () => {
+    it('&#34; を " にデコード', () => {
+      expect(decodeHtmlEntities("Title &#34;test&#34;")).toBe('Title "test"')
+    })
+
+    it("&#38; を & にデコード", () => {
+      expect(decodeHtmlEntities("A &#38; B")).toBe("A & B")
+    })
+
+    it("&#60; を < にデコード", () => {
+      expect(decodeHtmlEntities("x &#60; 10")).toBe("x < 10")
+    })
+
+    it("&#62; を > にデコード", () => {
+      expect(decodeHtmlEntities("x &#62; 5")).toBe("x > 5")
+    })
+
+    it("&#39; を ' にデコード", () => {
+      expect(decodeHtmlEntities("It&#39;s OK")).toBe("It's OK")
+    })
+
+    it("&#x27; を ' にデコード (16進数形式)", () => {
+      expect(decodeHtmlEntities("It&#x27;s great")).toBe("It's great")
+    })
+  })
+
+  describe("複数のエンティティが混在する場合", () => {
+    it("複数のエンティティを正しくデコード", () => {
+      expect(decodeHtmlEntities("&quot;A &amp; B&quot; &lt; &quot;C&quot;")).toBe('"A & B" < "C"')
+    })
+
+    it("名前付きと数値参照が混在する場合", () => {
+      expect(decodeHtmlEntities("&quot;test&#39;s&#34; result")).toBe('"test\'s" result')
+    })
+  })
+
+  describe("エンティティが含まれない場合", () => {
+    it("通常のテキストはそのまま返す", () => {
+      expect(decodeHtmlEntities("Normal text")).toBe("Normal text")
+    })
+
+    it("空文字列はそのまま返す", () => {
+      expect(decodeHtmlEntities("")).toBe("")
+    })
+
+    it("日本語テキストはそのまま返す", () => {
+      expect(decodeHtmlEntities("これはテストです")).toBe("これはテストです")
+    })
+  })
+
+  describe("二重エスケープ防止（&amp;を最後に処理）", () => {
+    it("&amp;quot; を &quot; にデコード（二重デコードしない）", () => {
+      // &amp;を最後に処理するので: &amp;quot; → &amp;quot; (quotは一致しない) → &quot; (&ampをデコード)
+      expect(decodeHtmlEntities("&amp;quot;")).toBe("&quot;")
+    })
+
+    it("&amp;lt; を &lt; にデコード（二重デコードしない）", () => {
+      expect(decodeHtmlEntities("&amp;lt;")).toBe("&lt;")
+    })
+
+    it("&amp;gt; を &gt; にデコード（二重デコードしない）", () => {
+      expect(decodeHtmlEntities("&amp;gt;")).toBe("&gt;")
+    })
+
+    it("&amp;apos; を &apos; にデコード（二重デコードしない）", () => {
+      expect(decodeHtmlEntities("&amp;apos;")).toBe("&apos;")
+    })
+
+    it("&amp;amp; を &amp; にデコード（二重デコードしない）", () => {
+      // &amp;を最後に処理するので: &amp;amp; → &amp;amp; (最初の&ampと一致しない) → &amp;
+      expect(decodeHtmlEntities("&amp;amp;")).toBe("&amp;")
+    })
+
+    it("複数の二重エスケープを含む文字列を正しくデコード", () => {
+      expect(decodeHtmlEntities("A &amp;amp; B &amp;lt; C")).toBe("A &amp; B &lt; C")
+    })
+
+    it("順序が重要：誤った順序だと二重デコードが発生する例", () => {
+      // 正しい順序(&ampを最後に処理)の場合の挙動を確認
+      // &amp;quot; は &quot; になる（" にならない）
+      expect(decodeHtmlEntities("&amp;quot;")).not.toBe('"')
+      expect(decodeHtmlEntities("&amp;quot;")).toBe("&quot;")
+    })
+  })
+
+  describe("実際のユースケース", () => {
+    it("NewsPicksタイトル例をデコード", () => {
+      expect(
+        decodeHtmlEntities(
+          "NO RULES 〜企業変革の&quot;今&quot;に迫る〜 | スキマバイト界を制したタイミー。28歳代表の野望が止まらない"
+        )
+      ).toBe('NO RULES 〜企業変革の"今"に迫る〜 | スキマバイト界を制したタイミー。28歳代表の野望が止まらない')
     })
   })
 })
