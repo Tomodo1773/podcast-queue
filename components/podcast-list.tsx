@@ -211,6 +211,7 @@ export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
           platform: podcast.platform || "その他",
           show_name: podcast.show_name || undefined,
           tags: podcast.tags.length > 0 ? podcast.tags : undefined,
+          speakers: podcast.speakers.length > 0 ? podcast.speakers : undefined,
         }),
       })
 

@@ -7,6 +7,7 @@ export interface PodcastData {
   platform: string
   show_name?: string
   tags?: string[]
+  speakers?: string[]
 }
 
 export function generateMarkdownContent(podcast: PodcastData): string {
@@ -23,6 +24,10 @@ export function generateMarkdownContent(podcast: PodcastData): string {
 
   if (podcast.tags && podcast.tags.length > 0) {
     frontmatterLines.push(`tags: [${podcast.tags.join(", ")}]`)
+  }
+
+  if (podcast.speakers && podcast.speakers.length > 0) {
+    frontmatterLines.push(`speakers: [${podcast.speakers.join(", ")}]`)
   }
 
   frontmatterLines.push("---")
