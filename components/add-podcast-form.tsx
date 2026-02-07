@@ -208,7 +208,7 @@ export function AddPodcastForm({ userId, onSuccess, initialUrl, autoFetch }: Add
             required
             value={url}
             onChange={(e) => handleUrlChange(e.target.value)}
-            className="flex-1"
+            className="flex-1 min-w-0"
           />
           <Button
             type="button"

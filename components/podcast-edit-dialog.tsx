@@ -90,7 +90,7 @@ export function PodcastEditDialog({ podcast, open, onOpenChange, onUpdate }: Pod
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="edit-url">URL（変更不可）</Label>
-            <Input id="edit-url" type="url" value={podcast.url} disabled className="bg-muted" />
+            <Input id="edit-url" type="url" value={podcast.url} disabled className="bg-muted min-w-0" />
           </div>
 
           <div className="space-y-2">
