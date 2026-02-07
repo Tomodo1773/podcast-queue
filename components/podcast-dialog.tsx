@@ -37,7 +37,7 @@ type Podcast = {
   show_name: string | null
   tags: string[]
   speakers: string[]
-  gemini_summary: string | null
+  summary: string | null
 }
 
 type PodcastDialogProps = {
@@ -84,7 +84,7 @@ export function PodcastDialog({
   const displayedDescription =
     isDescriptionExpanded || !isLongDescription ? description : description.slice(0, maxLength)
 
-  const summary = podcast.gemini_summary || ""
+  const summary = podcast.summary || ""
   const isLongSummary = summary.length > maxLength
   const displayedSummary = isSummaryExpanded || !isLongSummary ? summary : summary.slice(0, maxLength)
 
@@ -243,7 +243,7 @@ export function PodcastDialog({
               )}
             </div>
           )}
-          {podcast.platform === "youtube" && podcast.gemini_summary && (
+          {podcast.platform === "youtube" && podcast.summary && (
             <div className="space-y-2">
               <h3 className="text-sm font-semibold text-muted-foreground">動画内容（Gemini生成）:</h3>
               <p id="podcast-summary" className="text-sm whitespace-pre-wrap break-all">

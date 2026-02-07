@@ -37,7 +37,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Podcast not found or access denied" }, { status: 403 })
     }
 
-    const { tags, speakers, geminiSummary } = await updatePodcastMetadata(
+    const { tags, speakers, summary } = await updatePodcastMetadata(
       supabase,
       podcastId,
       podcast.title || "",
@@ -46,7 +46,7 @@ export async function POST(request: Request) {
       podcast.url
     )
 
-    return NextResponse.json({ success: true, tags, speakers, geminiSummary })
+    return NextResponse.json({ success: true, tags, speakers, summary })
   } catch (error) {
     console.error("Error in generate-metadata API:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })

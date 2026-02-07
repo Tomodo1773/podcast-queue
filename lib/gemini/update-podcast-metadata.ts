@@ -13,7 +13,7 @@ export async function updatePodcastMetadata(
   description: string,
   platform?: string,
   url?: string
-): Promise<{ tags: string[]; speakers: string[]; geminiSummary: string | null }> {
+): Promise<{ tags: string[]; speakers: string[]; summary: string | null }> {
   console.log("[updatePodcastMetadata] Starting for podcast:", podcastId)
   console.log("[updatePodcastMetadata] Title:", title)
   // platformはユーザー入力のため、ログインジェクション対策として改行文字を除去
@@ -52,28 +52,38 @@ export async function updatePodcastMetadata(
   console.log("[updatePodcastMetadata] Generated tags:", tags.length)
   console.log("[updatePodcastMetadata] Generated speakers:", speakers.length)
   console.log("[updatePodcastMetadata] Generated YouTube summary:", youtubeSummary ? "yes" : "no")
-  console.log("[updatePodcastMetadata] Podcast ID:", podcastId)
+  // podcastIdはユーザー入力のため、ログインジェクション対策として改行文字を除去
+  console.log("[updatePodcastMetadata] Podcast ID:", podcastId.replace(/[\r\n]/g, ""))
 
   const updateData: Record<string, unknown> = {}
   if (tags.length > 0) updateData.tags = tags
   if (speakers.length > 0) updateData.speakers = speakers
-  if (youtubeSummary) updateData.gemini_summary = youtubeSummary
+  if (youtubeSummary) updateData.summary = youtubeSummary
 
   if (Object.keys(updateData).length > 0) {
     const { error: updateError } = await supabase.from("podcasts").update(updateData).eq("id", podcastId)
 
     if (updateError) {
-      console.error("[updatePodcastMetadata] Failed to update DB for podcast:", podcastId)
+      // podcastIdはユーザー入力のため、ログインジェクション対策として改行文字を除去
+      console.error(
+        "[updatePodcastMetadata] Failed to update DB for podcast:",
+        podcastId.replace(/[\r\n]/g, "")
+      )
       console.error("[updatePodcastMetadata] Error:", updateError)
       throw new Error("Failed to update metadata")
     }
-    console.log("[updatePodcastMetadata] DB updated successfully for podcast:", podcastId)
+    // podcastIdはユーザー入力のため、ログインジェクション対策として改行文字を除去
+    console.log(
+      "[updatePodcastMetadata] DB updated successfully for podcast:",
+      podcastId.replace(/[\r\n]/g, "")
+    )
   } else {
+    // podcastIdはユーザー入力のため、ログインジェクション対策として改行文字を除去
     console.warn(
       "[updatePodcastMetadata] No tags, speakers, or summary generated for podcast, skipping DB update. Podcast ID:",
-      podcastId
+      podcastId.replace(/[\r\n]/g, "")
     )
   }
 
-  return { tags, speakers, geminiSummary: youtubeSummary }
+  return { tags, speakers, summary: youtubeSummary }
 }

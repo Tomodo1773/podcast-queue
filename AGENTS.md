@@ -130,11 +130,11 @@ Next.js 16 (App Router) + Supabase + shadcn/ui で構成されたPodcast管理We
 
 `podcasts` テーブル:
 
-- `id`, `user_id`, `url`, `title`, `description`, `thumbnail_url`, `platform`, `is_watched`, `is_watching`, `watched_at`, `priority`, `google_drive_file_created`, `show_name`, `tags`, `speakers`, `gemini_summary`, `created_at`, `updated_at`
+- `id`, `user_id`, `url`, `title`, `description`, `thumbnail_url`, `platform`, `is_watched`, `is_watching`, `watched_at`, `priority`, `google_drive_file_created`, `show_name`, `tags`, `speakers`, `summary`, `created_at`, `updated_at`
 - `show_name`: 番組名またはチャンネル名（YouTubeはチャンネル名、Spotifyは番組名）
 - `tags`: 検索用タグの配列（Gemini APIで自動生成）
 - `speakers`: 出演者名の配列（Gemini APIで自動抽出）
-- `gemini_summary`: YouTube動画の内容要約（Gemini APIで自動生成、YouTubeのみ）
+- `summary`: YouTube動画の内容要約（Gemini APIで自動生成、YouTubeのみ）
 - Row Level Security有効（ユーザーは自分のデータのみアクセス可能）
 
 ### メタデータ取得

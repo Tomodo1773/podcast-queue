@@ -150,7 +150,7 @@ export async function POST(request: Request) {
         if (insertData?.[0]) {
           try {
             console.log("Starting metadata generation for podcast:", insertData[0].id)
-            const { tags, speakers, geminiSummary } = await updatePodcastMetadata(
+            const { tags, speakers, summary } = await updatePodcastMetadata(
               supabase,
               insertData[0].id,
               metadata.title || url,
@@ -161,7 +161,7 @@ export async function POST(request: Request) {
             console.log("Metadata generation completed for podcast:", insertData[0].id)
             console.log("Tags count:", tags.length)
             console.log("Speakers count:", speakers.length)
-            console.log("YouTube summary:", geminiSummary ? "generated" : "not generated")
+            console.log("YouTube summary:", summary ? "generated" : "not generated")
           } catch (error) {
             console.error("Failed to generate metadata for podcast:", insertData[0].id)
             console.error("Error:", error)

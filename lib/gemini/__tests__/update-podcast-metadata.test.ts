@@ -43,7 +43,7 @@ describe("updatePodcastMetadata", () => {
 
     const result = await updatePodcastMetadata(supabase as never, "podcast-1", "テストタイトル", "テスト説明")
 
-    expect(result).toEqual({ tags: mockTags, speakers: mockSpeakers, geminiSummary: null })
+    expect(result).toEqual({ tags: mockTags, speakers: mockSpeakers, summary: null })
     expect(mockGenerateMetadata).toHaveBeenCalledWith("テストタイトル", "テスト説明")
     expect(supabase.from).toHaveBeenCalledWith("podcasts")
   })
@@ -55,7 +55,7 @@ describe("updatePodcastMetadata", () => {
 
     const result = await updatePodcastMetadata(supabase as never, "podcast-1", "テストタイトル", "テスト説明")
 
-    expect(result).toEqual({ tags: [], speakers: [], geminiSummary: null })
+    expect(result).toEqual({ tags: [], speakers: [], summary: null })
     expect(supabase.from).not.toHaveBeenCalled()
   })
 
@@ -87,7 +87,7 @@ describe("updatePodcastMetadata", () => {
       "https://www.youtube.com/watch?v=test"
     )
 
-    expect(result).toEqual({ tags: mockTags, speakers: mockSpeakers, geminiSummary: mockSummary })
+    expect(result).toEqual({ tags: mockTags, speakers: mockSpeakers, summary: mockSummary })
     expect(mockGenerateYoutubeSummary).toHaveBeenCalledWith("https://www.youtube.com/watch?v=test")
     expect(supabase.from).toHaveBeenCalledWith("podcasts")
   })
@@ -108,7 +108,7 @@ describe("updatePodcastMetadata", () => {
       "https://open.spotify.com/episode/test"
     )
 
-    expect(result).toEqual({ tags: mockTags, speakers: mockSpeakers, geminiSummary: null })
+    expect(result).toEqual({ tags: mockTags, speakers: mockSpeakers, summary: null })
     expect(mockGenerateYoutubeSummary).not.toHaveBeenCalled()
   })
 })
