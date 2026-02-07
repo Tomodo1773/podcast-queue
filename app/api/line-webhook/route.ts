@@ -1,5 +1,6 @@
 import crypto from "crypto"
 import { NextResponse } from "next/server"
+import { updatePodcastMetadata } from "@/lib/gemini/update-podcast-metadata"
 import {
   buildErrorMessage,
   buildMetadataFailedMessage,
@@ -146,25 +147,11 @@ export async function POST(request: Request) {
 
         // タグ生成をバックグラウンドで実行（ユーザーを待たせない）
         if (insertData?.[0]) {
-          const baseUrl = process.env.NEXT_PUBLIC_APP_URL
-          if (baseUrl) {
-            fetch(`${baseUrl}/api/generate-tags`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                podcastId: insertData[0].id,
-                title: metadata.title || url,
-                description: metadata.description || "",
-              }),
-            }).catch((error) => {
-              console.error("Failed to trigger tag generation:", error)
-            })
-          } else {
-            console.warn(
-              "NEXT_PUBLIC_APP_URL is not set. Skipping tag generation for podcast:",
-              insertData[0].id
-            )
-          }
+          updatePodcastMetadata(supabase, insertData[0].id, metadata.title || url, metadata.description || "").catch(
+            (error) => {
+              console.error("Failed to generate metadata:", error)
+            }
+          )
         }
 
         // 登録成功時は成功メッセージを返信

@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server"
-import { generateMetadata } from "@/lib/gemini/generate-metadata"
+import { updatePodcastMetadata } from "@/lib/gemini/update-podcast-metadata"
 import { createClient } from "@/lib/supabase/server"
 
 /**
  * ポッドキャストのタグと出演者名を生成するAPIエンドポイント
- * バックグラウンドで非同期に実行される想定
+ * Web UIからバックグラウンドで非同期に呼び出される
  */
 export async function POST(request: Request) {
   try {
@@ -37,22 +37,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Podcast not found or access denied" }, { status: 403 })
     }
 
-    // タグと出演者名を生成（Gemini API）
-    const { tags, speakers } = await generateMetadata(title, description || "")
-
-    // タグまたは出演者名が生成された場合のみDBを更新
-    const updateData: Record<string, unknown> = {}
-    if (tags.length > 0) updateData.tags = tags
-    if (speakers.length > 0) updateData.speakers = speakers
-
-    if (Object.keys(updateData).length > 0) {
-      const { error: updateError } = await supabase.from("podcasts").update(updateData).eq("id", podcastId)
-
-      if (updateError) {
-        console.error("Failed to update metadata:", updateError)
-        return NextResponse.json({ error: "Failed to update metadata" }, { status: 500 })
-      }
-    }
+    const { tags, speakers } = await updatePodcastMetadata(supabase, podcastId, title, description || "")
 
     return NextResponse.json({ success: true, tags, speakers })
   } catch (error) {
