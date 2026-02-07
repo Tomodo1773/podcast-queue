@@ -87,10 +87,10 @@ export function PodcastEditDialog({ podcast, open, onOpenChange, onUpdate }: Pod
           <DialogTitle>Podcastを編集</DialogTitle>
           <DialogDescription>タイトル、説明、サムネイル、プラットフォームを編集できます</DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="min-w-0 space-y-6">
           <div className="space-y-2">
             <Label htmlFor="edit-url">URL（変更不可）</Label>
-            <Input id="edit-url" type="url" value={podcast.url} disabled className="bg-muted" />
+            <Input id="edit-url" type="url" value={podcast.url} disabled className="bg-muted min-w-0" />
           </div>
 
           <div className="space-y-2">
