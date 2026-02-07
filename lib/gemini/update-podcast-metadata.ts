@@ -11,7 +11,11 @@ export async function updatePodcastMetadata(
   title: string,
   description: string
 ): Promise<{ tags: string[]; speakers: string[] }> {
+  console.log(`[updatePodcastMetadata] Starting for podcast ${podcastId}, title: "${title}"`)
   const { tags, speakers } = await generateMetadata(title, description)
+  console.log(
+    `[updatePodcastMetadata] Generated ${tags.length} tags and ${speakers.length} speakers for podcast ${podcastId}`
+  )
 
   const updateData: Record<string, unknown> = {}
   if (tags.length > 0) updateData.tags = tags
@@ -21,9 +25,12 @@ export async function updatePodcastMetadata(
     const { error: updateError } = await supabase.from("podcasts").update(updateData).eq("id", podcastId)
 
     if (updateError) {
-      console.error("Failed to update metadata:", updateError)
+      console.error(`[updatePodcastMetadata] Failed to update DB for podcast ${podcastId}:`, updateError)
       throw new Error("Failed to update metadata")
     }
+    console.log(`[updatePodcastMetadata] DB updated successfully for podcast ${podcastId}`)
+  } else {
+    console.warn(`[updatePodcastMetadata] No tags or speakers generated for podcast ${podcastId}, skipping DB update`)
   }
 
   return { tags, speakers }
