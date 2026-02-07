@@ -116,4 +116,18 @@ describe("generateMarkdownContent", () => {
 
     expect(result).not.toContain("tags:")
   })
+
+  it("speakersがある場合はフロントマターに含まれる", () => {
+    const podcast: PodcastData = {
+      title: "テストタイトル",
+      platform: "youtube",
+      url: "https://example.com/video",
+      description: "テスト説明",
+      speakers: ["山田太郎", "佐藤花子"],
+    }
+
+    const result = generateMarkdownContent(podcast)
+
+    expect(result).toContain("speakers: [山田太郎, 佐藤花子]")
+  })
 })

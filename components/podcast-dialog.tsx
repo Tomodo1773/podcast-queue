@@ -37,6 +37,7 @@ type Podcast = {
   show_name: string | null
   tags: string[]
   speakers: string[]
+  summary: string | null
 }
 
 type PodcastDialogProps = {
@@ -63,6 +64,7 @@ export function PodcastDialog({
   onChangeWatchedStatus,
 }: PodcastDialogProps) {
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false)
+  const [isSummaryExpanded, setIsSummaryExpanded] = useState(false)
   const [maxLength, setMaxLength] = useState(DESCRIPTION_MAX_LENGTH_DESKTOP)
   const { isCopied, copyToClipboard } = useCopyToClipboard()
 
@@ -82,9 +84,14 @@ export function PodcastDialog({
   const displayedDescription =
     isDescriptionExpanded || !isLongDescription ? description : description.slice(0, maxLength)
 
+  const summary = podcast.summary || ""
+  const isLongSummary = summary.length > maxLength
+  const displayedSummary = isSummaryExpanded || !isLongSummary ? summary : summary.slice(0, maxLength)
+
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
       setIsDescriptionExpanded(false)
+      setIsSummaryExpanded(false)
     }
     onOpenChange(newOpen)
   }
@@ -219,7 +226,7 @@ export function PodcastDialog({
           {podcast.description && (
             <div className="space-y-2">
               <h3 className="text-sm font-semibold text-muted-foreground">説明:</h3>
-              <p className="text-sm whitespace-pre-wrap break-all">
+              <p id="podcast-description" className="text-sm whitespace-pre-wrap break-all">
                 {displayedDescription}
                 {isLongDescription && !isDescriptionExpanded && "..."}
               </p>
@@ -228,8 +235,30 @@ export function PodcastDialog({
                   type="button"
                   onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
                   className="text-sm text-primary hover:underline"
+                  aria-expanded={isDescriptionExpanded}
+                  aria-controls="podcast-description"
                 >
                   {isDescriptionExpanded ? "閉じる" : "もっと見る"}
+                </button>
+              )}
+            </div>
+          )}
+          {podcast.platform === "youtube" && podcast.summary && (
+            <div className="space-y-2">
+              <h3 className="text-sm font-semibold text-muted-foreground">動画内容（Gemini生成）:</h3>
+              <p id="podcast-summary" className="text-sm whitespace-pre-wrap break-all">
+                {displayedSummary}
+                {isLongSummary && !isSummaryExpanded && "..."}
+              </p>
+              {isLongSummary && (
+                <button
+                  type="button"
+                  onClick={() => setIsSummaryExpanded(!isSummaryExpanded)}
+                  className="text-sm text-primary hover:underline"
+                  aria-expanded={isSummaryExpanded}
+                  aria-controls="podcast-summary"
+                >
+                  {isSummaryExpanded ? "閉じる" : "もっと見る"}
                 </button>
               )}
             </div>

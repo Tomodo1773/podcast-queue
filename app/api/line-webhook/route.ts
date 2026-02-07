@@ -146,19 +146,22 @@ export async function POST(request: Request) {
         console.log("Podcast added for user:", link.user_id)
         console.log("URL:", url)
 
-        // タグ生成・出演者抽出を同期的に実行（完了後にLINE返信する）
+        // タグ生成・出演者抽出・YouTube要約を同期的に実行（完了後にLINE返信する）
         if (insertData?.[0]) {
           try {
             console.log("Starting metadata generation for podcast:", insertData[0].id)
-            const { tags, speakers } = await updatePodcastMetadata(
+            const { tags, speakers, summary } = await updatePodcastMetadata(
               supabase,
               insertData[0].id,
               metadata.title || url,
-              metadata.description || ""
+              metadata.description || "",
+              detectPlatform(url),
+              url
             )
             console.log("Metadata generation completed for podcast:", insertData[0].id)
             console.log("Tags count:", tags.length)
             console.log("Speakers count:", speakers.length)
+            console.log("YouTube summary:", summary ? "generated" : "not generated")
           } catch (error) {
             console.error("Failed to generate metadata for podcast:", insertData[0].id)
             console.error("Error:", error)

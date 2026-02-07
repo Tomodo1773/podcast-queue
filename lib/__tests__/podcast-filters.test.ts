@@ -26,6 +26,7 @@ function createPodcast(overrides: Partial<Podcast> = {}): Podcast {
     show_name: null,
     tags: [],
     speakers: [],
+    summary: null,
     ...overrides,
   }
 }

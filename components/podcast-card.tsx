@@ -42,6 +42,7 @@ type Podcast = {
   show_name: string | null
   tags: string[]
   speakers: string[]
+  summary: string | null
 }
 
 type PodcastCardProps = {
