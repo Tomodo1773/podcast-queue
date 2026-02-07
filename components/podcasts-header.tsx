@@ -72,7 +72,7 @@ export function PodcastsHeader({ userId, onPodcastAdded, sharedUrl, autoFetch }:
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto overflow-x-hidden border-t-4 border-t-primary rounded-lg">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto border-t-4 border-t-primary rounded-lg">
           <DialogHeader>
             <DialogTitle className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
               新しいPodcastを追加

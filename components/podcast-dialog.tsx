@@ -212,7 +212,7 @@ export function PodcastDialog({
           {podcast.description && (
             <div className="space-y-2">
               <h3 className="text-sm font-semibold text-muted-foreground">説明:</h3>
-              <p className="text-sm whitespace-pre-wrap">
+              <p className="text-sm whitespace-pre-wrap break-all">
                 {displayedDescription}
                 {isLongDescription && !isDescriptionExpanded && "..."}
               </p>
