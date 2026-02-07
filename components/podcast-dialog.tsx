@@ -204,9 +204,9 @@ export function PodcastDialog({
               </DropdownMenu>
             </div>
             {podcast.speakers && podcast.speakers.length > 0 && (
-              <div className="flex items-center gap-2">
+              <div className="space-y-2">
                 <span className="text-sm font-semibold text-muted-foreground">出演者:</span>
-                <span className="text-sm">{podcast.speakers.join(", ")}</span>
+                <PodcastTags tags={podcast.speakers} />
               </div>
             )}
             {podcast.tags && podcast.tags.length > 0 && (
