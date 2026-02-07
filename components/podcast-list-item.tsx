@@ -41,6 +41,7 @@ type Podcast = {
   watched_at: string | null
   show_name: string | null
   tags: string[]
+  speakers: string[]
 }
 
 type PodcastListItemProps = {
@@ -151,6 +152,9 @@ export function PodcastListItem({
               </h3>
               {podcast.show_name && (
                 <p className="text-xs text-muted-foreground mt-0.5">{podcast.show_name}</p>
+              )}
+              {podcast.speakers && podcast.speakers.length > 0 && (
+                <p className="text-xs text-muted-foreground mt-0.5">{podcast.speakers.join(", ")}</p>
               )}
             </div>
             {/* 3-dot menu */}

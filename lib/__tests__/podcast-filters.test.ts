@@ -25,6 +25,7 @@ function createPodcast(overrides: Partial<Podcast> = {}): Podcast {
     google_drive_file_created: false,
     show_name: null,
     tags: [],
+    speakers: [],
     ...overrides,
   }
 }

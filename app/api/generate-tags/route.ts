@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server"
-import { generateTags } from "@/lib/gemini/generate-tags"
+import { generateMetadata } from "@/lib/gemini/generate-metadata"
 import { createClient } from "@/lib/supabase/server"
 
 /**
- * ポッドキャストのタグを生成するAPIエンドポイント
+ * ポッドキャストのタグと出演者名を生成するAPIエンドポイント
  * バックグラウンドで非同期に実行される想定
  */
 export async function POST(request: Request) {
@@ -37,22 +37,26 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Podcast not found or access denied" }, { status: 403 })
     }
 
-    // タグ生成（Gemini API）
-    const tags = await generateTags(title, description || "")
+    // タグと出演者名を生成（Gemini API）
+    const { tags, speakers } = await generateMetadata(title, description || "")
 
-    // タグが生成された場合のみDBを更新
-    if (tags.length > 0) {
-      const { error: updateError } = await supabase.from("podcasts").update({ tags }).eq("id", podcastId)
+    // タグまたは出演者名が生成された場合のみDBを更新
+    const updateData: Record<string, unknown> = {}
+    if (tags.length > 0) updateData.tags = tags
+    if (speakers.length > 0) updateData.speakers = speakers
+
+    if (Object.keys(updateData).length > 0) {
+      const { error: updateError } = await supabase.from("podcasts").update(updateData).eq("id", podcastId)
 
       if (updateError) {
-        console.error("Failed to update tags:", updateError)
-        return NextResponse.json({ error: "Failed to update tags" }, { status: 500 })
+        console.error("Failed to update metadata:", updateError)
+        return NextResponse.json({ error: "Failed to update metadata" }, { status: 500 })
       }
     }
 
-    return NextResponse.json({ success: true, tags })
+    return NextResponse.json({ success: true, tags, speakers })
   } catch (error) {
-    console.error("Error in generate-tags API:", error)
+    console.error("Error in generate-metadata API:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

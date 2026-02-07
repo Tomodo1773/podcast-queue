@@ -15,6 +15,7 @@ export type Podcast = {
   google_drive_file_created: boolean
   show_name: string | null
   tags: string[]
+  speakers: string[]
 }
 
 export type WatchFilter = "all" | "watched" | "unwatched"
