@@ -173,10 +173,6 @@ export function AddPodcastForm({ userId, onSuccess, initialUrl, autoFetch }: Add
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             podcastId: data[0].id,
-            title: title || url,
-            description: description || "",
-            platform: platform || null,
-            url,
           }),
         }).catch((error) => {
           console.error("Failed to trigger tag generation:", error)

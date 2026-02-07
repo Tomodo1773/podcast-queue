@@ -16,12 +16,32 @@ export async function updatePodcastMetadata(
 ): Promise<{ tags: string[]; speakers: string[]; geminiSummary: string | null }> {
   console.log("[updatePodcastMetadata] Starting for podcast:", podcastId)
   console.log("[updatePodcastMetadata] Title:", title)
-  console.log("[updatePodcastMetadata] Platform:", platform)
+  // platformはユーザー入力のため、ログインジェクション対策として改行文字を除去
+  console.log("[updatePodcastMetadata] Platform:", platform?.replace(/[\r\n]/g, ""))
+
+  // YouTube 要約生成を行うかどうかの判定（URL のホスト名が YouTube か検証）
+  const shouldGenerateYoutubeSummary =
+    platform === "youtube" &&
+    (() => {
+      if (!url) return false
+      try {
+        const hostname = new URL(url).hostname.toLowerCase()
+        return (
+          hostname === "youtube.com" ||
+          hostname === "www.youtube.com" ||
+          hostname === "youtu.be" ||
+          hostname === "www.youtu.be"
+        )
+      } catch {
+        console.warn("[updatePodcastMetadata] Invalid URL for YouTube summary, skipping:", url)
+        return false
+      }
+    })()
 
   // タグ・出演者生成とYouTube要約生成を並行実行
   const [metadataResult, youtubeSummary] = await Promise.all([
     generateMetadata(title, description),
-    platform === "youtube" && url ? generateYoutubeSummary(url) : Promise.resolve(null),
+    shouldGenerateYoutubeSummary && url ? generateYoutubeSummary(url) : Promise.resolve(null),
   ])
 
   const { tags, speakers } = metadataResult

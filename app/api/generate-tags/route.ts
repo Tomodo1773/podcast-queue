@@ -19,16 +19,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { podcastId, title, description, platform, url } = await request.json()
+    const { podcastId } = await request.json()
 
-    if (!podcastId || !title) {
-      return NextResponse.json({ error: "podcastId and title are required" }, { status: 400 })
+    if (!podcastId) {
+      return NextResponse.json({ error: "podcastId is required" }, { status: 400 })
     }
 
-    // ユーザーが対象のポッドキャストにアクセス権限を持っているか確認
+    // ユーザーが対象のポッドキャストにアクセス権限を持っているか確認し、必要なデータを取得
     const { data: podcast, error: fetchError } = await supabase
       .from("podcasts")
-      .select("id")
+      .select("id, title, description, platform, url")
       .eq("id", podcastId)
       .eq("user_id", user.id)
       .single()
@@ -40,10 +40,10 @@ export async function POST(request: Request) {
     const { tags, speakers, geminiSummary } = await updatePodcastMetadata(
       supabase,
       podcastId,
-      title,
-      description || "",
-      platform,
-      url
+      podcast.title || "",
+      podcast.description || "",
+      podcast.platform || undefined,
+      podcast.url
     )
 
     return NextResponse.json({ success: true, tags, speakers, geminiSummary })
