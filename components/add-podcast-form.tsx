@@ -197,7 +197,7 @@ export function AddPodcastForm({ userId, onSuccess, initialUrl, autoFetch }: Add
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="min-w-0 space-y-6">
       <div className="space-y-2">
         <Label htmlFor="url">URL *</Label>
         <div className="flex gap-2">

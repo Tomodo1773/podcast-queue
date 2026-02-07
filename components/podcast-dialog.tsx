@@ -107,7 +107,7 @@ export function PodcastDialog({
           </DialogTitle>
           {podcast.show_name && <p className="text-sm text-muted-foreground mt-1">{podcast.show_name}</p>}
         </DialogHeader>
-        <div className="space-y-4">
+        <div className="min-w-0 space-y-4">
           {podcast.thumbnail_url && (
             <button
               type="button"
