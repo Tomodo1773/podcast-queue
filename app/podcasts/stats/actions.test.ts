@@ -34,6 +34,7 @@ describe("getStats", () => {
     expect(stats).toHaveProperty("weeklyStats")
     expect(stats).toHaveProperty("monthlyStats")
     expect(stats).toHaveProperty("platformStats")
+    expect(stats).toHaveProperty("showNameStats")
     expect(stats).toHaveProperty("averagePerDay")
     expect(stats).toHaveProperty("averagePerWeek")
   })
@@ -55,6 +56,7 @@ describe("getStats", () => {
     expect(Array.isArray(stats.weeklyStats)).toBe(true)
     expect(Array.isArray(stats.monthlyStats)).toBe(true)
     expect(Array.isArray(stats.platformStats)).toBe(true)
+    expect(Array.isArray(stats.showNameStats)).toBe(true)
   })
 
   it("should return 30 daily stats", async () => {

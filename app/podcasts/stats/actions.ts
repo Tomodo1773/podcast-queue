@@ -12,6 +12,11 @@ export type PlatformStats = {
   count: number
 }
 
+export type ShowNameStats = {
+  showName: string
+  count: number
+}
+
 export type StatsData = {
   total: number
   thisWeek: number
@@ -20,6 +25,7 @@ export type StatsData = {
   weeklyStats: DailyStats[]
   monthlyStats: DailyStats[]
   platformStats: PlatformStats[]
+  showNameStats: ShowNameStats[]
   averagePerDay: number
   averagePerWeek: number
 }
@@ -118,6 +124,36 @@ export async function getStats(userId: string): Promise<StatsData> {
     count,
   }))
 
+  // 番組名別統計
+  const showNameMap = new Map<string, number>()
+  watchedPodcasts.forEach((p) => {
+    const showName = p.show_name?.trim() ? p.show_name : "その他"
+    showNameMap.set(showName, (showNameMap.get(showName) || 0) + 1)
+  })
+
+  // 件数の多い順にソート
+  const sortedShowNames = Array.from(showNameMap.entries()).sort((a, b) => b[1] - a[1])
+
+  // 上位10件を個別表示、11件目以降は「その他」にまとめる
+  const showNameStats: ShowNameStats[] = []
+  let othersCount = 0
+  sortedShowNames.forEach(([showName, count], index) => {
+    if (index < 10) {
+      showNameStats.push({ showName, count })
+    } else {
+      othersCount += count
+    }
+  })
+  if (othersCount > 0) {
+    // 既に「その他」が上位10件に入っている場合は統合
+    const othersIndex = showNameStats.findIndex((s) => s.showName === "その他")
+    if (othersIndex >= 0) {
+      showNameStats[othersIndex].count += othersCount
+    } else {
+      showNameStats.push({ showName: "その他", count: othersCount })
+    }
+  }
+
   let averagePerDay = 0
   let averagePerWeek = 0
 
@@ -141,6 +177,7 @@ export async function getStats(userId: string): Promise<StatsData> {
     weeklyStats,
     monthlyStats,
     platformStats,
+    showNameStats,
     averagePerDay,
     averagePerWeek,
   }

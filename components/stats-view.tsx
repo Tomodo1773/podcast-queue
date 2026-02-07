@@ -192,6 +192,57 @@ export function StatsView({ stats }: StatsViewProps) {
           </div>
         </CardContent>
       </Card>
+
+      {/* 番組別視聴数 */}
+      <Card>
+        <CardHeader>
+          <CardTitle>番組別視聴数</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <div className="space-y-2">
+                {stats.showNameStats.map((stat) => (
+                  <div key={stat.showName} className="flex items-center justify-between gap-2">
+                    <span className="text-sm truncate" title={stat.showName}>
+                      {stat.showName}
+                    </span>
+                    <span className="text-sm font-medium">{stat.count}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={stats.showNameStats}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    // biome-ignore lint/suspicious/noExplicitAny: recharts型定義の都合上必要
+                    label={(entry: any) => `${entry.showName}: ${entry.count}`}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="count"
+                  >
+                    {stats.showNameStats.map((item, index) => (
+                      <Cell key={item.showName} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    // biome-ignore lint/suspicious/noExplicitAny: recharts型定義の都合上必要
+                    formatter={(value: any, _name: any, props: any) => [
+                      `${value}回視聴`,
+                      props.payload?.showName ?? "不明",
+                    ]}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }
