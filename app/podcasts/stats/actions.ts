@@ -14,7 +14,6 @@ export type PlatformStats = {
 
 export type StatsData = {
   total: number
-  today: number
   thisWeek: number
   thisMonth: number
   dailyStats: DailyStats[]
@@ -45,10 +44,6 @@ export async function getStats(userId: string): Promise<StatsData> {
   const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1)
 
   const total = watchedPodcasts.length
-  const todayCount = watchedPodcasts.filter((p) => {
-    const watchedAt = new Date(p.watched_at!)
-    return watchedAt >= today
-  }).length
 
   const thisWeekCount = watchedPodcasts.filter((p) => {
     const watchedAt = new Date(p.watched_at!)
@@ -140,7 +135,6 @@ export async function getStats(userId: string): Promise<StatsData> {
 
   return {
     total,
-    today: todayCount,
     thisWeek: thisWeekCount,
     thisMonth: thisMonthCount,
     dailyStats,

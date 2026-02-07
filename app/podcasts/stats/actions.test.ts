@@ -28,7 +28,6 @@ describe("getStats", () => {
     const stats = await getStats("test-user-id")
 
     expect(stats).toHaveProperty("total")
-    expect(stats).toHaveProperty("today")
     expect(stats).toHaveProperty("thisWeek")
     expect(stats).toHaveProperty("thisMonth")
     expect(stats).toHaveProperty("dailyStats")
@@ -39,11 +38,10 @@ describe("getStats", () => {
     expect(stats).toHaveProperty("averagePerWeek")
   })
 
-  it("should return numbers for total, today, thisWeek, thisMonth", async () => {
+  it("should return numbers for total, thisWeek, thisMonth", async () => {
     const stats = await getStats("test-user-id")
 
     expect(typeof stats.total).toBe("number")
-    expect(typeof stats.today).toBe("number")
     expect(typeof stats.thisWeek).toBe("number")
     expect(typeof stats.thisMonth).toBe("number")
     expect(typeof stats.averagePerDay).toBe("number")
