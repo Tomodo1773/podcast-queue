@@ -245,6 +245,41 @@ describe("decodeHtmlEntities", () => {
     })
   })
 
+  describe("二重エスケープ防止（&amp;を最後に処理）", () => {
+    it("&amp;quot; を &quot; にデコード（二重デコードしない）", () => {
+      // &amp;を最後に処理するので: &amp;quot; → &amp;quot; (quotは一致しない) → &quot; (&ampをデコード)
+      expect(decodeHtmlEntities("&amp;quot;")).toBe("&quot;")
+    })
+
+    it("&amp;lt; を &lt; にデコード（二重デコードしない）", () => {
+      expect(decodeHtmlEntities("&amp;lt;")).toBe("&lt;")
+    })
+
+    it("&amp;gt; を &gt; にデコード（二重デコードしない）", () => {
+      expect(decodeHtmlEntities("&amp;gt;")).toBe("&gt;")
+    })
+
+    it("&amp;apos; を &apos; にデコード（二重デコードしない）", () => {
+      expect(decodeHtmlEntities("&amp;apos;")).toBe("&apos;")
+    })
+
+    it("&amp;amp; を &amp; にデコード（二重デコードしない）", () => {
+      // &amp;を最後に処理するので: &amp;amp; → &amp;amp; (最初の&ampと一致しない) → &amp;
+      expect(decodeHtmlEntities("&amp;amp;")).toBe("&amp;")
+    })
+
+    it("複数の二重エスケープを含む文字列を正しくデコード", () => {
+      expect(decodeHtmlEntities("A &amp;amp; B &amp;lt; C")).toBe("A &amp; B &lt; C")
+    })
+
+    it("順序が重要：誤った順序だと二重デコードが発生する例", () => {
+      // 正しい順序(&ampを最後に処理)の場合の挙動を確認
+      // &amp;quot; は &quot; になる（" にならない）
+      expect(decodeHtmlEntities("&amp;quot;")).not.toBe('"')
+      expect(decodeHtmlEntities("&amp;quot;")).toBe("&quot;")
+    })
+  })
+
   describe("実際のユースケース", () => {
     it("NewsPicksタイトル例をデコード", () => {
       expect(
