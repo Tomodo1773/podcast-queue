@@ -1,4 +1,4 @@
-import { type Mock, beforeEach, describe, expect, it, vi } from "vitest"
+import { beforeEach, describe, expect, it, type Mock, vi } from "vitest"
 import { updatePodcastMetadata } from "../update-podcast-metadata"
 
 vi.mock("../generate-metadata", () => ({
@@ -9,15 +9,17 @@ import { generateMetadata } from "../generate-metadata"
 
 const mockGenerateMetadata = generateMetadata as Mock
 
-function createMockSupabase(updateResult: { error: unknown } = { error: null }) {
+interface MockSupabaseClient {
+  from: Mock
+  update: Mock
+  eq: Mock
+}
+
+function createMockSupabase(updateResult: { error: unknown } = { error: null }): MockSupabaseClient {
   const eq = vi.fn().mockReturnValue(updateResult)
   const update = vi.fn().mockReturnValue({ eq })
   const from = vi.fn().mockReturnValue({ update })
-  return { from, update, eq } as unknown as ReturnType<typeof createMockSupabase> & {
-    from: Mock
-    update: Mock
-    eq: Mock
-  }
+  return { from, update, eq } as unknown as MockSupabaseClient
 }
 
 describe("updatePodcastMetadata", () => {

@@ -147,11 +147,14 @@ export async function POST(request: Request) {
 
         // タグ生成をバックグラウンドで実行（ユーザーを待たせない）
         if (insertData?.[0]) {
-          updatePodcastMetadata(supabase, insertData[0].id, metadata.title || url, metadata.description || "").catch(
-            (error) => {
-              console.error("Failed to generate metadata:", error)
-            }
-          )
+          updatePodcastMetadata(
+            supabase,
+            insertData[0].id,
+            metadata.title || url,
+            metadata.description || ""
+          ).catch((error) => {
+            console.error("Failed to generate metadata:", error)
+          })
         }
 
         // 登録成功時は成功メッセージを返信
