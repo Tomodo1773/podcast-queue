@@ -90,7 +90,7 @@ export async function POST(request: Request) {
 
       if (!link) {
         // 未連携ユーザーにはエラーメッセージを返信
-        console.log(`Unlinked LINE user: ${lineUserId}`)
+        console.log("Unlinked LINE user:", lineUserId)
         if (replyToken) {
           await replyMessage(replyToken, [
             buildErrorMessage(
@@ -143,23 +143,25 @@ export async function POST(request: Request) {
           ])
         }
       } else {
-        console.log(`Podcast added for user ${link.user_id}: ${url}`)
+        console.log("Podcast added for user:", link.user_id)
+        console.log("URL:", url)
 
         // タグ生成・出演者抽出を同期的に実行（完了後にLINE返信する）
         if (insertData?.[0]) {
           try {
-            console.log(`Starting metadata generation for podcast ${insertData[0].id}`)
+            console.log("Starting metadata generation for podcast:", insertData[0].id)
             const { tags, speakers } = await updatePodcastMetadata(
               supabase,
               insertData[0].id,
               metadata.title || url,
               metadata.description || ""
             )
-            console.log(
-              `Metadata generation completed for podcast ${insertData[0].id}: ${tags.length} tags, ${speakers.length} speakers`
-            )
+            console.log("Metadata generation completed for podcast:", insertData[0].id)
+            console.log("Tags count:", tags.length)
+            console.log("Speakers count:", speakers.length)
           } catch (error) {
-            console.error(`Failed to generate metadata for podcast ${insertData[0].id}:`, error)
+            console.error("Failed to generate metadata for podcast:", insertData[0].id)
+            console.error("Error:", error)
           }
         }
 
