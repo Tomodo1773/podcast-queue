@@ -129,6 +129,25 @@ export function extractNewsPicksShowName(title: string): string | null {
   return match?.[1]?.trim() || null
 }
 
+/**
+ * HTMLエンティティをデコードする関数
+ * OGPメタタグに含まれる主要なHTMLエンティティ（&quot;、&amp;、&lt;、&gt;、&apos;など）をデコード
+ */
+export function decodeHtmlEntities(text: string): string {
+  return text
+    .replace(/&quot;/g, '"')
+    .replace(/&#34;/g, '"')
+    .replace(/&amp;/g, "&")
+    .replace(/&#38;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&#60;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&#62;/g, ">")
+    .replace(/&apos;/g, "'")
+    .replace(/&#39;/g, "'")
+    .replace(/&#x27;/g, "'")
+}
+
 // Spotifyアクセストークンを取得する関数（Client Credentials Flow）
 async function getSpotifyAccessToken(): Promise<string | null> {
   const clientId = process.env.SPOTIFY_CLIENT_ID
@@ -235,7 +254,12 @@ async function fetchOgpMetadata(url: string): Promise<Metadata> {
     html.match(/<meta name="twitter:image" content="([^"]*)">/)
   const image = imageMatch ? imageMatch[1] : ""
 
-  return { title, description, image, showName: null }
+  return {
+    title: decodeHtmlEntities(title),
+    description: decodeHtmlEntities(description),
+    image,
+    showName: null,
+  }
 }
 
 /**
