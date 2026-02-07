@@ -104,6 +104,11 @@ export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
             : p
         )
       )
+
+      // 視聴済みにする場合、Google Driveファイル作成（バックグラウンド実行）
+      if (newStatus) {
+        tryCreateGoogleDriveFile(id)
+      }
     }
   }
 
@@ -135,6 +140,11 @@ export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
             : p
         )
       )
+
+      // 視聴済みにする場合、Google Driveファイル作成（バックグラウンド実行）
+      if (newStatus) {
+        tryCreateGoogleDriveFile(id)
+      }
     }
   }
 
@@ -159,6 +169,14 @@ export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
       console.error("[v0] 優先度更新エラー:", error)
     } else {
       setPodcasts((prev) => prev.map((p) => (p.id === id ? { ...p, priority: newPriority } : p)))
+    }
+  }
+
+  const tryCreateGoogleDriveFile = (id: string) => {
+    const podcast = podcasts.find((p) => p.id === id)
+    if (podcast && !podcast.google_drive_file_created) {
+      const supabase = createClient()
+      createGoogleDriveFile(id, podcast, supabase)
     }
   }
 
@@ -187,11 +205,7 @@ export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
       )
 
       // 4. Google Driveファイル作成（バックグラウンド実行）
-      const podcast = podcasts.find((p) => p.id === id)
-      if (podcast && !podcast.google_drive_file_created) {
-        // awaitしない - バックグラウンドで実行
-        createGoogleDriveFile(id, podcast, supabase)
-      }
+      tryCreateGoogleDriveFile(id)
     }
   }
 
