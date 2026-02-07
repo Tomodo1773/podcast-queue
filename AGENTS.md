@@ -130,10 +130,11 @@ Next.js 16 (App Router) + Supabase + shadcn/ui で構成されたPodcast管理We
 
 `podcasts` テーブル:
 
-- `id`, `user_id`, `url`, `title`, `description`, `thumbnail_url`, `platform`, `is_watched`, `is_watching`, `watched_at`, `priority`, `google_drive_file_created`, `show_name`, `tags`, `speakers`, `created_at`, `updated_at`
+- `id`, `user_id`, `url`, `title`, `description`, `thumbnail_url`, `platform`, `is_watched`, `is_watching`, `watched_at`, `priority`, `google_drive_file_created`, `show_name`, `tags`, `speakers`, `gemini_summary`, `created_at`, `updated_at`
 - `show_name`: 番組名またはチャンネル名（YouTubeはチャンネル名、Spotifyは番組名）
 - `tags`: 検索用タグの配列（Gemini APIで自動生成）
 - `speakers`: 出演者名の配列（Gemini APIで自動抽出）
+- `gemini_summary`: YouTube動画の内容要約（Gemini APIで自動生成、YouTubeのみ）
 - Row Level Security有効（ユーザーは自分のデータのみアクセス可能）
 
 ### メタデータ取得
@@ -157,16 +158,18 @@ LINEにURLを送信してポッドキャストを登録可能。`/api/line-webho
 - `google_drive_settings`テーブルで暗号化されたリフレッシュトークン・保存先フォルダIDを管理
 - リフレッシュトークンはAES-256-GCMで暗号化保存（アクセストークンは保存せず毎回リフレッシュ）
 - 暗号化キーは環境変数`ENCRYPTION_KEY`で管理
-- マークダウンファイルはYAMLフロントマター形式（title、platform、source、show_name、tags、speakersフィールド）で開始し、説明、学びセクション（空欄）を含む
+- マークダウンファイルはYAMLフロントマター形式（title、platform、source、show_name、tags、speakersフィールド）で開始し、説明、動画内容（Gemini生成、YouTubeのみ）、学びセクション（空欄）を含む
 - `google_drive_file_created`フラグで重複作成を防止（一度作成したPodcastは再度視聴中にしても作成しない）
 
 ### サンプルポッドキャスト
 
 LINE連携の動作確認用。`/samples/{id}`でOGP対応のデモページを提供。
 
-### AI機能（タグ・出演者名の自動生成）
+### AI機能（タグ・出演者名の自動生成、YouTube動画要約）
 
-Gemini APIを使用してポッドキャストのタイトル・説明から検索用タグと出演者名を自動生成。
+Gemini APIを使用してポッドキャストのメタデータを自動生成。
+
+#### タグ・出演者名の自動生成
 
 - **使用SDK**: Vercel AI SDK (`ai`, `@ai-sdk/google`)
 - **モデル**: `gemini-3-flash-preview`
@@ -175,3 +178,16 @@ Gemini APIを使用してポッドキャストのタイトル・説明から検�
   - **出演者名**: 0〜20個の出演者名（フルネーム、カタカナ名、ハンドルネームなど）
 - **統合呼び出し**: 1回のAPI呼び出しでタグと出演者名を同時に生成
 - **LangSmithトレーシング**: 環境変数で有効化可能（`LANGCHAIN_TRACING_V2=true`、`LANGSMITH_PROJECT`でプロジェクト名を設定）
+
+#### YouTube動画内容の自動要約
+
+- **使用SDK**: Vercel AI SDK (`ai`, `@ai-sdk/google`)
+- **モデル**: `gemini-3-pro-preview`
+- **入力**: YouTube動画URL
+- **生成内容**: セクション別箇条書きで整理された動画内容の詳細要約
+- **実行タイミング**: タグ・出演者名生成と並行実行（Podcast登録時）
+- **対象**: YouTubeプラットフォームのみ
+- **表示場所**:
+  - Podcast詳細ダイアログ（「動画内容（Gemini生成）」セクション）
+  - Google Driveマークダウンファイル（「## 動画内容（Gemini生成）」セクション）
+- **LangSmithトレーシング**: タグ生成と同じ設定を使用

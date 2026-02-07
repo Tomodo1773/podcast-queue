@@ -166,7 +166,7 @@ export function AddPodcastForm({ userId, onSuccess, initialUrl, autoFetch }: Add
         throw insertError
       }
 
-      // タグ生成をバックグラウンドで実行（ユーザーを待たせない）
+      // タグ生成・YouTube要約をバックグラウンドで実行（ユーザーを待たせない）
       if (data?.[0]) {
         fetch("/api/generate-tags", {
           method: "POST",
@@ -175,6 +175,8 @@ export function AddPodcastForm({ userId, onSuccess, initialUrl, autoFetch }: Add
             podcastId: data[0].id,
             title: title || url,
             description: description || "",
+            platform: platform || null,
+            url,
           }),
         }).catch((error) => {
           console.error("Failed to trigger tag generation:", error)

@@ -5,9 +5,15 @@ vi.mock("../generate-metadata", () => ({
   generateMetadata: vi.fn(),
 }))
 
+vi.mock("../generate-youtube-summary", () => ({
+  generateYoutubeSummary: vi.fn(),
+}))
+
 import { generateMetadata } from "../generate-metadata"
+import { generateYoutubeSummary } from "../generate-youtube-summary"
 
 const mockGenerateMetadata = generateMetadata as Mock
+const mockGenerateYoutubeSummary = generateYoutubeSummary as Mock
 
 interface MockSupabaseClient {
   from: Mock
@@ -25,6 +31,7 @@ function createMockSupabase(updateResult: { error: unknown } = { error: null }):
 describe("updatePodcastMetadata", () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mockGenerateYoutubeSummary.mockResolvedValue(null)
   })
 
   it("タグと出演者名を生成してDBを更新する", async () => {
@@ -36,7 +43,7 @@ describe("updatePodcastMetadata", () => {
 
     const result = await updatePodcastMetadata(supabase as never, "podcast-1", "テストタイトル", "テスト説明")
 
-    expect(result).toEqual({ tags: mockTags, speakers: mockSpeakers })
+    expect(result).toEqual({ tags: mockTags, speakers: mockSpeakers, geminiSummary: null })
     expect(mockGenerateMetadata).toHaveBeenCalledWith("テストタイトル", "テスト説明")
     expect(supabase.from).toHaveBeenCalledWith("podcasts")
   })
@@ -48,7 +55,7 @@ describe("updatePodcastMetadata", () => {
 
     const result = await updatePodcastMetadata(supabase as never, "podcast-1", "テストタイトル", "テスト説明")
 
-    expect(result).toEqual({ tags: [], speakers: [] })
+    expect(result).toEqual({ tags: [], speakers: [], geminiSummary: null })
     expect(supabase.from).not.toHaveBeenCalled()
   })
 
@@ -60,5 +67,48 @@ describe("updatePodcastMetadata", () => {
     await expect(
       updatePodcastMetadata(supabase as never, "podcast-1", "テストタイトル", "テスト説明")
     ).rejects.toThrow("Failed to update metadata")
+  })
+
+  it("YouTube動画の場合はYouTube要約も生成する", async () => {
+    const mockTags = ["技術", "AI"]
+    const mockSpeakers = ["佐藤花子"]
+    const mockSummary = "- セクション1\n\t- 内容1\n\t- 内容2"
+    mockGenerateMetadata.mockResolvedValue({ tags: mockTags, speakers: mockSpeakers })
+    mockGenerateYoutubeSummary.mockResolvedValue(mockSummary)
+
+    const supabase = createMockSupabase()
+
+    const result = await updatePodcastMetadata(
+      supabase as never,
+      "podcast-1",
+      "テストタイトル",
+      "テスト説明",
+      "youtube",
+      "https://www.youtube.com/watch?v=test"
+    )
+
+    expect(result).toEqual({ tags: mockTags, speakers: mockSpeakers, geminiSummary: mockSummary })
+    expect(mockGenerateYoutubeSummary).toHaveBeenCalledWith("https://www.youtube.com/watch?v=test")
+    expect(supabase.from).toHaveBeenCalledWith("podcasts")
+  })
+
+  it("YouTube以外のプラットフォームではYouTube要約を生成しない", async () => {
+    const mockTags = ["ビジネス"]
+    const mockSpeakers: string[] = []
+    mockGenerateMetadata.mockResolvedValue({ tags: mockTags, speakers: mockSpeakers })
+
+    const supabase = createMockSupabase()
+
+    const result = await updatePodcastMetadata(
+      supabase as never,
+      "podcast-1",
+      "テストタイトル",
+      "テスト説明",
+      "spotify",
+      "https://open.spotify.com/episode/test"
+    )
+
+    expect(result).toEqual({ tags: mockTags, speakers: mockSpeakers, geminiSummary: null })
+    expect(mockGenerateYoutubeSummary).not.toHaveBeenCalled()
   })
 })

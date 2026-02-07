@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js"
 import { generateMetadata } from "./generate-metadata"
+import { generateYoutubeSummary } from "./generate-youtube-summary"
 
 /**
  * ポッドキャストのタグと出演者名を生成してDBに保存する共通関数
@@ -9,18 +10,30 @@ export async function updatePodcastMetadata(
   supabase: SupabaseClient,
   podcastId: string,
   title: string,
-  description: string
-): Promise<{ tags: string[]; speakers: string[] }> {
+  description: string,
+  platform?: string,
+  url?: string
+): Promise<{ tags: string[]; speakers: string[]; geminiSummary: string | null }> {
   console.log("[updatePodcastMetadata] Starting for podcast:", podcastId)
   console.log("[updatePodcastMetadata] Title:", title)
-  const { tags, speakers } = await generateMetadata(title, description)
+  console.log("[updatePodcastMetadata] Platform:", platform)
+
+  // タグ・出演者生成とYouTube要約生成を並行実行
+  const [metadataResult, youtubeSummary] = await Promise.all([
+    generateMetadata(title, description),
+    platform === "youtube" && url ? generateYoutubeSummary(url) : Promise.resolve(null),
+  ])
+
+  const { tags, speakers } = metadataResult
   console.log("[updatePodcastMetadata] Generated tags:", tags.length)
   console.log("[updatePodcastMetadata] Generated speakers:", speakers.length)
+  console.log("[updatePodcastMetadata] Generated YouTube summary:", youtubeSummary ? "yes" : "no")
   console.log("[updatePodcastMetadata] Podcast ID:", podcastId)
 
   const updateData: Record<string, unknown> = {}
   if (tags.length > 0) updateData.tags = tags
   if (speakers.length > 0) updateData.speakers = speakers
+  if (youtubeSummary) updateData.gemini_summary = youtubeSummary
 
   if (Object.keys(updateData).length > 0) {
     const { error: updateError } = await supabase.from("podcasts").update(updateData).eq("id", podcastId)
@@ -33,10 +46,10 @@ export async function updatePodcastMetadata(
     console.log("[updatePodcastMetadata] DB updated successfully for podcast:", podcastId)
   } else {
     console.warn(
-      "[updatePodcastMetadata] No tags or speakers generated for podcast, skipping DB update. Podcast ID:",
+      "[updatePodcastMetadata] No tags, speakers, or summary generated for podcast, skipping DB update. Podcast ID:",
       podcastId
     )
   }
 
-  return { tags, speakers }
+  return { tags, speakers, geminiSummary: youtubeSummary }
 }

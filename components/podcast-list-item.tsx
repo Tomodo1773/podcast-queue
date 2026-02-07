@@ -41,6 +41,7 @@ type Podcast = {
   show_name: string | null
   tags: string[]
   speakers: string[]
+  gemini_summary: string | null
 }
 
 type PodcastListItemProps = {

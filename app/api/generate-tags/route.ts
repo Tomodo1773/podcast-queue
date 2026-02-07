@@ -19,7 +19,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { podcastId, title, description } = await request.json()
+    const { podcastId, title, description, platform, url } = await request.json()
 
     if (!podcastId || !title) {
       return NextResponse.json({ error: "podcastId and title are required" }, { status: 400 })
@@ -37,9 +37,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Podcast not found or access denied" }, { status: 403 })
     }
 
-    const { tags, speakers } = await updatePodcastMetadata(supabase, podcastId, title, description || "")
+    const { tags, speakers, geminiSummary } = await updatePodcastMetadata(
+      supabase,
+      podcastId,
+      title,
+      description || "",
+      platform,
+      url
+    )
 
-    return NextResponse.json({ success: true, tags, speakers })
+    return NextResponse.json({ success: true, tags, speakers, geminiSummary })
   } catch (error) {
     console.error("Error in generate-metadata API:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })

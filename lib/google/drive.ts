@@ -8,6 +8,7 @@ export interface PodcastData {
   show_name?: string
   tags?: string[]
   speakers?: string[]
+  gemini_summary?: string
 }
 
 export function generateMarkdownContent(podcast: PodcastData): string {
@@ -32,14 +33,26 @@ export function generateMarkdownContent(podcast: PodcastData): string {
 
   frontmatterLines.push("---")
 
-  return `${frontmatterLines.join("\n")}
+  let content = `${frontmatterLines.join("\n")}
 
 ## 説明
 ${podcast.description || "（説明なし）"}
+`
 
+  // YouTube動画の場合はGemini要約を追加
+  if (podcast.platform === "youtube" && podcast.gemini_summary) {
+    content += `
+## 動画内容（Gemini生成）
+${podcast.gemini_summary}
+`
+  }
+
+  content += `
 ## 学び
 （視聴後に記入）
 `
+
+  return content
 }
 
 function sanitizeFilename(title: string): string {
