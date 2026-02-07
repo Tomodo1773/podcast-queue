@@ -5,7 +5,6 @@ import Image from "next/image"
 import { useState } from "react"
 import { PodcastDialog } from "@/components/podcast-dialog"
 import { PodcastEditDialog } from "@/components/podcast-edit-dialog"
-import { PodcastTags } from "@/components/podcast-tags"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -153,9 +152,6 @@ export function PodcastListItem({
               {podcast.show_name && (
                 <p className="text-xs text-muted-foreground mt-0.5">{podcast.show_name}</p>
               )}
-              {podcast.speakers && podcast.speakers.length > 0 && (
-                <p className="text-xs text-muted-foreground mt-0.5">{podcast.speakers.join(", ")}</p>
-              )}
             </div>
             {/* 3-dot menu */}
             <DropdownMenu>
@@ -245,9 +241,6 @@ export function PodcastListItem({
               {podcast.description}
             </p>
           )}
-
-          {/* Tags */}
-          <PodcastTags tags={podcast.tags} maxTags={6} className="mt-2" />
         </div>
       </div>
 
