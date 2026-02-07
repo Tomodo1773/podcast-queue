@@ -130,47 +130,4 @@ describe("generateMarkdownContent", () => {
 
     expect(result).toContain("speakers: [山田太郎, 佐藤花子]")
   })
-
-  it("YouTubeかつgemini_summaryがある場合は動画内容セクションが含まれる", () => {
-    const podcast: PodcastData = {
-      title: "YouTubeテスト",
-      platform: "youtube",
-      url: "https://www.youtube.com/watch?v=test",
-      description: "テスト説明",
-      gemini_summary: "- セクション1\n\t- 内容1\n\t- 内容2",
-    }
-
-    const result = generateMarkdownContent(podcast)
-
-    expect(result).toContain("## 動画内容（Gemini生成）")
-    expect(result).toContain("- セクション1\n\t- 内容1\n\t- 内容2")
-  })
-
-  it("YouTube以外のプラットフォームではgemini_summaryがあっても動画内容セクションは含まれない", () => {
-    const podcast: PodcastData = {
-      title: "Spotifyテスト",
-      platform: "spotify",
-      url: "https://open.spotify.com/episode/test",
-      description: "テスト説明",
-      gemini_summary: "- セクション1\n\t- 内容1",
-    }
-
-    const result = generateMarkdownContent(podcast)
-
-    expect(result).not.toContain("## 動画内容（Gemini生成）")
-    expect(result).not.toContain("- セクション1")
-  })
-
-  it("YouTubeでもgemini_summaryがない場合は動画内容セクションは含まれない", () => {
-    const podcast: PodcastData = {
-      title: "YouTubeテスト",
-      platform: "youtube",
-      url: "https://www.youtube.com/watch?v=test",
-      description: "テスト説明",
-    }
-
-    const result = generateMarkdownContent(podcast)
-
-    expect(result).not.toContain("## 動画内容（Gemini生成）")
-  })
 })

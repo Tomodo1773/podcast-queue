@@ -33,7 +33,11 @@ export async function updatePodcastMetadata(
           hostname === "www.youtu.be"
         )
       } catch {
-        console.warn("[updatePodcastMetadata] Invalid URL for YouTube summary, skipping:", url)
+        // urlはユーザー入力のため、ログインジェクション対策として改行文字を除去
+        console.warn(
+          "[updatePodcastMetadata] Invalid URL for YouTube summary, skipping:",
+          url?.replace(/[\r\n]/g, "")
+        )
         return false
       }
     })()
