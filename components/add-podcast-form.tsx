@@ -175,12 +175,25 @@ export function AddPodcastForm({ userId, onSuccess, initialUrl, autoFetch }: Add
           body: JSON.stringify({
             podcastId: data[0].id,
           }),
-        }).catch((error) => {
-          console.error("Failed to trigger tag generation:", error)
         })
-        toast("AI処理を開始しました", {
-          description: "タグ・出演者・要約の生成をバックグラウンドで実行中です",
-        })
+          .then(async (response) => {
+            if (response.ok) {
+              toast("AI処理を開始しました", {
+                description: "タグ・出演者・要約の生成をバックグラウンドで実行中です",
+              })
+            } else {
+              console.error("Failed to trigger tag generation:", await response.text())
+              toast.error("AI処理の開始に失敗しました", {
+                description: "タグ・出演者・要約の自動生成ができませんでした",
+              })
+            }
+          })
+          .catch((error) => {
+            console.error("Failed to trigger tag generation:", error)
+            toast.error("AI処理の開始に失敗しました", {
+              description: "タグ・出演者・要約の自動生成ができませんでした",
+            })
+          })
       }
 
       console.log("[v0] Podcast追加成功、リダイレクト開始")
