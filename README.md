@@ -136,6 +136,31 @@ pnpm run knip
 pnpm run check
 ```
 
+## ユーティリティスクリプト
+
+### 過去分ポッドキャストへのメタデータ一括付与
+
+既存のポッドキャスト（約100件）にタグ・出演者名・YouTube要約を一括で付与するスクリプトです。
+
+**前提条件:**
+- 環境変数の設定
+  - `NEXT_PUBLIC_SUPABASE_URL`
+  - `SUPABASE_SERVICE_ROLE_KEY` (RLSバイパス用)
+  - `GOOGLE_GENERATIVE_AI_API_KEY` (Gemini API用)
+  - `YOUTUBE_API_KEY` (YouTube要約用、オプション)
+
+**実行方法:**
+
+```bash
+npx tsx scripts/backfill-metadata.ts
+```
+
+**動作:**
+- `tags IS NULL` または `tags = '{}'` のポッドキャストのみを対象
+- 各ポッドキャストに対して `updatePodcastMetadata()` を順次実行
+- 進捗ログと成功/失敗のサマリを出力
+- 途中で止めても再実行可能（処理済みはスキップ）
+
 ## ライセンス
 
 [MIT](LICENSE)
