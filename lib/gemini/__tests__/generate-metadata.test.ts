@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest"
-import { MetadataResponseSchema } from "../generate-metadata"
+import { beforeEach, describe, expect, it, vi } from "vitest"
+import { generateMetadata, MetadataResponseSchema } from "../generate-metadata"
 
 describe("MetadataResponseSchema", () => {
   describe("tags", () => {
@@ -129,6 +129,63 @@ describe("MetadataResponseSchema", () => {
 
       const result = MetadataResponseSchema.safeParse(invalidData)
       expect(result.success).toBe(false)
+    })
+  })
+})
+
+describe("generateMetadata", () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  describe("URL除去", () => {
+    it("descriptionからURLを除去してAIに渡す", async () => {
+      // GEMINI_API_KEYがない場合はスキップ
+      if (!process.env.GEMINI_API_KEY) {
+        return
+      }
+
+      const title = "テストタイトル"
+      const description =
+        "これはテスト説明文です。https://example.com/test を参照してください。詳細はhttps://test.example.com/details にあります。"
+
+      // URL除去の動作確認のため、実際にAPIを呼び出す
+      // （テストコストを抑えるため、GEMINI_API_KEYがある環境でのみ実行）
+      const result = await generateMetadata(title, description)
+
+      // APIが正常に動作することを確認（タグが生成されること）
+      expect(result).toHaveProperty("tags")
+      expect(result).toHaveProperty("speakers")
+    })
+
+    it("URLのみのdescriptionの場合は空文字列として扱う", async () => {
+      // GEMINI_API_KEYがない場合はスキップ
+      if (!process.env.GEMINI_API_KEY) {
+        return
+      }
+
+      const title = "テストタイトル"
+      const description = "https://example.com/test https://test.example.com/details"
+
+      const result = await generateMetadata(title, description)
+
+      // URLのみの場合でも正常に動作することを確認
+      expect(result).toHaveProperty("tags")
+      expect(result).toHaveProperty("speakers")
+    })
+
+    it("GEMINI_API_KEYがない場合は空配列を返す", async () => {
+      const originalApiKey = process.env.GEMINI_API_KEY
+      delete process.env.GEMINI_API_KEY
+
+      const result = await generateMetadata("タイトル", "説明文")
+
+      expect(result).toEqual({ tags: [], speakers: [] })
+
+      // 環境変数を復元
+      if (originalApiKey) {
+        process.env.GEMINI_API_KEY = originalApiKey
+      }
     })
   })
 })

@@ -115,6 +115,16 @@ const { generateObject } =
     : ai
 
 /**
+ * テキストからURLを除去する（AI呼び出し時のコンテキスト削減用）
+ */
+function removeUrls(text: string): string {
+  return text
+    .replace(/https?:\/\/\S+/g, "")
+    .replace(/\s{2,}/g, " ")
+    .trim()
+}
+
+/**
  * Gemini APIを使用してタグと出演者名を生成する
  * @param title ポッドキャストのタイトル
  * @param description ポッドキャストの説明
@@ -128,10 +138,13 @@ export async function generateMetadata(title: string, description: string): Prom
   }
 
   try {
+    // descriptionからURLを除去してコンテキスト削減
+    const sanitizedDescription = removeUrls(description || "")
+
     // プロンプトにタイトルと説明を埋め込む
     const prompt = PROMPT_TEMPLATE.replace("{title}", title).replace(
       "{description}",
-      description || "（説明なし）"
+      sanitizedDescription || "（説明なし）"
     )
 
     // API Keyを使用してGoogleクライアントを作成
