@@ -147,10 +147,10 @@ describe("sanitizeFilename (ファイル名のバイト数制限)", () => {
 
     const encoder = new TextEncoder()
     const titleBytes = encoder.encode(title).length
-    expect(titleBytes).toBeLessThan(242) // 242バイト制限内
+    expect(titleBytes).toBeLessThan(243) // 243バイト制限内
   })
 
-  it("242バイトを超える長いタイトルは切り詰められる", () => {
+  it("243バイトを超える長いタイトルは切り詰められる", () => {
     // issueのエラーケース: 「ドンロー主義」が揺らす世界...（91文字、~265バイト）
     const longTitle =
       '【「ドンロー主義」が揺らす世界】南米工作の狙いは"中国からの奪還"／目指すは「資源＆レアアース確保」／欧州で広がる"アメリカ不信"／同盟なのに独仏では「敵国視」増加／日本が進む道は？【1on1】'
@@ -158,8 +158,8 @@ describe("sanitizeFilename (ファイル名のバイト数制限)", () => {
     const encoder = new TextEncoder()
     const titleBytes = encoder.encode(longTitle).length
 
-    // 元のタイトルは242バイトを超える
-    expect(titleBytes).toBeGreaterThan(242)
+    // 元のタイトルは243バイトを超える
+    expect(titleBytes).toBeGreaterThan(243)
 
     // ファイル名全体（日付プレフィックス + _ + タイトル + .md）が255バイト以内であることを確認
     // 日付プレフィックス: YYYYMMDD (8バイト)
@@ -167,12 +167,11 @@ describe("sanitizeFilename (ファイル名のバイト数制限)", () => {
     // .md: 3バイト
     // 合計固定部分: 12バイト
     // → タイトル部分に使えるのは 255 - 12 = 243バイト
-    // ※実装では242バイトで制限しているため、より安全
-    const maxTitleBytes = 242
+    const maxTitleBytes = 243
 
     // truncateToBytes のロジックを検証
     // 実装上は private なので、直接テストできないが、
-    // 想定される動作として、242バイト以内に切り詰められることを確認
+    // 想定される動作として、243バイト以内に切り詰められることを確認
     const truncated = longTitle.slice(0, 80) // 概算で80文字程度に切り詰め
     const truncatedBytes = encoder.encode(truncated).length
     expect(truncatedBytes).toBeLessThanOrEqual(maxTitleBytes)
@@ -180,18 +179,18 @@ describe("sanitizeFilename (ファイル名のバイト数制限)", () => {
 
   it("マルチバイト文字の途中で切れても文字化けしない", () => {
     // 日本語文字は1文字=3バイト
-    // 242バイトの境界でマルチバイト文字が途切れるケースをシミュレート
-    const title = "あ".repeat(100) // 100文字 = 300バイト（242バイト超過）
+    // 243バイトの境界でマルチバイト文字が途切れるケースをシミュレート
+    const title = "あ".repeat(100) // 100文字 = 300バイト（243バイト超過）
 
     const encoder = new TextEncoder()
     const titleBytes = encoder.encode(title).length
     expect(titleBytes).toBe(300)
 
-    // 実装のtruncateToBytesロジックでは、242バイトで切り詰められ、
+    // 実装のtruncateToBytesロジックでは、243バイトで切り詰められ、
     // 不完全な文字（U+FFFD）が除去される
-    // → 結果は 242 / 3 = 80文字（240バイト）または 81文字（243バイト）になる可能性
-    // いずれにせよ、242バイト以内であることを確認
-    const maxTitleBytes = 242
+    // → 結果は 243 / 3 = 81文字（243バイト）または 80文字（240バイト）になる可能性
+    // いずれにせよ、243バイト以内であることを確認
+    const maxTitleBytes = 243
     const expectedMaxChars = Math.floor(maxTitleBytes / 3)
     expect(expectedMaxChars).toBeLessThanOrEqual(81)
   })

@@ -82,9 +82,9 @@ function sanitizeFilename(title: string): string {
   // ファイル名に使えない文字を置換
   const sanitized = title.replace(/[<>:"/\\|?*]/g, "_")
   // Android FS (ext4) の255バイト制限に対応
-  // ファイル名構造: YYYYMMDD_[title].md (固定13バイト: 8 + 1 + 3 + 1(.))
-  // → タイトル部分に使えるのは 255 - 13 = 242バイト
-  const maxBytes = 242
+  // ファイル名構造: YYYYMMDD_[title].md (固定12バイト: 8 + 1 + 3)
+  // → タイトル部分に使えるのは 255 - 12 = 243バイト
+  const maxBytes = 243
   return truncateToBytes(sanitized, maxBytes)
 }
 
