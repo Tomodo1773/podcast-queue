@@ -1,6 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
-  "entry": ["app/**/*.{ts,tsx}", "lib/**/*.{ts,tsx}", "components/**/*.{ts,tsx}"],
+  "entry": ["app/**/*.{ts,tsx}", "lib/**/*.{ts,tsx}", "components/**/*.{ts,tsx}", "scripts/**/*.{ts,tsx}"],
   "project": ["**/*.{ts,tsx}"],
   "ignore": ["**/*.d.ts", ".next/**", "node_modules/**"],
   "ignoreDependencies": [
@@ -8,7 +8,8 @@
     "postcss-load-config",
     "tailwindcss",
     "tailwindcss-animate",
-    "tw-animate-css"
+    "tw-animate-css",
+    "tsx"
   ],
   "next": {
     "entry": ["app/**/*.{ts,tsx}", "middleware.{ts,tsx}"]
