@@ -7,7 +7,7 @@
  *   1. 環境変数を設定:
  *      - NEXT_PUBLIC_SUPABASE_URL
  *      - SUPABASE_SERVICE_ROLE_KEY（RLSバイパス用）
- *      - GOOGLE_GENERATIVE_AI_API_KEY（Gemini API用）
+ *      - GEMINI_API_KEY（Gemini API用）
  *      - YOUTUBE_API_KEY（YouTube要約用）
  *   2. 実行: npx tsx scripts/backfill-metadata.ts
  *
@@ -29,8 +29,8 @@ if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
   process.exit(1)
 }
 
-if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
-  console.error("❌ GOOGLE_GENERATIVE_AI_API_KEY が設定されていません")
+if (!process.env.GEMINI_API_KEY) {
+  console.error("❌ GEMINI_API_KEY が設定されていません")
   process.exit(1)
 }
 
@@ -38,7 +38,8 @@ async function main() {
   console.log("🚀 メタデータ一括付与スクリプト開始\n")
 
   // サービスロールキーでSupabaseクライアントを初期化（RLSバイパス）
-  const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!)
 
   // 対象ポッドキャストを取得（tags IS NULL OR tags = '{}'）
   console.log("📋 対象ポッドキャストを取得中...")
@@ -80,7 +81,9 @@ async function main() {
         podcast.url || undefined
       )
 
-      console.log(`  ✅ 完了 (タグ: ${tags.length}, 出演者: ${speakers.length}, 要約: ${summary ? "あり" : "なし"})`)
+      console.log(
+        `  ✅ 完了 (タグ: ${tags.length}, 出演者: ${speakers.length}, 要約: ${summary ? "あり" : "なし"})`
+      )
       successCount++
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error)
@@ -97,9 +100,9 @@ async function main() {
   }
 
   // 結果サマリ
-  console.log("=" .repeat(60))
+  console.log("=".repeat(60))
   console.log("📊 処理結果サマリ")
-  console.log("=" .repeat(60))
+  console.log("=".repeat(60))
   console.log(`✅ 成功: ${successCount}件`)
   console.log(`❌ 失敗: ${errorCount}件`)
   console.log(`📋 合計: ${podcasts.length}件\n`)

@@ -146,7 +146,7 @@ pnpm run check
 - 環境変数の設定
   - `NEXT_PUBLIC_SUPABASE_URL`
   - `SUPABASE_SERVICE_ROLE_KEY` (RLSバイパス用)
-  - `GOOGLE_GENERATIVE_AI_API_KEY` (Gemini API用)
+  - `GEMINI_API_KEY` (Gemini API用)
   - `YOUTUBE_API_KEY` (YouTube要約用、オプション)
 
 **実行方法:**
