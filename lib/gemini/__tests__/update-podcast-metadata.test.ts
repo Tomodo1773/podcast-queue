@@ -111,4 +111,24 @@ describe("updatePodcastMetadata", () => {
     expect(result).toEqual({ tags: mockTags, speakers: mockSpeakers, summary: null })
     expect(mockGenerateYoutubeSummary).not.toHaveBeenCalled()
   })
+
+  it("YouTube /live/ URLの場合はYouTube要約を生成しない", async () => {
+    const mockTags = ["技術", "AI"]
+    const mockSpeakers = ["佐藤花子"]
+    mockGenerateMetadata.mockResolvedValue({ tags: mockTags, speakers: mockSpeakers })
+
+    const supabase = createMockSupabase()
+
+    const result = await updatePodcastMetadata(
+      supabase as never,
+      "podcast-1",
+      "テストタイトル",
+      "テスト説明",
+      "youtube",
+      "https://www.youtube.com/live/SO76xQ54Rg8"
+    )
+
+    expect(result).toEqual({ tags: mockTags, speakers: mockSpeakers, summary: null })
+    expect(mockGenerateYoutubeSummary).not.toHaveBeenCalled()
+  })
 })

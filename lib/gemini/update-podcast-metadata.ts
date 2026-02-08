@@ -25,13 +25,24 @@ export async function updatePodcastMetadata(
     (() => {
       if (!url) return false
       try {
-        const hostname = new URL(url).hostname.toLowerCase()
-        return (
+        const parsedUrl = new URL(url)
+        const hostname = parsedUrl.hostname.toLowerCase()
+        const isYouTubeHost =
           hostname === "youtube.com" ||
           hostname === "www.youtube.com" ||
           hostname === "youtu.be" ||
           hostname === "www.youtu.be"
-        )
+
+        // /live/ URLはGemini APIで非対応のためスキップ
+        if (isYouTubeHost && parsedUrl.pathname.startsWith("/live/")) {
+          console.warn(
+            "[updatePodcastMetadata] /live/ URL is not supported for YouTube summary, skipping:",
+            url?.replace(/[\r\n]/g, "")
+          )
+          return false
+        }
+
+        return isYouTubeHost
       } catch {
         // urlはユーザー入力のため、ログインジェクション対策として改行文字を除去
         console.warn(
