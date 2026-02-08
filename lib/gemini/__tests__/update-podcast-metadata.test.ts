@@ -131,4 +131,46 @@ describe("updatePodcastMetadata", () => {
     expect(result).toEqual({ tags: mockTags, speakers: mockSpeakers, summary: null })
     expect(mockGenerateYoutubeSummary).not.toHaveBeenCalled()
   })
+
+  it("YouTubeサブドメイン（m.youtube.com）の場合もYouTube要約を生成する", async () => {
+    const mockTags = ["技術", "AI"]
+    const mockSpeakers = ["佐藤花子"]
+    const mockSummary = "- セクション1\n\t- 内容1\n\t- 内容2"
+    mockGenerateMetadata.mockResolvedValue({ tags: mockTags, speakers: mockSpeakers })
+    mockGenerateYoutubeSummary.mockResolvedValue(mockSummary)
+
+    const supabase = createMockSupabase()
+
+    const result = await updatePodcastMetadata(
+      supabase as never,
+      "podcast-1",
+      "テストタイトル",
+      "テスト説明",
+      "youtube",
+      "https://m.youtube.com/watch?v=test"
+    )
+
+    expect(result).toEqual({ tags: mockTags, speakers: mockSpeakers, summary: mockSummary })
+    expect(mockGenerateYoutubeSummary).toHaveBeenCalledWith("https://m.youtube.com/watch?v=test")
+  })
+
+  it("YouTubeサブドメイン（m.youtube.com）で /live/ URLの場合はYouTube要約を生成しない", async () => {
+    const mockTags = ["技術", "AI"]
+    const mockSpeakers = ["佐藤花子"]
+    mockGenerateMetadata.mockResolvedValue({ tags: mockTags, speakers: mockSpeakers })
+
+    const supabase = createMockSupabase()
+
+    const result = await updatePodcastMetadata(
+      supabase as never,
+      "podcast-1",
+      "テストタイトル",
+      "テスト説明",
+      "youtube",
+      "https://m.youtube.com/live/SO76xQ54Rg8"
+    )
+
+    expect(result).toEqual({ tags: mockTags, speakers: mockSpeakers, summary: null })
+    expect(mockGenerateYoutubeSummary).not.toHaveBeenCalled()
+  })
 })

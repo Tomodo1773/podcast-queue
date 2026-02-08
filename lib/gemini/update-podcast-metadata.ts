@@ -30,8 +30,8 @@ export async function updatePodcastMetadata(
         const isYouTubeHost =
           hostname === "youtube.com" ||
           hostname === "www.youtube.com" ||
-          hostname === "youtu.be" ||
-          hostname === "www.youtu.be"
+          hostname.endsWith(".youtube.com") ||
+          hostname === "youtu.be"
 
         // /live/ URLはGemini APIで非対応のためスキップ
         if (isYouTubeHost && parsedUrl.pathname.startsWith("/live/")) {
