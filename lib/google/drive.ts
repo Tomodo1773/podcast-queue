@@ -66,9 +66,26 @@ ${podcast.summary}
   return content
 }
 
+function truncateToBytes(str: string, maxBytes: number): string {
+  const encoder = new TextEncoder()
+  const encoded = encoder.encode(str)
+  if (encoded.length <= maxBytes) return str
+
+  // バイト数制限でカット（マルチバイト文字の途中で切れないようにデコードで対応）
+  const decoder = new TextDecoder("utf-8", { fatal: false })
+  const truncated = decoder.decode(encoded.slice(0, maxBytes))
+  // デコード時に不完全な文字がある場合、置換文字（U+FFFD）が末尾に含まれるので削除
+  return truncated.replace(/\uFFFD+$/, "")
+}
+
 function sanitizeFilename(title: string): string {
   // ファイル名に使えない文字を置換
-  return title.replace(/[<>:"/\\|?*]/g, "_").slice(0, 100)
+  const sanitized = title.replace(/[<>:"/\\|?*]/g, "_")
+  // Android FS (ext4) の255バイト制限に対応
+  // ファイル名構造: YYYYMMDD_[title].md (固定13バイト: 8 + 1 + 3 + 1(.))
+  // → タイトル部分に使えるのは 255 - 13 = 242バイト
+  const maxBytes = 242
+  return truncateToBytes(sanitized, maxBytes)
 }
 
 export async function createMarkdownFile(
