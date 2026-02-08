@@ -12,11 +12,22 @@ export interface PodcastData {
 }
 
 export function generateMarkdownContent(podcast: PodcastData): string {
+  // 日本時間(JST)で日付を取得
+  const jstDate = new Date()
+    .toLocaleDateString("ja-JP", {
+      timeZone: "Asia/Tokyo",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    })
+    .replace(/\//g, "-")
+
   const frontmatterLines = [
     "---",
     `title: ${podcast.title}`,
     `platform: ${podcast.platform}`,
     `source: ${podcast.url}`,
+    `date: ${jstDate}`,
   ]
 
   if (podcast.show_name) {
@@ -66,7 +77,15 @@ export async function createMarkdownFile(
   podcast: PodcastData
 ): Promise<string> {
   const content = generateMarkdownContent(podcast)
-  const filename = `${sanitizeFilename(podcast.title)}.md`
+  // 日本時間(JST)で日付プレフィックスを生成
+  const jstDate = new Date().toLocaleDateString("ja-JP", {
+    timeZone: "Asia/Tokyo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  })
+  const datePrefix = jstDate.replace(/\//g, "")
+  const filename = `${datePrefix}_${sanitizeFilename(podcast.title)}.md`
 
   // マルチパートリクエストでファイルを作成
   const metadata = {
