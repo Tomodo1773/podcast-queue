@@ -115,9 +115,12 @@ const { generateObject } =
     : ai
 
 /**
- * テキストからURLを除去する（AI呼び出し時のコンテキスト削減用）
+ * テキストからURLを除去し、空白を正規化する（AI呼び出し時のコンテキスト削減用）
+ * - URLパターン（http/https）を削除
+ * - 連続する空白文字（改行含む）を単一スペースに圧縮
+ * - 前後の空白を削除
  */
-function removeUrls(text: string): string {
+export function removeUrls(text: string): string {
   return text
     .replace(/https?:\/\/\S+/g, "")
     .replace(/\s{2,}/g, " ")
