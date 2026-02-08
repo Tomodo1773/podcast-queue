@@ -4,6 +4,7 @@ import { Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import type React from "react"
 import { useEffect, useRef, useState } from "react"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -176,6 +177,9 @@ export function AddPodcastForm({ userId, onSuccess, initialUrl, autoFetch }: Add
           }),
         }).catch((error) => {
           console.error("Failed to trigger tag generation:", error)
+        })
+        toast("AI処理を開始しました", {
+          description: "タグ・出演者・要約の生成をバックグラウンドで実行中です",
         })
       }
 
