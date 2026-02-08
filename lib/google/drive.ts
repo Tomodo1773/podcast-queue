@@ -17,6 +17,7 @@ export function generateMarkdownContent(podcast: PodcastData): string {
     `title: ${podcast.title}`,
     `platform: ${podcast.platform}`,
     `source: ${podcast.url}`,
+    `date: ${new Date().toISOString().split("T")[0]}`,
   ]
 
   if (podcast.show_name) {
@@ -66,7 +67,8 @@ export async function createMarkdownFile(
   podcast: PodcastData
 ): Promise<string> {
   const content = generateMarkdownContent(podcast)
-  const filename = `${sanitizeFilename(podcast.title)}.md`
+  const datePrefix = new Date().toISOString().split("T")[0].replace(/-/g, "")
+  const filename = `${datePrefix}_${sanitizeFilename(podcast.title)}.md`
 
   // マルチパートリクエストでファイルを作成
   const metadata = {

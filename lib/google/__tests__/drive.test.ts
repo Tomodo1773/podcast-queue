@@ -16,6 +16,7 @@ describe("generateMarkdownContent", () => {
     expect(result).toContain(`title: ${podcast.title}`)
     expect(result).toContain(`platform: ${podcast.platform}`)
     expect(result).toContain(`source: ${podcast.url}`)
+    expect(result).toMatch(/date: \d{4}-\d{2}-\d{2}/)
     expect(result).toContain("## 説明")
     expect(result).toContain(podcast.description)
     expect(result).toContain("## 学び")
@@ -50,7 +51,8 @@ describe("generateMarkdownContent", () => {
     expect(lines[1]).toBe(`title: ${podcast.title}`)
     expect(lines[2]).toBe(`platform: ${podcast.platform}`)
     expect(lines[3]).toBe(`source: ${podcast.url}`)
-    expect(lines[4]).toBe("---")
+    expect(lines[4]).toMatch(/^date: \d{4}-\d{2}-\d{2}$/)
+    expect(lines[5]).toBe("---")
   })
 
   it("show_nameがある場合はフロントマターに含まれる", () => {
@@ -98,9 +100,10 @@ describe("generateMarkdownContent", () => {
     expect(lines[1]).toBe("title: テストタイトル")
     expect(lines[2]).toBe("platform: spotify")
     expect(lines[3]).toBe("source: https://example.com/episode")
-    expect(lines[4]).toBe("show_name: テスト番組")
-    expect(lines[5]).toBe("tags: [経済, 金融]")
-    expect(lines[6]).toBe("---")
+    expect(lines[4]).toMatch(/^date: \d{4}-\d{2}-\d{2}$/)
+    expect(lines[5]).toBe("show_name: テスト番組")
+    expect(lines[6]).toBe("tags: [経済, 金融]")
+    expect(lines[7]).toBe("---")
   })
 
   it("tagsが空配列の場合はフロントマターに含まれない", () => {
