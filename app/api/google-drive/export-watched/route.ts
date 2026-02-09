@@ -54,7 +54,7 @@ export async function POST(_request: NextRequest) {
     if (!podcasts || podcasts.length === 0) {
       return NextResponse.json({
         success: true,
-        message: "エクスポート対象のPodcastがありません",
+        message: "すべての視聴済みPodcastはエクスポート済みです",
         stats: { total: 0, success: 0, failed: 0, skipped: 0 },
       })
     }
