@@ -51,7 +51,7 @@ export function generateMarkdownContent(podcast: PodcastData): string {
   // サムネイル画像を埋め込む（存在する場合のみ）
   if (podcast.thumbnail_url) {
     content += `
-![](${podcast.thumbnail_url})
+![${podcast.title}のサムネイル](${podcast.thumbnail_url})
 `
   }
 

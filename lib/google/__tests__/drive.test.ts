@@ -145,9 +145,11 @@ describe("generateMarkdownContent", () => {
 
     const result = generateMarkdownContent(podcast)
 
-    expect(result).toContain("![](https://example.com/thumbnail.jpg)")
+    expect(result).toContain("![テストタイトルのサムネイル](https://example.com/thumbnail.jpg)")
     // フロントマターの直後に画像があることを確認
-    expect(result).toMatch(/---\n\n!\[\]\(https:\/\/example\.com\/thumbnail\.jpg\)\n/)
+    expect(result).toMatch(
+      /---\n\n!\[テストタイトルのサムネイル\]\(https:\/\/example\.com\/thumbnail\.jpg\)\n/
+    )
   })
 
   it("thumbnail_urlがない場合は画像行が含まれない", () => {
