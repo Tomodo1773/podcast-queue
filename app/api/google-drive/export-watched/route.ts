@@ -81,10 +81,14 @@ export async function POST(_request: NextRequest) {
         await createMarkdownFile(accessToken, settings.folder_id, podcastData)
 
         // ファイル作成成功フラグを更新
-        await supabase
+        const { error: updateError } = await supabase
           .from("podcasts")
           .update({ google_drive_file_created: true, updated_at: new Date().toISOString() })
           .eq("id", podcast.id)
+
+        if (updateError) {
+          throw updateError
+        }
 
         successCount++
       } catch (error) {
