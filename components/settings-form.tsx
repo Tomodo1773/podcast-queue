@@ -1,8 +1,9 @@
 "use client"
 
-import { CheckCircle, Loader2, Trash2 } from "lucide-react"
+import { CheckCircle, Download, Loader2, Trash2 } from "lucide-react"
 import { useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -39,6 +40,7 @@ export function SettingsForm({
     type: "success" | "error"
     text: string
   } | null>(null)
+  const [exportLoading, setExportLoading] = useState(false)
 
   // URLパラメータからメッセージを取得
   useEffect(() => {
@@ -170,6 +172,43 @@ export function SettingsForm({
     }
   }
 
+  const handleExportWatched = async () => {
+    setExportLoading(true)
+    toast.success("エクスポートを開始しました", {
+      description: "視聴済みデータをGoogle Driveに出力しています...",
+    })
+
+    try {
+      const response = await fetch("/api/google-drive/export-watched", {
+        method: "POST",
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || "エクスポートに失敗しました")
+      }
+
+      if (data.stats.total === 0) {
+        toast.info(data.message)
+      } else if (data.stats.failed > 0) {
+        toast.warning(data.message, {
+          description: `成功: ${data.stats.success}件、失敗: ${data.stats.failed}件`,
+        })
+      } else {
+        toast.success(data.message, {
+          description: `${data.stats.success}件のファイルを作成しました`,
+        })
+      }
+    } catch (error) {
+      toast.error("エクスポートに失敗しました", {
+        description: error instanceof Error ? error.message : "不明なエラーが発生しました",
+      })
+    } finally {
+      setExportLoading(false)
+    }
+  }
+
   return (
     <div className="space-y-6">
       <Card>
@@ -275,15 +314,36 @@ export function SettingsForm({
                 </p>
               )}
 
-              <div className="flex gap-2">
-                <Button onClick={handleDriveFolderSave} disabled={driveLoading}>
-                  {driveLoading && <Loader2 className="size-4 animate-spin" />}
-                  保存
-                </Button>
-                <Button variant="outline" onClick={handleDriveUnlink} disabled={driveLoading}>
-                  <Trash2 className="size-4" />
-                  連携解除
-                </Button>
+              <div className="flex flex-col gap-4">
+                <div className="flex gap-2">
+                  <Button onClick={handleDriveFolderSave} disabled={driveLoading}>
+                    {driveLoading && <Loader2 className="size-4 animate-spin" />}
+                    保存
+                  </Button>
+                  <Button variant="outline" onClick={handleDriveUnlink} disabled={driveLoading}>
+                    <Trash2 className="size-4" />
+                    連携解除
+                  </Button>
+                </div>
+
+                <div className="border-t pt-4">
+                  <p className="text-sm text-muted-foreground mb-3">
+                    過去の視聴済みデータをGoogle Driveにエクスポートできます。
+                  </p>
+                  <Button
+                    variant="secondary"
+                    onClick={handleExportWatched}
+                    disabled={exportLoading || driveLoading}
+                    className="w-full sm:w-auto"
+                  >
+                    {exportLoading ? (
+                      <Loader2 className="size-4 animate-spin" />
+                    ) : (
+                      <Download className="size-4" />
+                    )}
+                    視聴済みデータをエクスポート
+                  </Button>
+                </div>
               </div>
             </>
           )}

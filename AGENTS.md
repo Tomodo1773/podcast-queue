@@ -19,6 +19,7 @@ PodQueueは、ポッドキャストをプラットフォーム横断で一元管
 - **グリッド/リスト表示切替**: 好みに合わせて表示形式を選択可能
 - **LINE連携**: LINEにURLを送信するだけでポッドキャストを登録可能。登録結果はFlex Messageで通知
 - **Google Drive連携**: ポッドキャストを視聴中に設定した際、Google Driveへマークダウンファイルを自動生成。視聴後の学びを記録するのに活用可能
+- **Google Drive一括エクスポート**: 設定ページから、過去の視聴済みデータを一括でGoogle Driveにエクスポート可能。エクスポート状況はトースト通知で確認可能
 - **サンプルポッドキャスト**: デモ用のサンプルURLを公開しており、LINE連携の動作確認に利用可能
 
 ## サービスレベル
@@ -86,8 +87,11 @@ Next.js 16 (App Router) + Supabase + shadcn/ui で構成されたPodcast管理We
   - `api/line-webhook/` - LINE Messaging API Webhookエンドポイント
   - `api/auth/google/` - Google OAuth認証（認証開始・コールバック）
   - `api/google-drive/` - Google Driveファイル作成API
+    - `api/google-drive/create-file/` - 単一ファイル作成
+    - `api/google-drive/export-watched/` - 視聴済みデータ一括エクスポート
 - `components/` - Reactコンポーネント
   - `ui/` - shadcn/uiベースのUIコンポーネント
+    - `ui/sonner.tsx` - トースト通知コンポーネント（sonnerラッパー）
   - `podcast-list.tsx` - Podcast一覧表示（クライアントコンポーネント）
   - `podcast-card.tsx` - 個別Podcastカード
   - `podcast-list-item.tsx` - Podcastリストアイテム
@@ -120,7 +124,7 @@ Next.js 16 (App Router) + Supabase + shadcn/ui で構成されたPodcast管理We
 ### 技術スタック
 
 - **フロントエンド**: React 19, Next.js 16, Tailwind CSS 4
-- **UI**: shadcn/ui (new-york スタイル), Radix UI, Lucide Icons
+- **UI**: shadcn/ui (new-york スタイル), Radix UI, Lucide Icons, sonner (トースト通知)
 - **バックエンド**: Supabase (認証 + PostgreSQL)
 - **AI**: Vercel AI SDK + Google Gemini (タグ生成、出演者名抽出)
 - **Observability**: LangSmith (オプション、AIトレーシング)
@@ -160,6 +164,7 @@ LINEにURLを送信してポッドキャストを登録可能。`/api/line-webho
 - 暗号化キーは環境変数`ENCRYPTION_KEY`で管理
 - マークダウンファイルはYAMLフロントマター形式（title、platform、source、show_name、tags、speakersフィールド）で開始し、説明、動画内容（Gemini生成、YouTubeのみ）、学びセクション（空欄）を含む
 - `google_drive_file_created`フラグで重複作成を防止（一度作成したPodcastは再度視聴中にしても作成しない）
+- **一括エクスポート機能**: 設定ページから「視聴済みデータをエクスポート」ボタンで、過去の視聴済みPodcastをまとめてGoogle Driveに出力可能。`/api/google-drive/export-watched`エンドポイントで実装され、エクスポート状況はsonnerトースト通知で表示
 
 ### サンプルポッドキャスト
 
