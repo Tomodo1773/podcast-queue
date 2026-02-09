@@ -4,6 +4,7 @@ import { Check, ChevronDown, Copy, Play, Trash2 } from "lucide-react"
 import Image from "next/image"
 import { useEffect, useState } from "react"
 import { PodcastTags } from "@/components/podcast-tags"
+import { SimpleMarkdown } from "@/components/simple-markdown"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -246,10 +247,12 @@ export function PodcastDialog({
           {podcast.platform === "youtube" && podcast.summary && (
             <div className="space-y-2">
               <h3 className="text-sm font-semibold text-muted-foreground">動画内容（Gemini生成）:</h3>
-              <p id="podcast-summary" className="text-sm whitespace-pre-wrap break-all">
-                {displayedSummary}
-                {isLongSummary && !isSummaryExpanded && "..."}
-              </p>
+              <div id="podcast-summary" className="text-sm">
+                <SimpleMarkdown
+                  text={displayedSummary + (isLongSummary && !isSummaryExpanded ? "..." : "")}
+                  className="space-y-2"
+                />
+              </div>
               {isLongSummary && (
                 <button
                   type="button"
