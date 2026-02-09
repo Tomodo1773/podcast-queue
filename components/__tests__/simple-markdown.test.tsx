@@ -119,4 +119,58 @@ describe("SimpleMarkdown", () => {
     const uls = container.querySelectorAll("ul")
     expect(uls).toHaveLength(2)
   })
+
+  it("見出し3（### text）を<h3>タグでレンダリングすること", () => {
+    const { container } = render(<SimpleMarkdown text="### これは見出しです" />)
+    const h3Element = container.querySelector("h3")
+    expect(h3Element).not.toBeNull()
+    expect(h3Element?.textContent).toBe("これは見出しです")
+  })
+
+  it("見出し3内の太字を正しくレンダリングすること", () => {
+    const { container } = render(<SimpleMarkdown text="### **重要な**見出し" />)
+    const h3Element = container.querySelector("h3")
+    const strongElement = h3Element?.querySelector("strong")
+    expect(strongElement).not.toBeNull()
+    expect(strongElement?.textContent).toBe("重要な")
+  })
+
+  it("見出し3と箇条書きを混在して正しくレンダリングすること", () => {
+    const text = `### セクション1
+
+- アイテム1
+- アイテム2
+
+### セクション2
+
+- アイテム3`
+    const { container } = render(<SimpleMarkdown text={text} />)
+    const h3Elements = container.querySelectorAll("h3")
+    expect(h3Elements).toHaveLength(2)
+    expect(h3Elements[0].textContent).toBe("セクション1")
+    expect(h3Elements[1].textContent).toBe("セクション2")
+
+    const uls = container.querySelectorAll("ul")
+    expect(uls).toHaveLength(2)
+  })
+
+  it("Geminiが生成する新しいフォーマット（### 見出し）を正しくレンダリングすること", () => {
+    const text = `### イントロダクション
+
+- ポイント1
+- ポイント2
+
+### メインコンテンツ
+
+- 詳細1
+- 詳細2`
+    const { container } = render(<SimpleMarkdown text={text} />)
+    const h3Elements = container.querySelectorAll("h3")
+    expect(h3Elements).toHaveLength(2)
+    expect(h3Elements[0].textContent).toBe("イントロダクション")
+    expect(h3Elements[1].textContent).toBe("メインコンテンツ")
+
+    const uls = container.querySelectorAll("ul")
+    expect(uls).toHaveLength(2)
+  })
 })

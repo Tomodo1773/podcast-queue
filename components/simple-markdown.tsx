@@ -7,7 +7,7 @@ type SimpleMarkdownProps = {
 
 /**
  * 簡易マークダウンレンダラー
- * 太字（**text**）と箇条書き（- item）のみサポート
+ * 太字（**text**）、見出し（### text）、箇条書き（- item）のみサポート
  */
 export function SimpleMarkdown({ text, className }: SimpleMarkdownProps) {
   const lines = text.split("\n")
@@ -51,7 +51,15 @@ export function SimpleMarkdown({ text, className }: SimpleMarkdownProps) {
   lines.forEach((line, index) => {
     const trimmed = line.trim()
 
-    if (trimmed.startsWith("- ")) {
+    if (trimmed.startsWith("### ")) {
+      flushList()
+      const content = trimmed.slice(4)
+      elements.push(
+        <h3 key={`h3-${index}-${content.substring(0, 10)}`} className="font-bold mt-4 mb-2 break-all">
+          {parseBold(content, index)}
+        </h3>
+      )
+    } else if (trimmed.startsWith("- ")) {
       if (listItems.length === 0) {
         listStartIndex = index
       }
