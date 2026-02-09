@@ -133,6 +133,35 @@ describe("generateMarkdownContent", () => {
 
     expect(result).toContain("speakers: [山田太郎, 佐藤花子]")
   })
+
+  it("thumbnail_urlがある場合はフロントマター直後に画像が埋め込まれる", () => {
+    const podcast: PodcastData = {
+      title: "テストタイトル",
+      platform: "youtube",
+      url: "https://example.com/video",
+      description: "テスト説明",
+      thumbnail_url: "https://example.com/thumbnail.jpg",
+    }
+
+    const result = generateMarkdownContent(podcast)
+
+    expect(result).toContain("![](https://example.com/thumbnail.jpg)")
+    // フロントマターの直後に画像があることを確認
+    expect(result).toMatch(/---\n\n!\[\]\(https:\/\/example\.com\/thumbnail\.jpg\)\n/)
+  })
+
+  it("thumbnail_urlがない場合は画像行が含まれない", () => {
+    const podcast: PodcastData = {
+      title: "テストタイトル",
+      platform: "youtube",
+      url: "https://example.com/video",
+      description: "テスト説明",
+    }
+
+    const result = generateMarkdownContent(podcast)
+
+    expect(result).not.toContain("![](")
+  })
 })
 
 describe("sanitizeFilename (ファイル名のバイト数制限)", () => {

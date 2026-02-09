@@ -9,6 +9,7 @@ export interface PodcastData {
   tags?: string[]
   speakers?: string[]
   summary?: string
+  thumbnail_url?: string
 }
 
 export function generateMarkdownContent(podcast: PodcastData): string {
@@ -45,7 +46,16 @@ export function generateMarkdownContent(podcast: PodcastData): string {
   frontmatterLines.push("---")
 
   let content = `${frontmatterLines.join("\n")}
+`
 
+  // サムネイル画像を埋め込む（存在する場合のみ）
+  if (podcast.thumbnail_url) {
+    content += `
+![](${podcast.thumbnail_url})
+`
+  }
+
+  content += `
 ## 説明
 ${podcast.description || "（説明なし）"}
 `

@@ -227,6 +227,7 @@ export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
           tags: podcast.tags.length > 0 ? podcast.tags : undefined,
           speakers: podcast.speakers.length > 0 ? podcast.speakers : undefined,
           summary: podcast.summary || undefined,
+          thumbnail_url: podcast.thumbnail_url || undefined,
         }),
       })
 
