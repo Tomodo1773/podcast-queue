@@ -16,7 +16,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@ai-sdk/google": "^3.0.21",
+    "@ai-sdk/google": "^3.0.22",
     "@google/genai": "^1.40.0",
     "@radix-ui/react-collapsible": "^1.1.12",
     "@radix-ui/react-dialog": "1.1.15",
@@ -27,7 +27,7 @@
     "@supabase/ssr": "0.8.0",
     "@supabase/supabase-js": "latest",
     "@vercel/analytics": "1.6.1",
-    "ai": "^6.0.73",
+    "ai": "^6.0.77",
     "autoprefixer": "^10.4.24",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -51,8 +51,8 @@
     "@types/node": "^25",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "happy-dom": "^20.5.0",
-    "knip": "^5.83.0",
+    "happy-dom": "^20.5.3",
+    "knip": "^5.83.1",
     "postcss": "^8.5",
     "tailwindcss": "^4.1.18",
     "tsx": "^4.21.0",
