@@ -4,6 +4,7 @@ import {
   extractNewsPicksShowName,
   extractSpotifyId,
   extractYouTubeVideoId,
+  removeNewsPicksShowNamePrefix,
 } from "@/lib/metadata/fetcher"
 
 describe("extractYouTubeVideoId", () => {
@@ -166,6 +167,40 @@ describe("extractNewsPicksShowName", () => {
 
     it("空文字列の場合はnullを返す", () => {
       expect(extractNewsPicksShowName("")).toBeNull()
+    })
+  })
+})
+
+describe("removeNewsPicksShowNamePrefix", () => {
+  describe("番組名プレフィックスを除去できる", () => {
+    it("テックニュース最前線の形式", () => {
+      expect(
+        removeNewsPicksShowNamePrefix(
+          "テックニュース最前線 | 【完全解説】「SaaS全滅」の真相、全部教えます - NewsPicks"
+        )
+      ).toBe("【完全解説】「SaaS全滅」の真相、全部教えます - NewsPicks")
+    })
+
+    it("ビジネスのツボの形式", () => {
+      expect(
+        removeNewsPicksShowNamePrefix("ビジネスのツボ | スタートアップ投資のトレンドを語る - NewsPicks")
+      ).toBe("スタートアップ投資のトレンドを語る - NewsPicks")
+    })
+
+    it("スペースが多い場合も正しく除去", () => {
+      expect(removeNewsPicksShowNamePrefix("架空の番組   |   エピソード名 - NewsPicks")).toBe(
+        "エピソード名 - NewsPicks"
+      )
+    })
+  })
+
+  describe("無効な形式", () => {
+    it("| が含まれないタイトルの場合はそのまま返す", () => {
+      expect(removeNewsPicksShowNamePrefix("タイトルのみ")).toBe("タイトルのみ")
+    })
+
+    it("空文字列の場合はそのまま返す", () => {
+      expect(removeNewsPicksShowNamePrefix("")).toBe("")
     })
   })
 })

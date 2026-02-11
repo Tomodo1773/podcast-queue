@@ -130,6 +130,14 @@ export function extractNewsPicksShowName(title: string): string | null {
 }
 
 /**
+ * NewsPicksのタイトルから番組名プレフィックスを除去する関数
+ * "番組名 | エピソード名 - NewsPicks" → "エピソード名 - NewsPicks"
+ */
+export function removeNewsPicksShowNamePrefix(title: string): string {
+  return title.replace(/^.+?\s*\|\s*/, "")
+}
+
+/**
  * HTMLエンティティをデコードする関数
  * OGPメタタグに含まれる主要なHTMLエンティティ（&quot;、&amp;、&lt;、&gt;、&apos;など）をデコード
  */
@@ -353,7 +361,8 @@ export async function fetchMetadata(url: string): Promise<Metadata> {
     ) {
       const ogpData = await fetchOgpMetadata(url)
       const showName = extractNewsPicksShowName(ogpData.title)
-      return { ...ogpData, showName }
+      const title = removeNewsPicksShowNamePrefix(ogpData.title)
+      return { ...ogpData, title, showName }
     }
   } catch {
     // URLのパースに失敗した場合は無視してOGP取得へ
