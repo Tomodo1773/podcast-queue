@@ -82,6 +82,16 @@ export async function exchangeCodeForTokens(code: string): Promise<GoogleTokenRe
   }
 }
 
+export class TokenRefreshError extends Error {
+  constructor(
+    message: string,
+    public readonly isInvalidGrant: boolean
+  ) {
+    super(message)
+    this.name = "TokenRefreshError"
+  }
+}
+
 export async function refreshAccessToken(
   refreshToken: string
 ): Promise<{ access_token: string; expires_in: number }> {
@@ -113,8 +123,17 @@ export async function refreshAccessToken(
     clearTimeout(timeoutId)
 
     if (!response.ok) {
-      const error = await response.text()
-      throw new Error(`トークン更新に失敗しました: ${error}`)
+      const errorText = await response.text()
+      let errorData: { error?: string } = {}
+      try {
+        errorData = JSON.parse(errorText)
+      } catch {
+        // JSONパースに失敗してもエラーテキストは保持
+      }
+
+      // invalid_grantはリフレッシュトークンが無効（期限切れ、取り消し、無効化）
+      const isInvalidGrant = errorData.error === "invalid_grant"
+      throw new TokenRefreshError(`トークン更新に失敗しました: ${errorText}`, isInvalidGrant)
     }
 
     return response.json()

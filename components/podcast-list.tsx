@@ -1,7 +1,9 @@
 "use client"
 
 import { ArrowUpDown, Grid3x3, List, Loader2 } from "lucide-react"
+import Link from "next/link"
 import { useEffect, useState } from "react"
+import { toast } from "sonner"
 import { PodcastCard } from "@/components/podcast-card"
 import { PodcastListItem } from "@/components/podcast-list-item"
 import { Button } from "@/components/ui/button"
@@ -236,6 +238,22 @@ export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
         await supabase.from("podcasts").update({ google_drive_file_created: true }).eq("id", id)
 
         setPodcasts((prev) => prev.map((p) => (p.id === id ? { ...p, google_drive_file_created: true } : p)))
+      } else {
+        const data = await response.json()
+        // 再認証が必要な場合はトースト通知
+        if (data.code === "REAUTH_REQUIRED") {
+          toast.error("Google Driveの再認証が必要です", {
+            description: (
+              <>
+                設定ページから再度連携してください。
+                <Link href="/settings" className="underline ml-1">
+                  設定ページへ
+                </Link>
+              </>
+            ),
+            duration: 10000,
+          })
+        }
       }
     } catch (err) {
       console.error("Google Driveファイル作成エラー:", err)

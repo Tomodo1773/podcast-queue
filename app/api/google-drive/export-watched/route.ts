@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { decrypt } from "@/lib/crypto"
 import { createMarkdownFile, type PodcastData } from "@/lib/google/drive"
-import { refreshAccessToken } from "@/lib/google/oauth"
+import { refreshAccessToken, TokenRefreshError } from "@/lib/google/oauth"
 import { createClient } from "@/lib/supabase/server"
 
 export async function POST(_request: NextRequest) {
@@ -115,6 +115,15 @@ export async function POST(_request: NextRequest) {
     })
   } catch (error) {
     console.error("エクスポートエラー:", error)
+
+    // TokenRefreshErrorでinvalid_grantの場合は再認証が必要
+    if (error instanceof TokenRefreshError && error.isInvalidGrant) {
+      return NextResponse.json(
+        { error: "Google Driveの再認証が必要です", code: "REAUTH_REQUIRED" },
+        { status: 401 }
+      )
+    }
+
     return NextResponse.json(
       {
         error: "エクスポートに失敗しました",

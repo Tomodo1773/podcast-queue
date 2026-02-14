@@ -186,6 +186,14 @@ export function SettingsForm({
       const data = await response.json()
 
       if (!response.ok) {
+        // 再認証が必要な場合
+        if (data.code === "REAUTH_REQUIRED") {
+          toast.error("Google Driveの再認証が必要です", {
+            description: "設定ページの「Googleでログイン」ボタンから再度連携してください",
+            duration: 10000,
+          })
+          return
+        }
         throw new Error(data.error || "エクスポートに失敗しました")
       }
 
@@ -317,8 +325,11 @@ export function SettingsForm({
               <div className="flex flex-col gap-4">
                 <div className="flex gap-2">
                   <Button onClick={handleDriveFolderSave} disabled={driveLoading}>
-                    {driveLoading && <Loader2 className="size-4 animate-spin" />}
+                    {driveLoading && <Loader2 className="size-4" />}
                     保存
+                  </Button>
+                  <Button variant="secondary" asChild disabled={driveLoading}>
+                    <a href="/api/auth/google">再連携</a>
                   </Button>
                   <Button variant="outline" onClick={handleDriveUnlink} disabled={driveLoading}>
                     <Trash2 className="size-4" />
