@@ -1,23 +1,14 @@
 "use client"
 
-import { ArrowUpDown, Check, Copy, Edit, ExternalLink, MoreVertical, Trash2, X } from "lucide-react"
+import { MoreVertical } from "lucide-react"
 import Image from "next/image"
 import { useState } from "react"
+import { PodcastActionsMenu } from "@/components/podcast-actions-menu"
 import { PodcastDialog } from "@/components/podcast-dialog"
 import { PodcastEditDialog } from "@/components/podcast-edit-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard"
+import { DropdownMenu, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import type { Podcast } from "@/lib/types"
 import {
   getPlatformColor,
@@ -57,7 +48,6 @@ export function PodcastListItem({
 }: PodcastListItemProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-  const { isCopied, copyToClipboard } = useCopyToClipboard()
 
   const handleClick = () => {
     setIsDialogOpen(true)
@@ -68,31 +58,6 @@ export function PodcastListItem({
       event.preventDefault()
       setIsDialogOpen(true)
     }
-  }
-
-  const handleOpenLink = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    // 先に動画を開く
-    window.open(podcast.url, "_blank", "noopener,noreferrer")
-    // バックグラウンドで視聴中処理を実行（awaitしない）
-    onStartWatching(podcast.id)
-  }
-
-  const handleDelete = async () => {
-    const confirmed = window.confirm(
-      "このポッドキャストを削除してもよろしいですか？この操作は取り消せません。"
-    )
-    if (!confirmed) return
-    try {
-      await onDelete(podcast.id)
-    } catch (error) {
-      console.error("ポッドキャストの削除に失敗しました:", error)
-    }
-  }
-
-  const handleCopyLink = () => {
-    copyToClipboard(podcast.url)
   }
 
   return (
@@ -146,65 +111,14 @@ export function PodcastListItem({
                   <span className="sr-only">メニューを開く</span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-                <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>
-                  <Edit className="mr-2 size-4" />
-                  編集
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => onToggleWatched(podcast.id, podcast.is_watched)}>
-                  {podcast.is_watched ? (
-                    <>
-                      <X className="mr-2 size-4" />
-                      未視聴にする
-                    </>
-                  ) : (
-                    <>
-                      <Check className="mr-2 size-4" />
-                      視聴済みにする
-                    </>
-                  )}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleOpenLink}>
-                  <ExternalLink className="mr-2 size-4" />
-                  リンクを開く
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleCopyLink}>
-                  {isCopied ? <Check className="mr-2 size-4" /> : <Copy className="mr-2 size-4" />}
-                  リンクをコピー
-                </DropdownMenuItem>
-                <DropdownMenuSub>
-                  <DropdownMenuSubTrigger>
-                    <ArrowUpDown className="mr-2 size-4" />
-                    優先度を変更
-                  </DropdownMenuSubTrigger>
-                  <DropdownMenuSubContent>
-                    <DropdownMenuItem
-                      onClick={() => onChangePriority(podcast.id, "high")}
-                      disabled={podcast.priority === "high"}
-                    >
-                      {getPriorityLabel("high")}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => onChangePriority(podcast.id, "medium")}
-                      disabled={podcast.priority === "medium"}
-                    >
-                      {getPriorityLabel("medium")}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => onChangePriority(podcast.id, "low")}
-                      disabled={podcast.priority === "low"}
-                    >
-                      {getPriorityLabel("low")}
-                    </DropdownMenuItem>
-                  </DropdownMenuSubContent>
-                </DropdownMenuSub>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleDelete} className="text-destructive focus:text-destructive">
-                  <Trash2 className="mr-2 size-4" />
-                  削除
-                </DropdownMenuItem>
-              </DropdownMenuContent>
+              <PodcastActionsMenu
+                podcast={podcast}
+                onToggleWatched={onToggleWatched}
+                onDelete={onDelete}
+                onChangePriority={onChangePriority}
+                onStartWatching={onStartWatching}
+                onEditClick={() => setIsEditDialogOpen(true)}
+              />
             </DropdownMenu>
           </div>
 
