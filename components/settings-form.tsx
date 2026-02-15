@@ -1,9 +1,10 @@
 "use client"
 
-import { CheckCircle, Download, Loader2, Trash2 } from "lucide-react"
+import { AlertCircle, CheckCircle, Download, Loader2, Trash2 } from "lucide-react"
 import { useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -41,17 +42,23 @@ export function SettingsForm({
     text: string
   } | null>(null)
   const [exportLoading, setExportLoading] = useState(false)
+  const [showReauthAlert, setShowReauthAlert] = useState(false)
 
   // URLパラメータからメッセージを取得
   useEffect(() => {
     const success = searchParams.get("success")
     const error = searchParams.get("error")
+    const reauth = searchParams.get("reauth")
     if (success) {
       setDriveMessage({ type: "success", text: success })
       setIsDriveConnected(true)
+      setShowReauthAlert(false)
     }
     if (error) {
       setDriveMessage({ type: "error", text: error })
+    }
+    if (reauth === "required") {
+      setShowReauthAlert(true)
     }
   }, [searchParams])
 
@@ -188,8 +195,9 @@ export function SettingsForm({
       if (!response.ok) {
         // 再認証が必要な場合
         if (data.code === "REAUTH_REQUIRED") {
+          setShowReauthAlert(true)
           toast.error("Google Driveの再認証が必要です", {
-            description: "設定ページの「Googleでログイン」ボタンから再度連携してください",
+            description: "下の「再連携」ボタンから再度連携してください",
             duration: 10000,
           })
           return
@@ -301,6 +309,15 @@ export function SettingsForm({
             </Button>
           ) : (
             <>
+              {showReauthAlert && (
+                <Alert variant="destructive">
+                  <AlertCircle className="size-4" />
+                  <AlertDescription>
+                    Google Driveの認証が期限切れです。下の「再連携」ボタンから再度連携してください。
+                  </AlertDescription>
+                </Alert>
+              )}
+
               <div className="space-y-2">
                 <Label htmlFor="driveFolderId">保存先フォルダID</Label>
                 <Input
@@ -325,7 +342,7 @@ export function SettingsForm({
               <div className="flex flex-col gap-4">
                 <div className="flex gap-2">
                   <Button onClick={handleDriveFolderSave} disabled={driveLoading}>
-                    {driveLoading && <Loader2 className="size-4" />}
+                    {driveLoading && <Loader2 className="size-4 animate-spin" />}
                     保存
                   </Button>
                   <Button variant="secondary" asChild disabled={driveLoading}>

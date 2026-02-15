@@ -67,6 +67,7 @@ describe("refreshAccessToken", () => {
 
     try {
       await refreshAccessToken("test-refresh-token")
+      expect.fail("例外がスローされるべきでした")
     } catch (error) {
       expect(error).toBeInstanceOf(TokenRefreshError)
       expect((error as TokenRefreshError).isInvalidGrant).toBe(false)

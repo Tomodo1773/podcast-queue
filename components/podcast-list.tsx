@@ -246,7 +246,7 @@ export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
             description: (
               <>
                 設定ページから再度連携してください。
-                <Link href="/settings" className="underline ml-1">
+                <Link href="/settings?reauth=required" className="underline ml-1">
                   設定ページへ
                 </Link>
               </>
