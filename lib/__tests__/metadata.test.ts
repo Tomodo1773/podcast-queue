@@ -4,6 +4,7 @@ import {
   extractNewsPicksShowName,
   extractSpotifyId,
   extractYouTubeVideoId,
+  isNewsPicksUrl,
   removeNewsPicksShowNamePrefix,
 } from "@/lib/metadata/fetcher"
 
@@ -326,22 +327,7 @@ describe("decodeHtmlEntities", () => {
   })
 })
 
-describe("NewsPicksのURL検証", () => {
-  // fetchMetadata関数のURL検証ロジックのテスト
-  // 実際のfetchMetadataはモックが必要なため、ここでは検証ロジックを個別に確認
-  const isNewsPicksUrl = (url: string): boolean => {
-    try {
-      const urlObj = new URL(url)
-      return (
-        urlObj.hostname === "newspicks.com" ||
-        urlObj.hostname.endsWith(".newspicks.com") ||
-        urlObj.hostname === "npx.me"
-      )
-    } catch {
-      return false
-    }
-  }
-
+describe("isNewsPicksUrl", () => {
   describe("正規のNewsPicksドメイン", () => {
     it("newspicks.comを正しく検出", () => {
       expect(isNewsPicksUrl("https://newspicks.com/news/123")).toBe(true)
