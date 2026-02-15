@@ -25,7 +25,7 @@ export default async function SettingsPage() {
   // Google Drive連携情報を取得
   const { data: driveSettings } = await supabase
     .from("google_drive_settings")
-    .select("folder_id, auth_error")
+    .select("folder_id, encrypted_refresh_token")
     .eq("user_id", user.id)
     .single()
 
@@ -49,8 +49,8 @@ export default async function SettingsPage() {
           userId={user.id}
           initialLineUserId={lineLink?.line_user_id || ""}
           initialDriveFolderId={driveSettings?.folder_id || ""}
-          isDriveLinked={!!driveSettings}
-          hasAuthError={driveSettings?.auth_error || false}
+          isDriveLinked={!!driveSettings?.encrypted_refresh_token}
+          hasAuthError={!!driveSettings && !driveSettings.encrypted_refresh_token}
         />
       </main>
     </div>
