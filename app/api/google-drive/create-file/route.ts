@@ -48,6 +48,9 @@ export async function POST(request: NextRequest) {
 
     // TokenRefreshErrorでinvalid_grantの場合は再認証が必要
     if (error instanceof TokenRefreshError && error.isInvalidGrant) {
+      // DBにauth_errorフラグを立てる
+      await supabase.from("google_drive_settings").update({ auth_error: true }).eq("user_id", user.id)
+
       return NextResponse.json(
         { error: "Google Driveの再認証が必要です", code: "REAUTH_REQUIRED" },
         { status: 401 }

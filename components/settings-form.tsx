@@ -16,6 +16,7 @@ type SettingsFormProps = {
   initialLineUserId: string
   initialDriveFolderId: string
   isDriveLinked: boolean
+  hasAuthError: boolean
 }
 
 export function SettingsForm({
@@ -23,6 +24,7 @@ export function SettingsForm({
   initialLineUserId,
   initialDriveFolderId,
   isDriveLinked,
+  hasAuthError,
 }: SettingsFormProps) {
   const searchParams = useSearchParams()
   const [lineUserId, setLineUserId] = useState(initialLineUserId)
@@ -42,7 +44,7 @@ export function SettingsForm({
     text: string
   } | null>(null)
   const [exportLoading, setExportLoading] = useState(false)
-  const [showReauthAlert, setShowReauthAlert] = useState(false)
+  const [showReauthAlert, setShowReauthAlert] = useState(hasAuthError)
 
   // URLパラメータからメッセージを取得
   useEffect(() => {

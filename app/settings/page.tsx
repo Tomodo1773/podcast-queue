@@ -25,7 +25,7 @@ export default async function SettingsPage() {
   // Google Drive連携情報を取得
   const { data: driveSettings } = await supabase
     .from("google_drive_settings")
-    .select("folder_id")
+    .select("folder_id, auth_error")
     .eq("user_id", user.id)
     .single()
 
@@ -50,6 +50,7 @@ export default async function SettingsPage() {
           initialLineUserId={lineLink?.line_user_id || ""}
           initialDriveFolderId={driveSettings?.folder_id || ""}
           isDriveLinked={!!driveSettings}
+          hasAuthError={driveSettings?.auth_error || false}
         />
       </main>
     </div>

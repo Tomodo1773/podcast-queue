@@ -56,11 +56,13 @@ export async function GET(request: NextRequest) {
     const encryptedRefreshToken = encrypt(tokens.refresh_token)
 
     // 既存の設定があれば更新、なければ挿入
+    // auth_errorフラグを必ずfalseにリセット（再認証成功）
     const { error: upsertError } = await supabase.from("google_drive_settings").upsert(
       {
         user_id: user.id,
         encrypted_refresh_token: encryptedRefreshToken,
         folder_id: null,
+        auth_error: false,
         updated_at: new Date().toISOString(),
       },
       { onConflict: "user_id" }
