@@ -55,12 +55,28 @@ export async function GET(request: NextRequest) {
     // リフレッシュトークンを暗号化
     const encryptedRefreshToken = encrypt(tokens.refresh_token)
 
+    // 既存の設定を取得してフォルダIDを保持
+    const { data: existingSettings, error: existingSettingsError } = await supabase
+      .from("google_drive_settings")
+      .select("folder_id")
+      .eq("user_id", user.id)
+      .single()
+
+    // PGRST116（レコードが見つからない）は正常ケースとして扱い、
+    // それ以外のエラーはユーザーにエラーメッセージを表示してリダイレクトする
+    if (existingSettingsError && existingSettingsError.code !== "PGRST116") {
+      console.error("Google Drive既存設定の取得に失敗:", existingSettingsError)
+      return NextResponse.redirect(
+        new URL(`/settings?error=${encodeURIComponent("設定の取得に失敗しました")}`, baseUrl)
+      )
+    }
+
     // 既存の設定があれば更新、なければ挿入
     const { error: upsertError } = await supabase.from("google_drive_settings").upsert(
       {
         user_id: user.id,
         encrypted_refresh_token: encryptedRefreshToken,
-        folder_id: null,
+        folder_id: existingSettings?.folder_id || null,
         updated_at: new Date().toISOString(),
       },
       { onConflict: "user_id" }
