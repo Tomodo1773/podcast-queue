@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { decrypt } from "@/lib/crypto"
 import { createMarkdownFile, type PodcastData } from "@/lib/google/drive"
-import { refreshAccessToken } from "@/lib/google/oauth"
+import { refreshAccessToken, TokenRefreshError } from "@/lib/google/oauth"
 import { createClient } from "@/lib/supabase/server"
 
 export async function POST(request: NextRequest) {
@@ -45,6 +45,21 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, fileId })
   } catch (error) {
     console.error("Google Driveファイル作成エラー:", error)
+
+    // TokenRefreshErrorでinvalid_grantの場合は再認証が必要
+    if (error instanceof TokenRefreshError && error.isInvalidGrant) {
+      // リフレッシュトークンを空にする（無効なトークンをDBに残さない）
+      await supabase
+        .from("google_drive_settings")
+        .update({ encrypted_refresh_token: "", updated_at: new Date().toISOString() })
+        .eq("user_id", user.id)
+
+      return NextResponse.json(
+        { error: "Google Driveの再認証が必要です", code: "REAUTH_REQUIRED" },
+        { status: 401 }
+      )
+    }
+
     return NextResponse.json({ error: "ファイル作成に失敗しました" }, { status: 500 })
   }
 }
