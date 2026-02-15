@@ -356,11 +356,7 @@ export function SettingsForm({
                   >
                     再連携
                   </Button>
-                  <Button
-                    variant="outline"
-                    onClick={handleDriveUnlink}
-                    disabled={driveLoading || showReauthAlert}
-                  >
+                  <Button variant="outline" onClick={handleDriveUnlink} disabled={driveLoading}>
                     <Trash2 className="size-4" />
                     連携解除
                   </Button>

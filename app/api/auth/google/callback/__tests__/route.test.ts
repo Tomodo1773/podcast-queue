@@ -201,4 +201,54 @@ describe("GET /api/auth/google/callback", () => {
       { onConflict: "user_id" }
     )
   })
+
+  it("既存設定取得時のデータベースエラー（PGRST116以外）で適切にエラーハンドリングすること", async () => {
+    const request = new NextRequest(
+      "http://localhost:3000/api/auth/google/callback?code=test_code&state=valid_state"
+    )
+    mockSupabase.auth.getUser.mockResolvedValue({ data: { user: { id: "user-1" } } })
+    mockCookieStore.get.mockReturnValue({ value: "valid_state" })
+    vi.mocked(oauth.exchangeCodeForTokens).mockResolvedValue({
+      access_token: "access-token",
+      refresh_token: "refresh-token",
+      expires_in: 3600,
+      scope: "scope",
+      token_type: "Bearer",
+    })
+    vi.mocked(crypto.encrypt).mockReturnValue("encrypted-refresh-token")
+
+    const mockSelect = vi.fn().mockReturnThis()
+    const mockEq = vi.fn().mockReturnThis()
+    const mockSingle = vi.fn().mockResolvedValue({
+      data: null,
+      error: { code: "PGRST500", message: "Database connection error" }, // DBエラー
+    })
+
+    mockSupabase.from.mockImplementation((table: string) => {
+      if (table === "google_drive_settings") {
+        return {
+          select: mockSelect,
+          eq: mockEq,
+          single: mockSingle,
+        }
+      }
+      return {}
+    })
+
+    mockSelect.mockReturnValue({
+      eq: mockEq,
+      single: mockSingle,
+    })
+    mockEq.mockReturnValue({
+      single: mockSingle,
+    })
+
+    const response = await GET(request)
+
+    expect(response.status).toBe(307)
+    expect(response.headers.get("location")).toContain(
+      "/settings?error=" + encodeURIComponent("設定の取得に失敗しました")
+    )
+    expect(mockCookieStore.delete).toHaveBeenCalledWith("oauth_state")
+  })
 })
