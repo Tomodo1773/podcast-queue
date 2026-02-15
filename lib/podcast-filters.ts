@@ -1,23 +1,7 @@
-import { getPriorityOrder, type Platform, type Priority } from "@/lib/utils"
+import { getPriorityOrder, type Priority } from "@/lib/utils"
+import type { Podcast } from "@/lib/types"
 
-export type Podcast = {
-  id: string
-  url: string
-  title: string | null
-  description: string | null
-  thumbnail_url: string | null
-  platform: Platform | null
-  priority: Priority
-  is_watched: boolean
-  is_watching: boolean
-  watched_at: string | null
-  created_at: string
-  google_drive_file_created: boolean
-  show_name: string | null
-  tags: string[]
-  speakers: string[]
-  summary: string | null
-}
+export type { Podcast } from "@/lib/types"
 
 export type WatchFilter = "all" | "watched" | "unwatched"
 export type PriorityFilter = Priority | "all"

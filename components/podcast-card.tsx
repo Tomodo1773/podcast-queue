@@ -19,6 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard"
+import type { Podcast } from "@/lib/types"
 import {
   getPlatformColor,
   getPlatformLabel,
@@ -27,23 +28,6 @@ import {
   type Platform,
   type Priority,
 } from "@/lib/utils"
-
-type Podcast = {
-  id: string
-  url: string
-  title: string | null
-  description: string | null
-  thumbnail_url: string | null
-  platform: Platform | null
-  priority: Priority
-  is_watched: boolean
-  is_watching: boolean
-  watched_at: string | null
-  show_name: string | null
-  tags: string[]
-  speakers: string[]
-  summary: string | null
-}
 
 type PodcastCardProps = {
   podcast: Podcast
