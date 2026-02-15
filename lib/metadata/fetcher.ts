@@ -11,6 +11,19 @@ export interface Metadata {
 }
 
 /**
+ * ログ出力用に文字列をサニタイズする関数
+ * Log injection対策として改行文字などの制御文字を除去
+ */
+function sanitizeForLog(value: unknown): string {
+  if (value === null || value === undefined) {
+    return String(value)
+  }
+  // 改行文字とその他の制御文字を除去
+  // biome-ignore lint/suspicious/noControlCharactersInRegex: Log injection対策のため制御文字を除去する必要がある
+  return String(value).replace(/[\r\n\t\x00-\x1F\x7F]/g, "")
+}
+
+/**
  * YouTube動画IDを抽出する関数
  * 対応形式: youtube.com/watch?v=xxx, youtu.be/xxx, youtube.com/shorts/xxx, youtube.com/live/xxx
  */
@@ -151,7 +164,7 @@ async function fetchYouTubeVideoInfo(videoId: string): Promise<{
 
     const data = await response.json()
     if (!data.items || data.items.length === 0) {
-      console.error("YouTube video not found:", videoId)
+      console.error("YouTube video not found:", sanitizeForLog(videoId))
       return null
     }
 
@@ -167,7 +180,7 @@ async function fetchYouTubeVideoInfo(videoId: string): Promise<{
       channelTitle: snippet.channelTitle || null,
     }
   } catch (error) {
-    console.error("YouTube Data API fetch error:", error)
+    console.error("YouTube Data API fetch error:", sanitizeForLog(error))
     return null
   }
 }
@@ -317,7 +330,7 @@ async function fetchYoutubeMetadata(videoId: string): Promise<Metadata> {
       }
     }
   } catch (error) {
-    console.error("YouTube oEmbed API error:", error)
+    console.error("YouTube oEmbed API error:", sanitizeForLog(error))
   }
 
   // フォールバック: サムネイルURLを直接構築
@@ -360,7 +373,7 @@ async function fetchSpotifyMetadata(url: string, type: "episode" | "show", id: s
       }
     }
   } catch (error) {
-    console.error("Spotify oEmbed API error:", error)
+    console.error("Spotify oEmbed API error:", sanitizeForLog(error))
   }
 
   return { title: "", description: "", image: "", showName: null }
