@@ -57,6 +57,7 @@ jobs:
               "language": "Japanese",
               "permissions": {
                 "allow": [
+                  "Bash(pnpm run test:*)",
                   "Bash(pnpm run lint)",
                   "Bash(pnpm run format)",
                   "Bash(pnpm run dev)",
