@@ -89,3 +89,11 @@ export function getPlatformLabel(platform: Platform | null): string {
   const option = PLATFORM_OPTIONS.find((opt) => opt.value === platform)
   return option ? option.label : "その他"
 }
+
+/**
+ * ログインジェクション対策として改行文字を除去する
+ */
+export function sanitizeForLog(text: string | undefined | null): string {
+  if (!text) return ""
+  return text.replace(/[\r\n]/g, "")
+}
