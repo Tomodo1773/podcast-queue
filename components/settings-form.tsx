@@ -343,14 +343,24 @@ export function SettingsForm({
 
               <div className="flex flex-col gap-4">
                 <div className="flex gap-2">
-                  <Button onClick={handleDriveFolderSave} disabled={driveLoading}>
+                  <Button onClick={handleDriveFolderSave} disabled={driveLoading || showReauthAlert}>
                     {driveLoading && <Loader2 className="size-4 animate-spin" />}
                     保存
                   </Button>
-                  <Button variant="secondary" asChild disabled={driveLoading}>
-                    <a href="/api/auth/google">再連携</a>
+                  <Button
+                    variant={showReauthAlert ? "default" : "secondary"}
+                    onClick={() => {
+                      window.location.href = "/api/auth/google"
+                    }}
+                    disabled={driveLoading}
+                  >
+                    再連携
                   </Button>
-                  <Button variant="outline" onClick={handleDriveUnlink} disabled={driveLoading}>
+                  <Button
+                    variant="outline"
+                    onClick={handleDriveUnlink}
+                    disabled={driveLoading || showReauthAlert}
+                  >
                     <Trash2 className="size-4" />
                     連携解除
                   </Button>
@@ -363,7 +373,7 @@ export function SettingsForm({
                   <Button
                     variant="secondary"
                     onClick={handleExportWatched}
-                    disabled={exportLoading || driveLoading}
+                    disabled={exportLoading || driveLoading || showReauthAlert}
                     className="w-full sm:w-auto"
                   >
                     {exportLoading ? (
