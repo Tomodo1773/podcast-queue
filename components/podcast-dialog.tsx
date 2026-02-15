@@ -21,7 +21,6 @@ import {
   getPlatformLabel,
   getPriorityColor,
   getPriorityLabel,
-  type Platform,
   type Priority,
 } from "@/lib/utils"
 

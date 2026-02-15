@@ -9,12 +9,12 @@ import { PodcastListItem } from "@/components/podcast-list-item"
 import { Button } from "@/components/ui/button"
 import {
   applyFilterAndSort,
-  type Podcast,
   type PriorityFilter,
   type SortOption,
   type WatchFilter,
 } from "@/lib/podcast-filters"
 import { createClient } from "@/lib/supabase/client"
+import type { Podcast } from "@/lib/types"
 import { getPriorityLabel, type Platform, type Priority } from "@/lib/utils"
 
 type PodcastListProps = {

@@ -1,7 +1,5 @@
-import { getPriorityOrder, type Priority } from "@/lib/utils"
 import type { Podcast } from "@/lib/types"
-
-export type { Podcast } from "@/lib/types"
+import { getPriorityOrder, type Priority } from "@/lib/utils"
 
 export type WatchFilter = "all" | "watched" | "unwatched"
 export type PriorityFilter = Priority | "all"
