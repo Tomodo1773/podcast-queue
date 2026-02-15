@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js"
+import { sanitizeForLog } from "@/lib/utils"
 import { generateMetadata } from "./generate-metadata"
 import { generateYoutubeSummary } from "./generate-youtube-summary"
 
@@ -16,8 +17,7 @@ export async function updatePodcastMetadata(
 ): Promise<{ tags: string[]; speakers: string[]; summary: string | null }> {
   console.log("[updatePodcastMetadata] Starting for podcast:", podcastId)
   console.log("[updatePodcastMetadata] Title:", title)
-  // platformはユーザー入力のため、ログインジェクション対策として改行文字を除去
-  console.log("[updatePodcastMetadata] Platform:", platform?.replace(/[\r\n]/g, ""))
+  console.log("[updatePodcastMetadata] Platform:", sanitizeForLog(platform))
 
   // YouTube 要約生成を行うかどうかの判定（URL のホスト名が YouTube か検証）
   const shouldGenerateYoutubeSummary =
@@ -37,17 +37,16 @@ export async function updatePodcastMetadata(
         if (isYouTubeHost && parsedUrl.pathname.startsWith("/live/")) {
           console.warn(
             "[updatePodcastMetadata] /live/ URL is not supported for YouTube summary, skipping:",
-            url?.replace(/[\r\n]/g, "")
+            sanitizeForLog(url)
           )
           return false
         }
 
         return isYouTubeHost
       } catch {
-        // urlはユーザー入力のため、ログインジェクション対策として改行文字を除去
         console.warn(
           "[updatePodcastMetadata] Invalid URL for YouTube summary, skipping:",
-          url?.replace(/[\r\n]/g, "")
+          sanitizeForLog(url)
         )
         return false
       }
@@ -63,8 +62,7 @@ export async function updatePodcastMetadata(
   console.log("[updatePodcastMetadata] Generated tags:", tags.length)
   console.log("[updatePodcastMetadata] Generated speakers:", speakers.length)
   console.log("[updatePodcastMetadata] Generated YouTube summary:", youtubeSummary ? "yes" : "no")
-  // podcastIdはユーザー入力のため、ログインジェクション対策として改行文字を除去
-  console.log("[updatePodcastMetadata] Podcast ID:", podcastId.replace(/[\r\n]/g, ""))
+  console.log("[updatePodcastMetadata] Podcast ID:", sanitizeForLog(podcastId))
 
   const updateData: Record<string, unknown> = {}
   if (tags.length > 0) updateData.tags = tags
@@ -76,23 +74,17 @@ export async function updatePodcastMetadata(
 
     if (updateError) {
       // podcastIdはユーザー入力のため、ログインジェクション対策として改行文字を除去
-      console.error(
-        "[updatePodcastMetadata] Failed to update DB for podcast:",
-        podcastId.replace(/[\r\n]/g, "")
-      )
+      console.error("[updatePodcastMetadata] Failed to update DB for podcast:", sanitizeForLog(podcastId))
       console.error("[updatePodcastMetadata] Error:", updateError)
       throw new Error("Failed to update metadata")
     }
     // podcastIdはユーザー入力のため、ログインジェクション対策として改行文字を除去
-    console.log(
-      "[updatePodcastMetadata] DB updated successfully for podcast:",
-      podcastId.replace(/[\r\n]/g, "")
-    )
+    console.log("[updatePodcastMetadata] DB updated successfully for podcast:", sanitizeForLog(podcastId))
   } else {
     // podcastIdはユーザー入力のため、ログインジェクション対策として改行文字を除去
     console.warn(
       "[updatePodcastMetadata] No tags, speakers, or summary generated for podcast, skipping DB update. Podcast ID:",
-      podcastId.replace(/[\r\n]/g, "")
+      sanitizeForLog(podcastId)
     )
   }
 

@@ -6,6 +6,7 @@ import {
   getPriorityOrder,
   type Platform,
   type Priority,
+  sanitizeForLog,
 } from "@/lib/utils"
 
 describe("detectPlatform", () => {
@@ -96,5 +97,29 @@ describe("getPriorityOrder", () => {
 
   it.each(testCases)("$priority のソート順は $expected を返す", ({ priority, expected }) => {
     expect(getPriorityOrder(priority)).toBe(expected)
+  })
+})
+
+describe("sanitizeForLog", () => {
+  it("改行文字を除去できる", () => {
+    expect(sanitizeForLog("hello\nworld")).toBe("helloworld")
+    expect(sanitizeForLog("hello\rworld")).toBe("helloworld")
+    expect(sanitizeForLog("hello\r\nworld")).toBe("helloworld")
+  })
+
+  it("改行文字がない文字列はそのまま返す", () => {
+    expect(sanitizeForLog("hello world")).toBe("hello world")
+  })
+
+  it("undefinedは空文字列を返す", () => {
+    expect(sanitizeForLog(undefined)).toBe("")
+  })
+
+  it("nullは空文字列を返す", () => {
+    expect(sanitizeForLog(null)).toBe("")
+  })
+
+  it("空文字列は空文字列を返す", () => {
+    expect(sanitizeForLog("")).toBe("")
   })
 })
