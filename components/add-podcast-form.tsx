@@ -33,55 +33,7 @@ export function AddPodcastForm({ userId, onSuccess, initialUrl, autoFetch }: Add
   const router = useRouter()
   const hasAutoFetched = useRef(false)
 
-  // URL共有連携: 初期URLが設定されている場合、プラットフォームを検出
-  // autoFetch=true の場合は自動的にメタデータを取得
-  useEffect(() => {
-    if (initialUrl) {
-      setPlatform(detectPlatform(initialUrl))
-
-      // 自動メタデータ取得（一度だけ実行）
-      if (autoFetch && !hasAutoFetched.current) {
-        hasAutoFetched.current = true
-        // フォームがマウントされた後に実行するため、少し遅延
-        const fetchMetadata = async () => {
-          setIsFetchingMetadata(true)
-          setError(null)
-
-          try {
-            const response = await fetch("/api/fetch-metadata", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ url: initialUrl }),
-            })
-
-            if (!response.ok) {
-              throw new Error("メタデータの取得に失敗しました")
-            }
-
-            const data = await response.json()
-
-            if (data.title) setTitle(data.title)
-            if (data.description) setDescription(data.description)
-            if (data.image) setThumbnailUrl(data.image)
-            if (data.showName) setShowName(data.showName)
-          } catch (error: unknown) {
-            console.error("自動メタデータ取得エラー:", error)
-            setError("メタデータの自動取得に失敗しました。手動で取得してください。")
-          } finally {
-            setIsFetchingMetadata(false)
-          }
-        }
-
-        fetchMetadata()
-      }
-    }
-  }, [initialUrl, autoFetch])
-
-  const handleFetchMetadata = async () => {
-    if (!url) return
-
+  const fetchAndSetMetadata = async (targetUrl: string) => {
     setIsFetchingMetadata(true)
     setError(null)
 
@@ -91,7 +43,7 @@ export function AddPodcastForm({ userId, onSuccess, initialUrl, autoFetch }: Add
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ url }),
+        body: JSON.stringify({ url: targetUrl }),
       })
 
       if (!response.ok) {
@@ -110,6 +62,25 @@ export function AddPodcastForm({ userId, onSuccess, initialUrl, autoFetch }: Add
     } finally {
       setIsFetchingMetadata(false)
     }
+  }
+
+  // URL共有連携: 初期URLが設定されている場合、プラットフォームを検出
+  // autoFetch=true の場合は自動的にメタデータを取得
+  useEffect(() => {
+    if (initialUrl) {
+      setPlatform(detectPlatform(initialUrl))
+
+      // 自動メタデータ取得（一度だけ実行）
+      if (autoFetch && !hasAutoFetched.current) {
+        hasAutoFetched.current = true
+        fetchAndSetMetadata(initialUrl)
+      }
+    }
+  }, [initialUrl, autoFetch])
+
+  const handleFetchMetadata = () => {
+    if (!url) return
+    fetchAndSetMetadata(url)
   }
 
   const handleUrlChange = (newUrl: string) => {
