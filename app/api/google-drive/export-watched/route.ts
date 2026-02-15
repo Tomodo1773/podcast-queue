@@ -1,7 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { decrypt } from "@/lib/crypto"
 import { createMarkdownFile, type PodcastData } from "@/lib/google/drive"
-import { refreshAccessToken, TokenRefreshError } from "@/lib/google/oauth"
+import { DriveAuthError, getDriveAuth } from "@/lib/google/drive-auth"
 import { createClient } from "@/lib/supabase/server"
 
 export async function POST(_request: NextRequest) {
@@ -15,28 +14,8 @@ export async function POST(_request: NextRequest) {
     return NextResponse.json({ error: "認証が必要です" }, { status: 401 })
   }
 
-  // Google Drive設定を取得
-  const { data: settings, error: settingsError } = await supabase
-    .from("google_drive_settings")
-    .select("*")
-    .eq("user_id", user.id)
-    .single()
-
-  if (settingsError || !settings) {
-    return NextResponse.json({ error: "Google Drive連携が設定されていません" }, { status: 400 })
-  }
-
-  if (!settings.folder_id) {
-    return NextResponse.json({ error: "保存先フォルダが設定されていません" }, { status: 400 })
-  }
-
   try {
-    // 暗号化されたリフレッシュトークンを復号化
-    const refreshToken = decrypt(settings.encrypted_refresh_token)
-
-    // アクセストークンを取得（全ファイルで使い回す）
-    const tokens = await refreshAccessToken(refreshToken)
-    const accessToken = tokens.access_token
+    const { accessToken, folderId } = await getDriveAuth(supabase, user.id)
 
     // 視聴済みかつファイル未作成のPodcastを取得
     const { data: podcasts, error: podcastsError } = await supabase
@@ -78,7 +57,7 @@ export async function POST(_request: NextRequest) {
           thumbnail_url: podcast.thumbnail_url || undefined,
         }
 
-        await createMarkdownFile(accessToken, settings.folder_id, podcastData)
+        await createMarkdownFile(accessToken, folderId, podcastData)
 
         // ファイル作成成功フラグを更新
         const { error: updateError } = await supabase
@@ -114,22 +93,14 @@ export async function POST(_request: NextRequest) {
       errors: errors.length > 0 ? errors : undefined,
     })
   } catch (error) {
-    console.error("エクスポートエラー:", error)
-
-    // TokenRefreshErrorでinvalid_grantの場合は再認証が必要
-    if (error instanceof TokenRefreshError && error.isInvalidGrant) {
-      // リフレッシュトークンを空にする（無効なトークンをDBに残さない）
-      await supabase
-        .from("google_drive_settings")
-        .update({ encrypted_refresh_token: "", updated_at: new Date().toISOString() })
-        .eq("user_id", user.id)
-
+    if (error instanceof DriveAuthError) {
       return NextResponse.json(
-        { error: "Google Driveの再認証が必要です", code: "REAUTH_REQUIRED" },
-        { status: 401 }
+        { error: error.message, ...(error.code && { code: error.code }) },
+        { status: error.statusCode }
       )
     }
 
+    console.error("エクスポートエラー:", error)
     return NextResponse.json(
       {
         error: "エクスポートに失敗しました",
