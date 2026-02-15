@@ -49,7 +49,7 @@ export default async function SettingsPage() {
           userId={user.id}
           initialLineUserId={lineLink?.line_user_id || ""}
           initialDriveFolderId={driveSettings?.folder_id || ""}
-          isDriveLinked={!!driveSettings?.encrypted_refresh_token}
+          isDriveLinked={!!driveSettings}
           hasAuthError={!!driveSettings && !driveSettings.encrypted_refresh_token}
         />
       </main>
