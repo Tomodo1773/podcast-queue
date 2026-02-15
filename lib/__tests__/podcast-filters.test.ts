@@ -4,9 +4,9 @@ import {
   filterByPriority,
   filterByWatchStatus,
   moveWatchingToTop,
-  type Podcast,
   sortPodcasts,
 } from "@/lib/podcast-filters"
+import type { Podcast } from "@/lib/types"
 
 // テスト用のサンプルポッドキャストを作成するヘルパー関数
 function createPodcast(overrides: Partial<Podcast> = {}): Podcast {
