@@ -41,6 +41,9 @@ PodQueueは、ポッドキャストをプラットフォーム横断で一元管
 - 過度に高品質な実装は不要。
 - 必要な要件をよく考え最小のコードで要件を達成することが望ましい。
 - 開発者は1人。自分が使う上で最低限のエラーハンドリングやセキュリティ対応を行う
+- 病的なまでの正確さよりも、常にシンプルさを優先すること。
+- YAGNI、KISS、DRYを徹底せよ。
+- サイクロマチック複雑度（循環的複雑度）を増大させずに済む場合を除き、後方互換性のためのシムやフォールバックパスは設けないこと。
 
 ## コマンド
 
@@ -74,53 +77,6 @@ pnpm run check
 
 Next.js 16 (App Router) + Supabase + shadcn/ui で構成されたPodcast管理Webアプリ。
 
-### ディレクトリ構成
-
-- `app/` - Next.js App Router ページ群
-  - `page.tsx` - 認証状態に応じてリダイレクト
-  - `auth/` - ログイン・サインアップページ
-    - `auth/sign-up-success/` - サインアップ完了ページ
-  - `podcasts/` - Podcast一覧・追加ページ
-  - `settings/` - 設定ページ（LINE連携、Google Drive連携）
-  - `samples/[id]/` - サンプルPodcastページ（OGP対応）
-  - `api/fetch-metadata/` - URLからメタデータを取得するAPI Route
-  - `api/line-webhook/` - LINE Messaging API Webhookエンドポイント
-  - `api/auth/google/` - Google OAuth認証（認証開始・コールバック）
-  - `api/google-drive/` - Google Driveファイル作成API
-    - `api/google-drive/create-file/` - 単一ファイル作成
-    - `api/google-drive/export-watched/` - 視聴済みデータ一括エクスポート
-- `components/` - Reactコンポーネント
-  - `ui/` - shadcn/uiベースのUIコンポーネント
-    - `ui/sonner.tsx` - トースト通知コンポーネント（sonnerラッパー）
-  - `podcast-list.tsx` - Podcast一覧表示（クライアントコンポーネント）
-  - `podcast-card.tsx` - 個別Podcastカード
-  - `podcast-list-item.tsx` - Podcastリストアイテム
-  - `podcast-dialog.tsx` - Podcast詳細ダイアログ
-  - `add-podcast-form.tsx` - Podcast追加フォーム
-  - `podcasts-header.tsx` - Podcastページヘッダー
-  - `podcasts-container.tsx` - Podcastページコンテナ
-  - `settings-form.tsx` - 設定フォーム（LINE連携、Google Drive連携）
-  - `theme-provider.tsx` - テーマプロバイダー
-- `lib/` - ユーティリティ
-  - `utils.ts` - 汎用ユーティリティ関数
-  - `crypto.ts` - 暗号化・復号化ユーティリティ（AES-256-GCM）
-  - `supabase/` - Supabaseクライアント
-    - `client.ts` - ブラウザ用クライアント
-    - `server.ts` - サーバー用クライアント（Server Components/Actions用）
-    - `proxy.ts` - Supabaseプロキシ
-- `scripts/` - データベースマイグレーションSQL
-- `lib/line/` - LINE Messaging API関連
-  - `flex-message.ts` - Flex Message生成
-  - `reply.ts` - メッセージ返信
-  - `loading.ts` - ローディングアニメーション
-- `lib/google/` - Google API関連
-  - `oauth.ts` - OAuth認証ユーティリティ
-  - `drive.ts` - Google Drive APIファイル操作
-- `lib/samples/` - サンプルPodcastデータ
-  - `data.ts` - サンプルデータ定義
-- `lib/gemini/` - Gemini AI関連
-  - `generate-metadata.ts` - タグと出演者名の自動生成機能
-
 ### 技術スタック
 
 - **フロントエンド**: React 19, Next.js 16, Tailwind CSS 4
@@ -129,17 +85,6 @@ Next.js 16 (App Router) + Supabase + shadcn/ui で構成されたPodcast管理We
 - **AI**: Vercel AI SDK + Google Gemini (タグ生成、出演者名抽出)
 - **Observability**: LangSmith (オプション、AIトレーシング)
 - **パスエイリアス**: `@/*` でルートからのインポート
-
-### データモデル
-
-`podcasts` テーブル:
-
-- `id`, `user_id`, `url`, `title`, `description`, `thumbnail_url`, `platform`, `is_watched`, `is_watching`, `watched_at`, `priority`, `google_drive_file_created`, `show_name`, `tags`, `speakers`, `summary`, `created_at`, `updated_at`
-- `show_name`: 番組名またはチャンネル名（YouTubeはチャンネル名、Spotifyは番組名）
-- `tags`: 検索用タグの配列（Gemini APIで自動生成）
-- `speakers`: 出演者名の配列（Gemini APIで自動抽出）
-- `summary`: YouTube動画の内容要約（Gemini APIで自動生成、YouTubeのみ）
-- Row Level Security有効（ユーザーは自分のデータのみアクセス可能）
 
 ### メタデータ取得
 
