@@ -65,6 +65,8 @@ jobs:
                   "Bash(pnpm add:*)",
                   "Bash(npx shadcn@latest add:*)",
                   "Bash(git:*)",
+                  "Bash(gh issue create:*)",
+                  "Bash(gh issue comment:*)",
                   "WebSearch",
                   "WebFetch",
                   "Skill(add-package)"
