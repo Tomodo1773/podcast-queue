@@ -77,9 +77,8 @@ export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
     setFilteredPodcasts(result)
   }
 
-  const handleToggleWatched = async (id: string, currentStatus: boolean) => {
+  const handleUpdateWatchedStatus = async (id: string, newStatus: boolean) => {
     const supabase = createClient()
-    const newStatus = !currentStatus
     const watched_at = newStatus ? new Date().toISOString() : null
 
     // 視聴済みにする場合は視聴中も解除
@@ -114,40 +113,12 @@ export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
     }
   }
 
+  const handleToggleWatched = async (id: string, currentStatus: boolean) => {
+    await handleUpdateWatchedStatus(id, !currentStatus)
+  }
+
   const handleChangeWatchedStatus = async (id: string, newStatus: boolean) => {
-    const supabase = createClient()
-    const watched_at = newStatus ? new Date().toISOString() : null
-
-    // 視聴済みにする場合は視聴中も解除
-    const updateData = {
-      is_watched: newStatus,
-      watched_at,
-      ...(newStatus && { is_watching: false }),
-    }
-
-    const { error } = await supabase.from("podcasts").update(updateData).eq("id", id)
-
-    if (error) {
-      console.error("[v0] ステータス更新エラー:", error)
-    } else {
-      setPodcasts((prev) =>
-        prev.map((p) =>
-          p.id === id
-            ? {
-                ...p,
-                is_watched: newStatus,
-                watched_at,
-                is_watching: newStatus ? false : p.is_watching,
-              }
-            : p
-        )
-      )
-
-      // 視聴済みにする場合、Google Driveファイル作成（バックグラウンド実行）
-      if (newStatus) {
-        tryCreateGoogleDriveFile(id)
-      }
-    }
+    await handleUpdateWatchedStatus(id, newStatus)
   }
 
   const handleDelete = async (id: string) => {
