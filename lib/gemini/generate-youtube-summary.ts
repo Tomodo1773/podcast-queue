@@ -27,48 +27,71 @@ const YOUTUBE_SUMMARY_PROMPT = `提供されたYoutube動画について内容�
 - オープニングやエンディング、告知、番組自体に関する説明といった本編に関係ない内容は含めない
 - Youtubeのタイトルやディスクリプションだけでなく、実際の動画の内容に基づいてかく`
 
+function formatTraceInputs(inputs: unknown): Record<string, unknown> {
+  const input =
+    typeof inputs === "object" && inputs !== null && "input" in inputs
+      ? (inputs as { input?: unknown }).input
+      : null
+  const url = typeof input === "string" ? input : ""
+
+  return {
+    messages: [
+      {
+        role: "user",
+        content: [
+          {
+            type: "file_data",
+            file_uri: url,
+            mime_type: "video/*",
+          },
+          {
+            type: "text",
+            text: YOUTUBE_SUMMARY_PROMPT,
+          },
+        ],
+      },
+    ],
+    url,
+  }
+}
+
 /**
- * Gemini APIを使用してYouTube動画の内容を要約する（内部実装）
+ * Gemini APIを使用してYouTube動画の内容を要約する（トレース対象の内部実装）
  * @param url YouTube動画のURL
- * @returns 動画内容の要約テキスト（セクション別箇条書き形式）、生成失敗時はnull
+ * @returns 動画内容の要約テキスト（セクション別箇条書き形式）、生成失敗時は例外を投げる
  */
-async function generateYoutubeSummaryImpl(url: string): Promise<string | null> {
+async function generateYoutubeSummaryCore(url: string): Promise<string | null> {
   const apiKey = process.env.GEMINI_API_KEY
   if (!apiKey) {
     console.warn("GEMINI_API_KEY is not set, skipping YouTube summary generation")
     return null
   }
 
-  try {
-    // GoogleGenAIクライアントを作成
-    const genAI = new GoogleGenAI({ apiKey })
+  // GoogleGenAIクライアントを作成
+  const genAI = new GoogleGenAI({ apiKey })
 
-    // fileDataを使用してYouTube動画を直接処理
-    const response = await genAI.models.generateContent({
-      model: "gemini-3-pro-preview",
-      contents: [
-        {
-          role: "user",
-          parts: [
-            {
-              fileData: {
-                fileUri: url,
-                mimeType: "video/*",
-              },
+  // fileDataを使用してYouTube動画を直接処理
+  const response = await genAI.models.generateContent({
+    model: "gemini-3-pro-preview",
+    contents: [
+      {
+        role: "user",
+        parts: [
+          {
+            fileData: {
+              fileUri: url,
+              mimeType: "video/*",
             },
-            {
-              text: YOUTUBE_SUMMARY_PROMPT,
-            },
-          ],
-        },
-      ],
-    })
+          },
+          {
+            text: YOUTUBE_SUMMARY_PROMPT,
+          },
+        ],
+      },
+    ],
+  })
 
-    return response.text ?? null
-  } catch (error) {
-    console.error("Failed to generate YouTube summary:", error)
-    return null
-  }
+  return response.text ?? null
 }
 
 /**
@@ -77,11 +100,21 @@ async function generateYoutubeSummaryImpl(url: string): Promise<string | null> {
  * @param url YouTube動画のURL
  * @returns 動画内容の要約テキスト（セクション別箇条書き形式）、生成失敗時はnull
  */
-export const generateYoutubeSummary =
+const tracedGenerateYoutubeSummary =
   process.env.LANGCHAIN_TRACING_V2 === "true"
-    ? traceable(generateYoutubeSummaryImpl, {
+    ? traceable(generateYoutubeSummaryCore, {
         name: "generate-youtube-summary",
         run_type: "llm",
         project_name: process.env.LANGSMITH_PROJECT,
+        processInputs: formatTraceInputs,
       })
-    : generateYoutubeSummaryImpl
+    : generateYoutubeSummaryCore
+
+export async function generateYoutubeSummary(url: string): Promise<string | null> {
+  try {
+    return await tracedGenerateYoutubeSummary(url)
+  } catch (error) {
+    console.error("Failed to generate YouTube summary:", error)
+    return null
+  }
+}
