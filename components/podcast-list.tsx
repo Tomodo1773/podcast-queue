@@ -2,8 +2,9 @@
 
 import { ArrowUpDown, Grid3x3, List, Loader2 } from "lucide-react"
 import Link from "next/link"
-import { useEffect, useState } from "react"
+import { useMemo, useState } from "react"
 import { toast } from "sonner"
+import useSWR from "swr"
 import { PodcastCard } from "@/components/podcast-card"
 import { PodcastListItem } from "@/components/podcast-list-item"
 import { Button } from "@/components/ui/button"
@@ -19,14 +20,22 @@ import { getPriorityLabel, type Platform, type Priority } from "@/lib/utils"
 
 type PodcastListProps = {
   userId: string
-  refreshKey?: number
 }
 
 const VIEW_MODE_STORAGE_KEY = "podcast-view-mode"
 
-export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
-  const [podcasts, setPodcasts] = useState<Podcast[]>([])
-  const [filteredPodcasts, setFilteredPodcasts] = useState<Podcast[]>([])
+const fetchPodcasts = async (userId: string): Promise<Podcast[]> => {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from("podcasts")
+    .select("*")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+  if (error) throw error
+  return data || []
+}
+
+export function PodcastList({ userId }: PodcastListProps) {
   const [filter, setFilter] = useState<WatchFilter>("unwatched")
   const [priorityFilter, setPriorityFilter] = useState<PriorityFilter>("all")
   const [sortBy, setSortBy] = useState<SortOption>("created_at")
@@ -39,42 +48,17 @@ export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
     }
     return "grid"
   })
-  const [isLoading, setIsLoading] = useState(true)
+
+  const { data: podcasts = [], isLoading, mutate } = useSWR(["podcasts", userId], () => fetchPodcasts(userId))
+
+  const filteredPodcasts = useMemo(
+    () => applyFilterAndSort(podcasts, filter, priorityFilter, sortBy),
+    [podcasts, filter, priorityFilter, sortBy]
+  )
 
   const handleViewModeChange = (mode: "grid" | "list") => {
     setViewMode(mode)
     localStorage.setItem(VIEW_MODE_STORAGE_KEY, mode)
-  }
-
-  useEffect(() => {
-    loadPodcasts()
-  }, [userId, refreshKey])
-
-  useEffect(() => {
-    updateFilteredPodcasts()
-  }, [filter, priorityFilter, sortBy, podcasts])
-
-  const loadPodcasts = async () => {
-    const supabase = createClient()
-    setIsLoading(true)
-
-    const { data, error } = await supabase
-      .from("podcasts")
-      .select("*")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false })
-
-    if (error) {
-      console.error("[v0] Podcastの読み込みエラー:", error)
-    } else {
-      setPodcasts(data || [])
-    }
-    setIsLoading(false)
-  }
-
-  const updateFilteredPodcasts = () => {
-    const result = applyFilterAndSort(podcasts, filter, priorityFilter, sortBy)
-    setFilteredPodcasts(result)
   }
 
   const handleUpdateWatchedStatus = async (id: string, newStatus: boolean) => {
@@ -93,8 +77,8 @@ export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
     if (error) {
       console.error("[v0] ステータス更新エラー:", error)
     } else {
-      setPodcasts((prev) =>
-        prev.map((p) =>
+      mutate(
+        podcasts.map((p) =>
           p.id === id
             ? {
                 ...p,
@@ -103,12 +87,13 @@ export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
                 is_watching: newStatus ? false : p.is_watching,
               }
             : p
-        )
+        ),
+        false
       )
 
       // 視聴済みにする場合、Google Driveファイル作成（バックグラウンド実行）
       if (newStatus) {
-        tryCreateGoogleDriveFile(id)
+        tryCreateGoogleDriveFile(id, podcasts)
       }
     }
   }
@@ -129,7 +114,10 @@ export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
     if (error) {
       console.error("[v0] 削除エラー:", error)
     } else {
-      setPodcasts((prev) => prev.filter((p) => p.id !== id))
+      mutate(
+        podcasts.filter((p) => p.id !== id),
+        false
+      )
     }
   }
 
@@ -141,12 +129,15 @@ export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
     if (error) {
       console.error("[v0] 優先度更新エラー:", error)
     } else {
-      setPodcasts((prev) => prev.map((p) => (p.id === id ? { ...p, priority: newPriority } : p)))
+      mutate(
+        podcasts.map((p) => (p.id === id ? { ...p, priority: newPriority } : p)),
+        false
+      )
     }
   }
 
-  const tryCreateGoogleDriveFile = (id: string) => {
-    const podcast = podcasts.find((p) => p.id === id)
+  const tryCreateGoogleDriveFile = (id: string, currentPodcasts: Podcast[]) => {
+    const podcast = currentPodcasts.find((p) => p.id === id)
     if (podcast && !podcast.google_drive_file_created) {
       const supabase = createClient()
       createGoogleDriveFile(id, podcast, supabase)
@@ -169,16 +160,15 @@ export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
     if (error) {
       console.error("[v0] 視聴中設定エラー:", error)
     } else {
-      // 3. ローカルstate更新
-      setPodcasts((prev) =>
-        prev.map((p) => ({
-          ...p,
-          is_watching: p.id === id,
-        }))
-      )
+      // 3. キャッシュ更新
+      const updated = podcasts.map((p) => ({
+        ...p,
+        is_watching: p.id === id,
+      }))
+      mutate(updated, false)
 
       // 4. Google Driveファイル作成（バックグラウンド実行）
-      tryCreateGoogleDriveFile(id)
+      tryCreateGoogleDriveFile(id, updated)
     }
   }
 
@@ -208,7 +198,10 @@ export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
         // Google Driveファイル作成成功時、フラグを更新
         await supabase.from("podcasts").update({ google_drive_file_created: true }).eq("id", id)
 
-        setPodcasts((prev) => prev.map((p) => (p.id === id ? { ...p, google_drive_file_created: true } : p)))
+        mutate(
+          (current = []) => current.map((p) => (p.id === id ? { ...p, google_drive_file_created: true } : p)),
+          false
+        )
       } else {
         const data = await response.json()
         // 再認証が必要な場合はトースト通知
@@ -250,7 +243,10 @@ export function PodcastList({ userId, refreshKey = 0 }: PodcastListProps) {
       console.error("[v0] Podcast更新エラー:", error)
       throw error
     } else {
-      setPodcasts((prev) => prev.map((p) => (p.id === id ? { ...p, ...updates } : p)))
+      mutate(
+        podcasts.map((p) => (p.id === id ? { ...p, ...updates } : p)),
+        false
+      )
     }
   }
 
