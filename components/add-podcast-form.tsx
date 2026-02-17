@@ -146,8 +146,9 @@ export function AddPodcastForm({ userId, onSuccess, initialUrl, autoFetch }: Add
           body: JSON.stringify({
             podcastId: data[0].id,
           }),
-        }).then((res) => {
+        }).then(async (res) => {
           if (!res.ok) throw new Error("タグ生成に失敗しました")
+          return res.json() as Promise<{ summary?: string | null }>
         })
 
         toast.promise(tagPromise, {
@@ -155,6 +156,19 @@ export function AddPodcastForm({ userId, onSuccess, initialUrl, autoFetch }: Add
           success: "タグ・出演者の生成が完了しました",
           error: "タグ生成に失敗しました",
         })
+
+        if (platform === "youtube") {
+          toast.promise(
+            tagPromise.then((result) => {
+              if (!result.summary) throw new Error("文字起こしが生成されませんでした")
+            }),
+            {
+              loading: "AIがYouTube動画を文字起こし中...",
+              success: "YouTube動画の文字起こしが完了しました",
+              error: "YouTube文字起こしに失敗しました",
+            }
+          )
+        }
       }
 
       console.log("[v0] Podcast追加成功、リダイレクト開始")
