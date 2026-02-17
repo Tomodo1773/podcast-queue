@@ -4,6 +4,7 @@ import { Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import type React from "react"
 import { useEffect, useRef, useState } from "react"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -139,15 +140,35 @@ export function AddPodcastForm({ userId, onSuccess, initialUrl, autoFetch }: Add
 
       // タグ生成・YouTube要約をバックグラウンドで実行（ユーザーを待たせない）
       if (data?.[0]) {
-        fetch("/api/generate-tags", {
+        const tagPromise = fetch("/api/generate-tags", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             podcastId: data[0].id,
           }),
-        }).catch((error) => {
-          console.error("Failed to trigger tag generation:", error)
+        }).then(async (res) => {
+          if (!res.ok) throw new Error("タグ生成に失敗しました")
+          return res.json() as Promise<{ summary?: string | null }>
         })
+
+        toast.promise(tagPromise, {
+          loading: "AIがタグ・出演者を生成中...",
+          success: "タグ・出演者の生成が完了しました",
+          error: "タグ生成に失敗しました",
+        })
+
+        if (platform === "youtube") {
+          toast.promise(
+            tagPromise.then((result) => {
+              if (!result.summary) throw new Error("文字起こしが生成されませんでした")
+            }),
+            {
+              loading: "AIがYouTube動画を文字起こし中...",
+              success: "YouTube動画の文字起こしが完了しました",
+              error: "YouTube文字起こしに失敗しました",
+            }
+          )
+        }
       }
 
       console.log("[v0] Podcast追加成功、リダイレクト開始")

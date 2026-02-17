@@ -128,3 +128,16 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* sonnerのデフォルトCSS（詳細度0-2-0）に勝つため、CSS変数をオーバーライド */
+[data-sonner-toast][data-type="error"] {
+  --normal-bg: var(--destructive);
+  --normal-border: var(--destructive);
+  --normal-text: white;
+}
+
+[data-sonner-toast][data-type="info"] {
+  --normal-bg: var(--color-blue-500);
+  --normal-border: var(--color-blue-600);
+  --normal-text: white;
+}
