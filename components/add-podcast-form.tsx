@@ -4,6 +4,7 @@ import { Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import type React from "react"
 import { useEffect, useRef, useState } from "react"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -139,14 +140,20 @@ export function AddPodcastForm({ userId, onSuccess, initialUrl, autoFetch }: Add
 
       // タグ生成・YouTube要約をバックグラウンドで実行（ユーザーを待たせない）
       if (data?.[0]) {
-        fetch("/api/generate-tags", {
+        const tagPromise = fetch("/api/generate-tags", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             podcastId: data[0].id,
           }),
-        }).catch((error) => {
-          console.error("Failed to trigger tag generation:", error)
+        }).then((res) => {
+          if (!res.ok) throw new Error("タグ生成に失敗しました")
+        })
+
+        toast.promise(tagPromise, {
+          loading: "AIがタグ・出演者を生成中...",
+          success: "タグ・出演者の生成が完了しました",
+          error: "タグ生成に失敗しました",
         })
       }
 
