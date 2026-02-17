@@ -199,7 +199,7 @@ export function PodcastList({ userId }: PodcastListProps) {
         await supabase.from("podcasts").update({ google_drive_file_created: true }).eq("id", id)
 
         mutate(
-          podcasts.map((p) => (p.id === id ? { ...p, google_drive_file_created: true } : p)),
+          (current = []) => current.map((p) => (p.id === id ? { ...p, google_drive_file_created: true } : p)),
           false
         )
       } else {
