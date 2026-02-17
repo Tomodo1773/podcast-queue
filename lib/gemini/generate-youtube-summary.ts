@@ -27,6 +27,34 @@ const YOUTUBE_SUMMARY_PROMPT = `提供されたYoutube動画について内容�
 - オープニングやエンディング、告知、番組自体に関する説明といった本編に関係ない内容は含めない
 - Youtubeのタイトルやディスクリプションだけでなく、実際の動画の内容に基づいてかく`
 
+function formatTraceInputs(inputs: unknown): Record<string, unknown> {
+  const input =
+    typeof inputs === "object" && inputs !== null && "input" in inputs
+      ? (inputs as { input?: unknown }).input
+      : null
+  const url = typeof input === "string" ? input : ""
+
+  return {
+    messages: [
+      {
+        role: "user",
+        content: [
+          {
+            type: "file_data",
+            file_uri: url,
+            mime_type: "video/*",
+          },
+          {
+            type: "text",
+            text: YOUTUBE_SUMMARY_PROMPT,
+          },
+        ],
+      },
+    ],
+    url,
+  }
+}
+
 /**
  * Gemini APIを使用してYouTube動画の内容を要約する（トレース対象の内部実装）
  * @param url YouTube動画のURL
@@ -78,6 +106,7 @@ const tracedGenerateYoutubeSummary =
         name: "generate-youtube-summary",
         run_type: "llm",
         project_name: process.env.LANGSMITH_PROJECT,
+        processInputs: formatTraceInputs,
       })
     : generateYoutubeSummaryCore
 
