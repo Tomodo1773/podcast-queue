@@ -298,7 +298,7 @@ export function PodcastList({ userId }: PodcastListProps) {
           >
             <List className="size-4" />
           </Button>
-          <CsvExportDialog podcasts={filteredPodcasts} />
+          <CsvExportDialog podcasts={podcasts} />
         </div>
       </div>
 
