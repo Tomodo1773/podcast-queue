@@ -1,0 +1,2 @@
+ALTER TABLE public.podcasts
+ADD COLUMN IF NOT EXISTS notion_page_created BOOLEAN DEFAULT FALSE;
