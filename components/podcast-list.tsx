@@ -5,6 +5,7 @@ import Link from "next/link"
 import { useMemo, useState } from "react"
 import { toast } from "sonner"
 import useSWR from "swr"
+import { CsvExportDialog } from "@/components/csv-export-dialog"
 import { PodcastCard } from "@/components/podcast-card"
 import { PodcastListItem } from "@/components/podcast-list-item"
 import { Button } from "@/components/ui/button"
@@ -297,6 +298,7 @@ export function PodcastList({ userId }: PodcastListProps) {
           >
             <List className="size-4" />
           </Button>
+          <CsvExportDialog podcasts={podcasts} />
         </div>
       </div>
 
