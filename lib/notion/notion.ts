@@ -1,4 +1,4 @@
-import { generateMarkdownContent, type PodcastData } from "@/lib/google/drive"
+import type { PodcastData } from "@/lib/google/drive"
 
 const NOTION_API_URL = "https://api.notion.com/v1"
 const NOTION_VERSION = "2022-06-28"
@@ -38,19 +38,83 @@ export async function createNotionDatabase(accessToken: string, parentPageId: st
 }
 
 // Notionのrich_textは2000文字制限があるため分割する
-function splitIntoCodeBlocks(content: string): object[] {
-  const maxLength = 2000
-  const blocks = []
-  for (let i = 0; i < content.length; i += maxLength) {
+function toRichText(text: string): object[] {
+  const maxLen = 2000
+  const chunks = []
+  for (let i = 0; i < text.length; i += maxLen) {
+    chunks.push({ type: "text", text: { content: text.slice(i, i + maxLen) } })
+  }
+  return chunks.length > 0 ? chunks : [{ type: "text", text: { content: "" } }]
+}
+
+function buildNotionBlocks(podcast: PodcastData): object[] {
+  const blocks: object[] = []
+
+  if (podcast.thumbnail_url) {
     blocks.push({
       object: "block",
-      type: "code",
-      code: {
-        rich_text: [{ type: "text", text: { content: content.slice(i, i + maxLength) } }],
-        language: "markdown",
-      },
+      type: "image",
+      image: { type: "external", external: { url: podcast.thumbnail_url } },
     })
   }
+
+  blocks.push({
+    object: "block",
+    type: "heading_2",
+    heading_2: { rich_text: [{ type: "text", text: { content: "説明" } }] },
+  })
+
+  const description = podcast.description || "（説明なし）"
+  for (let i = 0; i < description.length; i += 2000) {
+    blocks.push({
+      object: "block",
+      type: "paragraph",
+      paragraph: { rich_text: [{ type: "text", text: { content: description.slice(i, i + 2000) } }] },
+    })
+  }
+
+  if (podcast.platform === "youtube" && podcast.summary) {
+    blocks.push({
+      object: "block",
+      type: "heading_2",
+      heading_2: { rich_text: [{ type: "text", text: { content: "動画内容（Gemini生成）" } }] },
+    })
+    for (const line of podcast.summary.split("\n")) {
+      if (line.startsWith("## ")) {
+        blocks.push({
+          object: "block",
+          type: "heading_3",
+          heading_3: { rich_text: toRichText(line.slice(3)) },
+        })
+      } else if (line.startsWith("- ")) {
+        blocks.push({
+          object: "block",
+          type: "bulleted_list_item",
+          bulleted_list_item: { rich_text: toRichText(line.slice(2)) },
+        })
+      } else if (line.trim()) {
+        blocks.push({
+          object: "block",
+          type: "paragraph",
+          paragraph: { rich_text: toRichText(line) },
+        })
+      }
+    }
+  }
+
+  blocks.push(
+    {
+      object: "block",
+      type: "heading_2",
+      heading_2: { rich_text: [{ type: "text", text: { content: "学び" } }] },
+    },
+    {
+      object: "block",
+      type: "paragraph",
+      paragraph: { rich_text: [{ type: "text", text: { content: "（視聴後に記入）" } }] },
+    }
+  )
+
   return blocks
 }
 
@@ -67,8 +131,6 @@ export async function createNotionPage(
       day: "2-digit",
     })
     .replace(/\//g, "-")
-
-  const content = generateMarkdownContent(podcast)
 
   const properties: Record<string, unknown> = {
     title: {
@@ -93,7 +155,7 @@ export async function createNotionPage(
     body: JSON.stringify({
       parent: { database_id: databaseId },
       properties,
-      children: splitIntoCodeBlocks(content),
+      children: buildNotionBlocks(podcast),
     }),
   })
 
