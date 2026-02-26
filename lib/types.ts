@@ -13,6 +13,7 @@ export type Podcast = {
   watched_at: string | null
   created_at: string
   google_drive_file_created: boolean
+  notion_page_created: boolean
   show_name: string | null
   tags: string[]
   speakers: string[]

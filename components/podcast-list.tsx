@@ -92,9 +92,10 @@ export function PodcastList({ userId }: PodcastListProps) {
         false
       )
 
-      // 視聴済みにする場合、Google Driveファイル作成（バックグラウンド実行）
+      // 視聴済みにする場合、Google Drive/Notionファイル作成（バックグラウンド実行）
       if (newStatus) {
         tryCreateGoogleDriveFile(id, podcasts)
+        tryCreateNotionPage(id, podcasts)
       }
     }
   }
@@ -145,6 +146,14 @@ export function PodcastList({ userId }: PodcastListProps) {
     }
   }
 
+  const tryCreateNotionPage = (id: string, currentPodcasts: Podcast[]) => {
+    const podcast = currentPodcasts.find((p) => p.id === id)
+    if (podcast && !podcast.notion_page_created) {
+      const supabase = createClient()
+      createNotionPage(id, podcast, supabase)
+    }
+  }
+
   const handleStartWatching = async (id: string) => {
     const supabase = createClient()
 
@@ -168,8 +177,9 @@ export function PodcastList({ userId }: PodcastListProps) {
       }))
       mutate(updated, false)
 
-      // 4. Google Driveファイル作成（バックグラウンド実行）
+      // 4. Google Drive/Notionファイル作成（バックグラウンド実行）
       tryCreateGoogleDriveFile(id, updated)
+      tryCreateNotionPage(id, updated)
     }
   }
 
@@ -223,6 +233,42 @@ export function PodcastList({ userId }: PodcastListProps) {
     } catch (err) {
       console.error("Google Driveファイル作成エラー:", err)
       // エラーでも視聴中操作自体は成功させる
+    }
+  }
+
+  const createNotionPage = async (
+    id: string,
+    podcast: Podcast,
+    supabase: ReturnType<typeof createClient>
+  ) => {
+    try {
+      const response = await fetch("/api/notion/create-page", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: podcast.title || podcast.url,
+          url: podcast.url,
+          description: podcast.description || "",
+          platform: podcast.platform || "その他",
+          show_name: podcast.show_name || undefined,
+          tags: podcast.tags.length > 0 ? podcast.tags : undefined,
+          speakers: podcast.speakers.length > 0 ? podcast.speakers : undefined,
+          summary: podcast.summary || undefined,
+          thumbnail_url: podcast.thumbnail_url || undefined,
+        }),
+      })
+
+      if (response.ok) {
+        await supabase.from("podcasts").update({ notion_page_created: true }).eq("id", id)
+
+        mutate(
+          (current = []) => current.map((p) => (p.id === id ? { ...p, notion_page_created: true } : p)),
+          false
+        )
+      }
+    } catch (err) {
+      console.error("Notionページ作成エラー:", err)
+      // エラーでも視聴中・視聴済み操作自体は成功させる
     }
   }
 
