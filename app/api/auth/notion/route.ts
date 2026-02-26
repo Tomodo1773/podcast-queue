@@ -18,7 +18,7 @@ export async function GET() {
   const state = randomBytes(32).toString("hex")
 
   const cookieStore = await cookies()
-  cookieStore.set("oauth_state", state, {
+  cookieStore.set("notion_oauth_state", state, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",

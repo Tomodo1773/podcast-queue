@@ -35,16 +35,16 @@ export async function GET(request: NextRequest) {
   }
 
   const cookieStore = await cookies()
-  const storedState = cookieStore.get("oauth_state")?.value
+  const storedState = cookieStore.get("notion_oauth_state")?.value
 
   if (!storedState || state !== storedState) {
-    cookieStore.delete("oauth_state")
+    cookieStore.delete("notion_oauth_state")
     return NextResponse.redirect(
       new URL(`/settings?notion_error=${encodeURIComponent("認証状態が不正です")}`, baseUrl)
     )
   }
 
-  cookieStore.delete("oauth_state")
+  cookieStore.delete("notion_oauth_state")
 
   try {
     const tokens = await exchangeCodeForTokens(code)

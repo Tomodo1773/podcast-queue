@@ -49,7 +49,7 @@ export async function POST(_request: NextRequest) {
           title: podcast.title,
           url: podcast.url,
           description: podcast.description || "",
-          platform: podcast.platform,
+          platform: podcast.platform || "その他",
           show_name: podcast.show_name || undefined,
           tags: podcast.tags || undefined,
           speakers: podcast.speakers || undefined,
