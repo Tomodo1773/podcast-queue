@@ -1,6 +1,25 @@
 import { markdownToBlocks } from "@tryfabric/martian"
 import { generateMarkdownContent, type PodcastData } from "@/lib/google/drive"
 
+function buildNotionChildren(markdown: string) {
+  const frontmatterMatch = markdown.match(/^---\n([\s\S]*?)\n---\n?/)
+  if (!frontmatterMatch) return markdownToBlocks(markdown)
+
+  const frontmatterText = frontmatterMatch[0].trimEnd()
+  const restContent = markdown.slice(frontmatterMatch[0].length)
+
+  const frontmatterBlock = {
+    object: "block" as const,
+    type: "code" as const,
+    code: {
+      rich_text: [{ type: "text" as const, text: { content: frontmatterText } }],
+      language: "yaml" as const,
+    },
+  }
+
+  return [frontmatterBlock, ...markdownToBlocks(restContent)]
+}
+
 const NOTION_API_URL = "https://api.notion.com/v1"
 const NOTION_VERSION = "2022-06-28"
 
@@ -75,7 +94,7 @@ export async function createNotionPage(
     body: JSON.stringify({
       parent: { database_id: databaseId },
       properties,
-      children: markdownToBlocks(generateMarkdownContent(podcast)),
+      children: buildNotionChildren(generateMarkdownContent(podcast)),
     }),
   })
 
