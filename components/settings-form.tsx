@@ -68,6 +68,7 @@ export function SettingsForm({
     const success = searchParams.get("success")
     const error = searchParams.get("error")
     const notionSuccess = searchParams.get("notion_success")
+    const notionError = searchParams.get("notion_error")
     const reauth = searchParams.get("reauth")
     if (success) {
       setDriveMessage({ type: "success", text: success })
@@ -80,6 +81,9 @@ export function SettingsForm({
     }
     if (error) {
       setDriveMessage({ type: "error", text: error })
+    }
+    if (notionError) {
+      setNotionMessage({ type: "error", text: notionError })
     }
     if (reauth === "required") {
       setShowReauthAlert(true)

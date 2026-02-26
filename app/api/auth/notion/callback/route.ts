@@ -14,13 +14,13 @@ export async function GET(request: NextRequest) {
 
   if (error) {
     return NextResponse.redirect(
-      new URL(`/settings?error=${encodeURIComponent("Notion認証がキャンセルされました")}`, baseUrl)
+      new URL(`/settings?notion_error=${encodeURIComponent("Notion認証がキャンセルされました")}`, baseUrl)
     )
   }
 
   if (!code || !state) {
     return NextResponse.redirect(
-      new URL(`/settings?error=${encodeURIComponent("認証パラメータが不正です")}`, baseUrl)
+      new URL(`/settings?notion_error=${encodeURIComponent("認証パラメータが不正です")}`, baseUrl)
     )
   }
 
@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
   if (!storedState || state !== storedState) {
     cookieStore.delete("oauth_state")
     return NextResponse.redirect(
-      new URL(`/settings?error=${encodeURIComponent("認証状態が不正です")}`, baseUrl)
+      new URL(`/settings?notion_error=${encodeURIComponent("認証状態が不正です")}`, baseUrl)
     )
   }
 
@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
     if (existingSettingsError && existingSettingsError.code !== "PGRST116") {
       console.error("Notion既存設定の取得に失敗:", existingSettingsError)
       return NextResponse.redirect(
-        new URL(`/settings?error=${encodeURIComponent("設定の取得に失敗しました")}`, baseUrl)
+        new URL(`/settings?notion_error=${encodeURIComponent("設定の取得に失敗しました")}`, baseUrl)
       )
     }
 
@@ -78,7 +78,7 @@ export async function GET(request: NextRequest) {
     if (upsertError) {
       console.error("Notion設定の保存に失敗:", upsertError)
       return NextResponse.redirect(
-        new URL(`/settings?error=${encodeURIComponent("設定の保存に失敗しました")}`, baseUrl)
+        new URL(`/settings?notion_error=${encodeURIComponent("設定の保存に失敗しました")}`, baseUrl)
       )
     }
 
@@ -88,7 +88,7 @@ export async function GET(request: NextRequest) {
   } catch (err) {
     console.error("Notion OAuth処理でエラー:", err)
     return NextResponse.redirect(
-      new URL(`/settings?error=${encodeURIComponent("認証処理に失敗しました")}`, baseUrl)
+      new URL(`/settings?notion_error=${encodeURIComponent("認証処理に失敗しました")}`, baseUrl)
     )
   }
 }
