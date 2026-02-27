@@ -35,6 +35,7 @@ type PodcastListItemProps = {
     }
   ) => Promise<void>
   onChangeWatchedStatus: (id: string, newStatus: boolean) => Promise<void>
+  onRegenerateAI: (id: string) => Promise<void>
 }
 
 export function PodcastListItem({
@@ -45,6 +46,7 @@ export function PodcastListItem({
   onStartWatching,
   onUpdate,
   onChangeWatchedStatus,
+  onRegenerateAI,
 }: PodcastListItemProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
@@ -151,6 +153,7 @@ export function PodcastListItem({
         onChangePriority={onChangePriority}
         onStartWatching={onStartWatching}
         onChangeWatchedStatus={onChangeWatchedStatus}
+        onRegenerateAI={onRegenerateAI}
       />
 
       <PodcastEditDialog

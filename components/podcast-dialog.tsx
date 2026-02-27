@@ -1,8 +1,9 @@
 "use client"
 
-import { Check, ChevronDown, Copy, Play, Trash2 } from "lucide-react"
+import { Check, ChevronDown, Copy, Loader2, Play, Sparkles, Trash2 } from "lucide-react"
 import Image from "next/image"
 import { useEffect, useState } from "react"
+import { toast } from "sonner"
 import { PodcastTags } from "@/components/podcast-tags"
 import { SimpleMarkdown } from "@/components/simple-markdown"
 import { Badge } from "@/components/ui/badge"
@@ -32,6 +33,7 @@ type PodcastDialogProps = {
   onChangePriority: (id: string, newPriority: Priority) => Promise<void>
   onStartWatching: (id: string) => Promise<void>
   onChangeWatchedStatus: (id: string, newStatus: boolean) => Promise<void>
+  onRegenerateAI: (id: string) => Promise<void>
 }
 
 const DESCRIPTION_MAX_LENGTH_MOBILE = 70
@@ -46,10 +48,12 @@ export function PodcastDialog({
   onChangePriority,
   onStartWatching,
   onChangeWatchedStatus,
+  onRegenerateAI,
 }: PodcastDialogProps) {
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false)
   const [isSummaryExpanded, setIsSummaryExpanded] = useState(false)
   const [maxLength, setMaxLength] = useState(DESCRIPTION_MAX_LENGTH_DESKTOP)
+  const [isRegenerating, setIsRegenerating] = useState(false)
   const { isCopied, copyToClipboard } = useCopyToClipboard()
 
   useEffect(() => {
@@ -88,6 +92,18 @@ export function PodcastDialog({
 
   const handleCopyLink = () => {
     copyToClipboard(podcast.url)
+  }
+
+  const handleRegenerate = () => {
+    setIsRegenerating(true)
+    toast.promise(
+      onRegenerateAI(podcast.id).finally(() => setIsRegenerating(false)),
+      {
+        loading: "AIがタグ・出演者・要約を再生成中...",
+        success: "タグ・出演者・要約の再生成が完了しました",
+        error: "AI再生成に失敗しました",
+      }
+    )
   }
 
   return (
@@ -253,6 +269,14 @@ export function PodcastDialog({
             <Button variant="outline" onClick={handleCopyLink} className="flex-1">
               {isCopied ? <Check className="mr-2 size-4" /> : <Copy className="mr-2 size-4" />}
               コピー
+            </Button>
+            <Button variant="outline" onClick={handleRegenerate} disabled={isRegenerating} className="flex-1">
+              {isRegenerating ? (
+                <Loader2 className="mr-2 size-4 animate-spin" />
+              ) : (
+                <Sparkles className="mr-2 size-4" />
+              )}
+              {isRegenerating ? "生成中..." : "AI再生成"}
             </Button>
             <Button
               variant="destructive"

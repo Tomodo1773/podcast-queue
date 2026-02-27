@@ -272,6 +272,23 @@ export function PodcastList({ userId }: PodcastListProps) {
     }
   }
 
+  const handleRegenerateAI = async (id: string) => {
+    const response = await fetch("/api/generate-tags", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ podcastId: id }),
+    })
+
+    if (!response.ok) throw new Error("AI再生成に失敗しました")
+
+    const { tags, speakers, summary } = await response.json()
+
+    mutate(
+      podcasts.map((p) => (p.id === id ? { ...p, tags, speakers, summary } : p)),
+      false
+    )
+  }
+
   const handleUpdatePodcast = async (
     id: string,
     updates: {
@@ -422,6 +439,7 @@ export function PodcastList({ userId }: PodcastListProps) {
               onStartWatching={handleStartWatching}
               onUpdate={handleUpdatePodcast}
               onChangeWatchedStatus={handleChangeWatchedStatus}
+              onRegenerateAI={handleRegenerateAI}
             />
           ))}
         </div>
@@ -437,6 +455,7 @@ export function PodcastList({ userId }: PodcastListProps) {
               onStartWatching={handleStartWatching}
               onUpdate={handleUpdatePodcast}
               onChangeWatchedStatus={handleChangeWatchedStatus}
+              onRegenerateAI={handleRegenerateAI}
             />
           ))}
         </div>
