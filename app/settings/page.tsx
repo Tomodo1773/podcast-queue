@@ -29,6 +29,13 @@ export default async function SettingsPage() {
     .eq("user_id", user.id)
     .single()
 
+  // Notion連携情報を取得
+  const { data: notionSettings } = await supabase
+    .from("notion_settings")
+    .select("database_id, workspace_name, encrypted_access_token")
+    .eq("user_id", user.id)
+    .single()
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50/30 to-blue-50/30">
       <header className="border-b bg-white/80 backdrop-blur-sm">
@@ -51,6 +58,9 @@ export default async function SettingsPage() {
           initialDriveFolderId={driveSettings?.folder_id || ""}
           isDriveLinked={!!driveSettings}
           hasAuthError={!!driveSettings && !driveSettings.encrypted_refresh_token}
+          isNotionLinked={!!notionSettings}
+          initialNotionDatabaseId={notionSettings?.database_id || ""}
+          notionWorkspaceName={notionSettings?.workspace_name || ""}
         />
       </main>
     </div>
