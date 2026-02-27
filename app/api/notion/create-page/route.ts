@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import type { PodcastData } from "@/lib/google/drive"
-import { createNotionPage } from "@/lib/notion/notion"
+import { createNotionPage, ensureDatabaseProperties } from "@/lib/notion/notion"
 import { getNotionAuth, NotionAuthError } from "@/lib/notion/notion-auth"
 import { createClient } from "@/lib/supabase/server"
 
@@ -18,6 +18,7 @@ export async function POST(request: NextRequest) {
   try {
     const body: PodcastData = await request.json()
     const { accessToken, databaseId } = await getNotionAuth(supabase, user.id)
+    await ensureDatabaseProperties(accessToken, databaseId)
     const pageId = await createNotionPage(accessToken, databaseId, body)
 
     return NextResponse.json({ success: true, pageId })

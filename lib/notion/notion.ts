@@ -44,6 +44,8 @@ export async function createNotionDatabase(accessToken: string, parentPageId: st
         platform: { rich_text: {} },
         source: { url: {} },
         show_name: { rich_text: {} },
+        tags: { multi_select: {} },
+        speakers: { multi_select: {} },
       },
     }),
   })
@@ -55,6 +57,24 @@ export async function createNotionDatabase(accessToken: string, parentPageId: st
 
   const result = await response.json()
   return result.id
+}
+
+export async function ensureDatabaseProperties(accessToken: string, databaseId: string): Promise<void> {
+  const response = await fetch(`${NOTION_API_URL}/databases/${databaseId}`, {
+    method: "PATCH",
+    headers: notionHeaders(accessToken),
+    body: JSON.stringify({
+      properties: {
+        tags: { multi_select: {} },
+        speakers: { multi_select: {} },
+      },
+    }),
+  })
+
+  if (!response.ok) {
+    const error = await response.text()
+    throw new Error(`Notionデータベースのプロパティ更新に失敗しました: ${error}`)
+  }
 }
 
 export async function createNotionPage(
@@ -85,6 +105,18 @@ export async function createNotionPage(
   if (podcast.show_name) {
     properties.show_name = {
       rich_text: [{ type: "text", text: { content: podcast.show_name } }],
+    }
+  }
+
+  if (podcast.tags && podcast.tags.length > 0) {
+    properties.tags = {
+      multi_select: podcast.tags.map((tag) => ({ name: tag })),
+    }
+  }
+
+  if (podcast.speakers && podcast.speakers.length > 0) {
+    properties.speakers = {
+      multi_select: podcast.speakers.map((speaker) => ({ name: speaker })),
     }
   }
 
