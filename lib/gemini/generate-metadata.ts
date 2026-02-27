@@ -156,7 +156,7 @@ export async function generateMetadata(title: string, description: string): Prom
     })
 
     const result = await generateObject({
-      model: google("gemini-3-flash-preview"),
+      model: google("gemini-flash-latest"),
       schema: MetadataResponseSchema,
       prompt,
     })
