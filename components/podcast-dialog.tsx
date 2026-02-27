@@ -1,6 +1,6 @@
 "use client"
 
-import { Check, ChevronDown, Copy, Play, Trash2 } from "lucide-react"
+import { Check, ChevronDown, Copy, Loader2, Play, Sparkles, Trash2 } from "lucide-react"
 import Image from "next/image"
 import { useEffect, useState } from "react"
 import { PodcastTags } from "@/components/podcast-tags"
@@ -15,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard"
+import { showAIGenerateToasts } from "@/lib/ai-toast"
 import type { Podcast } from "@/lib/types"
 import {
   getPlatformColor,
@@ -32,6 +33,7 @@ type PodcastDialogProps = {
   onChangePriority: (id: string, newPriority: Priority) => Promise<void>
   onStartWatching: (id: string) => Promise<void>
   onChangeWatchedStatus: (id: string, newStatus: boolean) => Promise<void>
+  onRegenerateAI: (id: string) => Promise<{ summary: string | null }>
 }
 
 const DESCRIPTION_MAX_LENGTH_MOBILE = 70
@@ -46,10 +48,12 @@ export function PodcastDialog({
   onChangePriority,
   onStartWatching,
   onChangeWatchedStatus,
+  onRegenerateAI,
 }: PodcastDialogProps) {
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false)
   const [isSummaryExpanded, setIsSummaryExpanded] = useState(false)
   const [maxLength, setMaxLength] = useState(DESCRIPTION_MAX_LENGTH_DESKTOP)
+  const [isRegenerating, setIsRegenerating] = useState(false)
   const { isCopied, copyToClipboard } = useCopyToClipboard()
 
   useEffect(() => {
@@ -88,6 +92,12 @@ export function PodcastDialog({
 
   const handleCopyLink = () => {
     copyToClipboard(podcast.url)
+  }
+
+  const handleRegenerate = () => {
+    setIsRegenerating(true)
+    const promise = onRegenerateAI(podcast.id).finally(() => setIsRegenerating(false))
+    showAIGenerateToasts(promise, podcast.platform, "regenerate")
   }
 
   return (
@@ -253,6 +263,14 @@ export function PodcastDialog({
             <Button variant="outline" onClick={handleCopyLink} className="flex-1">
               {isCopied ? <Check className="mr-2 size-4" /> : <Copy className="mr-2 size-4" />}
               コピー
+            </Button>
+            <Button variant="outline" onClick={handleRegenerate} disabled={isRegenerating} className="flex-1">
+              {isRegenerating ? (
+                <Loader2 className="mr-2 size-4 animate-spin" />
+              ) : (
+                <Sparkles className="mr-2 size-4" />
+              )}
+              {isRegenerating ? "生成中..." : "AI再生成"}
             </Button>
             <Button
               variant="destructive"
