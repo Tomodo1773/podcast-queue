@@ -287,6 +287,8 @@ export function PodcastList({ userId }: PodcastListProps) {
       podcasts.map((p) => (p.id === id ? { ...p, tags, speakers, summary } : p)),
       false
     )
+
+    return { tags, speakers, summary }
   }
 
   const handleUpdatePodcast = async (

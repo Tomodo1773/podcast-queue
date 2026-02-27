@@ -3,7 +3,6 @@
 import { Check, ChevronDown, Copy, Loader2, Play, Sparkles, Trash2 } from "lucide-react"
 import Image from "next/image"
 import { useEffect, useState } from "react"
-import { toast } from "sonner"
 import { PodcastTags } from "@/components/podcast-tags"
 import { SimpleMarkdown } from "@/components/simple-markdown"
 import { Badge } from "@/components/ui/badge"
@@ -16,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard"
+import { showAIGenerateToasts } from "@/lib/ai-toast"
 import type { Podcast } from "@/lib/types"
 import {
   getPlatformColor,
@@ -33,7 +33,7 @@ type PodcastDialogProps = {
   onChangePriority: (id: string, newPriority: Priority) => Promise<void>
   onStartWatching: (id: string) => Promise<void>
   onChangeWatchedStatus: (id: string, newStatus: boolean) => Promise<void>
-  onRegenerateAI: (id: string) => Promise<void>
+  onRegenerateAI: (id: string) => Promise<{ summary: string | null }>
 }
 
 const DESCRIPTION_MAX_LENGTH_MOBILE = 70
@@ -96,14 +96,8 @@ export function PodcastDialog({
 
   const handleRegenerate = () => {
     setIsRegenerating(true)
-    toast.promise(
-      onRegenerateAI(podcast.id).finally(() => setIsRegenerating(false)),
-      {
-        loading: "AIがタグ・出演者・要約を再生成中...",
-        success: "タグ・出演者・要約の再生成が完了しました",
-        error: "AI再生成に失敗しました",
-      }
-    )
+    const promise = onRegenerateAI(podcast.id).finally(() => setIsRegenerating(false))
+    showAIGenerateToasts(promise, podcast.platform, "regenerate")
   }
 
   return (

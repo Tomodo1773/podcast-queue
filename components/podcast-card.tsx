@@ -36,7 +36,7 @@ type PodcastCardProps = {
     }
   ) => Promise<void>
   onChangeWatchedStatus: (id: string, newStatus: boolean) => Promise<void>
-  onRegenerateAI: (id: string) => Promise<void>
+  onRegenerateAI: (id: string) => Promise<{ summary: string | null }>
 }
 
 export function PodcastCard({

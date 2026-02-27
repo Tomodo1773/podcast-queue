@@ -4,12 +4,12 @@ import { Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import type React from "react"
 import { useEffect, useRef, useState } from "react"
-import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
+import { showAIGenerateToasts } from "@/lib/ai-toast"
 import { createClient } from "@/lib/supabase/client"
 import { detectPlatform, getPriorityLabel, PLATFORM_OPTIONS, type Platform, type Priority } from "@/lib/utils"
 
@@ -151,24 +151,7 @@ export function AddPodcastForm({ userId, onSuccess, initialUrl, autoFetch }: Add
           return res.json() as Promise<{ summary?: string | null }>
         })
 
-        toast.promise(tagPromise, {
-          loading: "AIがタグ・出演者を生成中...",
-          success: "タグ・出演者の生成が完了しました",
-          error: "タグ生成に失敗しました",
-        })
-
-        if (platform === "youtube") {
-          toast.promise(
-            tagPromise.then((result) => {
-              if (!result.summary) throw new Error("文字起こしが生成されませんでした")
-            }),
-            {
-              loading: "AIがYouTube動画を文字起こし中...",
-              success: "YouTube動画の文字起こしが完了しました",
-              error: "YouTube文字起こしに失敗しました",
-            }
-          )
-        }
+        showAIGenerateToasts(tagPromise, platform)
       }
 
       console.log("[v0] Podcast追加成功、リダイレクト開始")
