@@ -72,7 +72,7 @@ async function generateYoutubeSummaryCore(url: string): Promise<string | null> {
 
   // fileDataを使用してYouTube動画を直接処理
   const response = await genAI.models.generateContent({
-    model: "gemini-3-pro-preview",
+    model: "gemini-pro-latest",
     contents: [
       {
         role: "user",
