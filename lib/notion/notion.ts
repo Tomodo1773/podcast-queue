@@ -1,9 +1,44 @@
 import { markdownToBlocks } from "@tryfabric/martian"
 import { generateMarkdownContent, type PodcastData } from "@/lib/google/drive"
 
+const MAX_URL_LENGTH = 2000
+
+function sanitizeRichText(richText: unknown[]): unknown[] {
+  return richText.map((item) => {
+    const rt = item as { type: string; text?: { content: string; link?: { url: string } | null } }
+    if (rt.type === "text" && rt.text?.link?.url && rt.text.link.url.length > MAX_URL_LENGTH) {
+      return { ...rt, text: { content: rt.text.content, link: null } }
+    }
+    return item
+  })
+}
+
+function sanitizeNotionBlocks(blocks: unknown[]): unknown[] {
+  return blocks.map((block) => {
+    const b = block as Record<string, unknown>
+    const blockType = b.type as string
+    if (!blockType) return block
+
+    const typeContent = b[blockType] as Record<string, unknown> | undefined
+    if (!typeContent) return block
+
+    const sanitized = { ...b, [blockType]: { ...typeContent } }
+
+    if (Array.isArray(typeContent.rich_text)) {
+      ;(sanitized[blockType] as Record<string, unknown>).rich_text = sanitizeRichText(typeContent.rich_text)
+    }
+
+    if (Array.isArray(typeContent.children)) {
+      ;(sanitized[blockType] as Record<string, unknown>).children = sanitizeNotionBlocks(typeContent.children)
+    }
+
+    return sanitized
+  })
+}
+
 function buildNotionChildren(markdown: string) {
   const frontmatterMatch = markdown.match(/^---\n([\s\S]*?)\n---\n?/)
-  if (!frontmatterMatch) return markdownToBlocks(markdown)
+  if (!frontmatterMatch) return sanitizeNotionBlocks(markdownToBlocks(markdown))
 
   const frontmatterText = frontmatterMatch[0].trimEnd()
   const restContent = markdown.slice(frontmatterMatch[0].length)
@@ -17,7 +52,7 @@ function buildNotionChildren(markdown: string) {
     },
   }
 
-  return [frontmatterBlock, ...markdownToBlocks(restContent)]
+  return [frontmatterBlock, ...sanitizeNotionBlocks(markdownToBlocks(restContent))]
 }
 
 const NOTION_API_URL = "https://api.notion.com/v1"
