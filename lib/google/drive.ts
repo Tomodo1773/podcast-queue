@@ -10,11 +10,13 @@ export interface PodcastData {
   speakers?: string[]
   summary?: string
   thumbnail_url?: string
+  watched_at?: string
 }
 
 export function generateMarkdownContent(podcast: PodcastData): string {
-  // 日本時間(JST)で日付を取得
-  const jstDate = new Date()
+  // 日本時間(JST)で日付を取得（watched_atがあればそれを使用）
+  const baseDate = podcast.watched_at ? new Date(podcast.watched_at) : new Date()
+  const jstDate = baseDate
     .toLocaleDateString("ja-JP", {
       timeZone: "Asia/Tokyo",
       year: "numeric",
@@ -104,8 +106,9 @@ export async function createMarkdownFile(
   podcast: PodcastData
 ): Promise<string> {
   const content = generateMarkdownContent(podcast)
-  // 日本時間(JST)で日付プレフィックスを生成
-  const jstDate = new Date().toLocaleDateString("ja-JP", {
+  // 日本時間(JST)で日付プレフィックスを生成（watched_atがあればそれを使用）
+  const baseDate = podcast.watched_at ? new Date(podcast.watched_at) : new Date()
+  const jstDate = baseDate.toLocaleDateString("ja-JP", {
     timeZone: "Asia/Tokyo",
     year: "numeric",
     month: "2-digit",
