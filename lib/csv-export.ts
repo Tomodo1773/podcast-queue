@@ -7,14 +7,13 @@ export type ColumnKey =
   | "show_name"
   | "platform"
   | "priority"
-  | "is_watched"
+  | "status"
   | "created_at"
   | "tags"
   | "speakers"
   | "description"
   | "summary"
   | "watched_at"
-  | "is_watching"
 
 export type ColumnDef = {
   key: ColumnKey
@@ -28,15 +27,20 @@ export const EXPORT_COLUMNS: ColumnDef[] = [
   { key: "show_name", label: "番組名", defaultEnabled: true },
   { key: "platform", label: "プラットフォーム", defaultEnabled: true },
   { key: "priority", label: "優先度", defaultEnabled: true },
-  { key: "is_watched", label: "視聴状態", defaultEnabled: true },
+  { key: "status", label: "視聴状態", defaultEnabled: true },
   { key: "created_at", label: "追加日時", defaultEnabled: true },
   { key: "tags", label: "タグ", defaultEnabled: true },
   { key: "speakers", label: "出演者", defaultEnabled: true },
   { key: "description", label: "説明", defaultEnabled: false },
   { key: "summary", label: "要約", defaultEnabled: false },
   { key: "watched_at", label: "視聴日時", defaultEnabled: false },
-  { key: "is_watching", label: "視聴中", defaultEnabled: false },
 ]
+
+const STATUS_LABELS = {
+  unwatched: "未視聴",
+  watching: "視聴中",
+  watched: "視聴済み",
+}
 
 function getCellValue(podcast: Podcast, key: ColumnKey): string {
   switch (key) {
@@ -44,10 +48,8 @@ function getCellValue(podcast: Podcast, key: ColumnKey): string {
       return getPlatformLabel(podcast.platform)
     case "priority":
       return getPriorityLabel(podcast.priority)
-    case "is_watched":
-      return podcast.is_watched ? "視聴済み" : "未視聴"
-    case "is_watching":
-      return podcast.is_watching ? "視聴中" : ""
+    case "status":
+      return STATUS_LABELS[podcast.status]
     case "tags":
       return podcast.tags.join(", ")
     case "speakers":

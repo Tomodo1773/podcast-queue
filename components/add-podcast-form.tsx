@@ -124,7 +124,7 @@ export function AddPodcastForm({ userId, onSuccess, initialUrl, autoFetch }: Add
         thumbnail_url: thumbnailUrl || null,
         platform: platform || null,
         priority,
-        is_watched: false,
+        status: "unwatched",
         show_name: showName || null,
       }
       console.log("[v0] 挿入データ:", podcastData)

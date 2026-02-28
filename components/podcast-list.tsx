@@ -16,7 +16,7 @@ import {
   type WatchFilter,
 } from "@/lib/podcast-filters"
 import { createClient } from "@/lib/supabase/client"
-import type { Podcast } from "@/lib/types"
+import type { Podcast, PodcastStatus } from "@/lib/types"
 import { getPriorityLabel, type Platform, type Priority } from "@/lib/utils"
 
 type PodcastListProps = {
@@ -62,51 +62,67 @@ export function PodcastList({ userId }: PodcastListProps) {
     localStorage.setItem(VIEW_MODE_STORAGE_KEY, mode)
   }
 
-  const handleUpdateWatchedStatus = async (id: string, newStatus: boolean) => {
+  const handleUpdateStatus = async (id: string, newStatus: PodcastStatus) => {
     const supabase = createClient()
-    const podcast = podcasts.find((p) => p.id === id)
-    const watched_at = newStatus ? podcast?.watched_at || new Date().toISOString() : null
 
-    // 視聴済みにする場合は視聴中も解除
-    const updateData = {
-      is_watched: newStatus,
-      watched_at,
-      ...(newStatus && { is_watching: false }),
-    }
+    if (newStatus === "watching") {
+      // 現在視聴中のものをすべて解除
+      await supabase
+        .from("podcasts")
+        .update({ status: "unwatched" })
+        .eq("user_id", userId)
+        .eq("status", "watching")
 
-    const { error } = await supabase.from("podcasts").update(updateData).eq("id", id)
+      const watched_at = new Date().toISOString()
+      const { error } = await supabase
+        .from("podcasts")
+        .update({ status: "watching", watched_at })
+        .eq("id", id)
 
-    if (error) {
-      console.error("[v0] ステータス更新エラー:", error)
+      if (error) {
+        console.error("[v0] ステータス更新エラー:", error)
+      } else {
+        const updated = podcasts.map((p) => ({
+          ...p,
+          status: (p.id === id
+            ? "watching"
+            : p.status === "watching"
+              ? "unwatched"
+              : p.status) as PodcastStatus,
+          ...(p.id === id && { watched_at }),
+        }))
+        mutate(updated, false)
+        tryCreateGoogleDriveFile(id, updated)
+        tryCreateNotionPage(id, updated)
+      }
     } else {
-      mutate(
-        podcasts.map((p) =>
-          p.id === id
-            ? {
-                ...p,
-                is_watched: newStatus,
-                watched_at,
-                is_watching: newStatus ? false : p.is_watching,
-              }
-            : p
-        ),
-        false
-      )
+      const podcast = podcasts.find((p) => p.id === id)
+      const watched_at = newStatus === "watched" ? podcast?.watched_at || new Date().toISOString() : null
 
-      // 視聴済みにする場合、Google Drive/Notionファイル作成（バックグラウンド実行）
-      if (newStatus) {
-        tryCreateGoogleDriveFile(id, podcasts)
-        tryCreateNotionPage(id, podcasts)
+      const { error } = await supabase.from("podcasts").update({ status: newStatus, watched_at }).eq("id", id)
+
+      if (error) {
+        console.error("[v0] ステータス更新エラー:", error)
+      } else {
+        mutate(
+          podcasts.map((p) => (p.id === id ? { ...p, status: newStatus, watched_at } : p)),
+          false
+        )
+
+        if (newStatus === "watched") {
+          tryCreateGoogleDriveFile(id, podcasts)
+          tryCreateNotionPage(id, podcasts)
+        }
       }
     }
   }
 
-  const handleToggleWatched = async (id: string, currentStatus: boolean) => {
-    await handleUpdateWatchedStatus(id, !currentStatus)
+  const handleToggleWatched = async (id: string, currentStatus: PodcastStatus) => {
+    await handleUpdateStatus(id, currentStatus === "watched" ? "unwatched" : "watched")
   }
 
-  const handleChangeWatchedStatus = async (id: string, newStatus: boolean) => {
-    await handleUpdateWatchedStatus(id, newStatus)
+  const handleChangeWatchedStatus = async (id: string, newStatus: PodcastStatus) => {
+    await handleUpdateStatus(id, newStatus)
   }
 
   const handleDelete = async (id: string) => {
@@ -156,34 +172,7 @@ export function PodcastList({ userId }: PodcastListProps) {
   }
 
   const handleStartWatching = async (id: string) => {
-    const supabase = createClient()
-
-    // 1. 現在視聴中のものをすべて解除
-    await supabase
-      .from("podcasts")
-      .update({ is_watching: false })
-      .eq("user_id", userId)
-      .eq("is_watching", true)
-
-    // 2. 対象を視聴中に設定（watched_atも設定）
-    const watched_at = new Date().toISOString()
-    const { error } = await supabase.from("podcasts").update({ is_watching: true, watched_at }).eq("id", id)
-
-    if (error) {
-      console.error("[v0] 視聴中設定エラー:", error)
-    } else {
-      // 3. キャッシュ更新
-      const updated = podcasts.map((p) => ({
-        ...p,
-        is_watching: p.id === id,
-        ...(p.id === id && { watched_at }),
-      }))
-      mutate(updated, false)
-
-      // 4. Google Drive/Notionファイル作成（バックグラウンド実行）
-      tryCreateGoogleDriveFile(id, updated)
-      tryCreateNotionPage(id, updated)
-    }
+    await handleUpdateStatus(id, "watching")
   }
 
   const createGoogleDriveFile = async (
@@ -341,10 +330,10 @@ export function PodcastList({ userId }: PodcastListProps) {
             variant={filter === "unwatched" ? "default" : "outline"}
             onClick={() => setFilter("unwatched")}
           >
-            未視聴 ({podcasts.filter((p) => !p.is_watched).length})
+            未視聴 ({podcasts.filter((p) => p.status !== "watched").length})
           </Button>
           <Button variant={filter === "watched" ? "default" : "outline"} onClick={() => setFilter("watched")}>
-            視聴済み ({podcasts.filter((p) => p.is_watched).length})
+            視聴済み ({podcasts.filter((p) => p.status === "watched").length})
           </Button>
         </div>
 

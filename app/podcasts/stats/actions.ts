@@ -37,7 +37,7 @@ export async function getStats(userId: string): Promise<StatsData> {
     .from("podcasts")
     .select("*")
     .eq("user_id", userId)
-    .eq("is_watched", true)
+    .eq("status", "watched")
     .gte("watched_at", new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString())
     .order("watched_at", { ascending: true })
 

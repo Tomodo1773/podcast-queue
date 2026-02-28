@@ -18,8 +18,7 @@ function createPodcast(overrides: Partial<Podcast> = {}): Podcast {
     thumbnail_url: null,
     platform: "other",
     priority: "medium",
-    is_watched: false,
-    is_watching: false,
+    status: "unwatched",
     watched_at: null,
     created_at: "2024-01-01T00:00:00Z",
     google_drive_file_created: false,
@@ -34,10 +33,10 @@ function createPodcast(overrides: Partial<Podcast> = {}): Podcast {
 
 describe("filterByWatchStatus", () => {
   const podcasts: Podcast[] = [
-    createPodcast({ id: "1", is_watched: false }),
-    createPodcast({ id: "2", is_watched: true }),
-    createPodcast({ id: "3", is_watched: false }),
-    createPodcast({ id: "4", is_watched: true }),
+    createPodcast({ id: "1", status: "unwatched" }),
+    createPodcast({ id: "2", status: "watched" }),
+    createPodcast({ id: "3", status: "unwatched" }),
+    createPodcast({ id: "4", status: "watched" }),
   ]
 
   describe("すべて表示", () => {
@@ -49,11 +48,11 @@ describe("filterByWatchStatus", () => {
   })
 
   describe("未視聴のみ", () => {
-    it("フィルタが 'unwatched' の場合、未視聴のポッドキャストのみを返す", () => {
+    it("フィルタが 'unwatched' の場合、未視聴・視聴中のポッドキャストを返す", () => {
       const result = filterByWatchStatus(podcasts, "unwatched")
       expect(result).toHaveLength(2)
       expect(result.map((p) => p.id)).toEqual(["1", "3"])
-      expect(result.every((p) => !p.is_watched)).toBe(true)
+      expect(result.every((p) => p.status !== "watched")).toBe(true)
     })
   })
 
@@ -62,7 +61,7 @@ describe("filterByWatchStatus", () => {
       const result = filterByWatchStatus(podcasts, "watched")
       expect(result).toHaveLength(2)
       expect(result.map((p) => p.id)).toEqual(["2", "4"])
-      expect(result.every((p) => p.is_watched)).toBe(true)
+      expect(result.every((p) => p.status === "watched")).toBe(true)
     })
   })
 })
@@ -137,33 +136,33 @@ describe("sortPodcasts", () => {
 describe("moveWatchingToTop", () => {
   it("視聴中のポッドキャストを先頭に移動する", () => {
     const podcasts: Podcast[] = [
-      createPodcast({ id: "1", is_watching: false }),
-      createPodcast({ id: "2", is_watching: true }),
-      createPodcast({ id: "3", is_watching: false }),
+      createPodcast({ id: "1", status: "unwatched" }),
+      createPodcast({ id: "2", status: "watching" }),
+      createPodcast({ id: "3", status: "unwatched" }),
     ]
 
     const result = moveWatchingToTop(podcasts)
     expect(result[0].id).toBe("2")
-    expect(result[0].is_watching).toBe(true)
+    expect(result[0].status).toBe("watching")
   })
 
   it("視聴中が複数ある場合、すべてを先頭に移動する", () => {
     const podcasts: Podcast[] = [
-      createPodcast({ id: "1", is_watching: false }),
-      createPodcast({ id: "2", is_watching: true }),
-      createPodcast({ id: "3", is_watching: true }),
-      createPodcast({ id: "4", is_watching: false }),
+      createPodcast({ id: "1", status: "unwatched" }),
+      createPodcast({ id: "2", status: "watching" }),
+      createPodcast({ id: "3", status: "watching" }),
+      createPodcast({ id: "4", status: "unwatched" }),
     ]
 
     const result = moveWatchingToTop(podcasts)
-    expect(result.slice(0, 2).every((p) => p.is_watching)).toBe(true)
-    expect(result.slice(2).every((p) => !p.is_watching)).toBe(true)
+    expect(result.slice(0, 2).every((p) => p.status === "watching")).toBe(true)
+    expect(result.slice(2).every((p) => p.status !== "watching")).toBe(true)
   })
 
   it("視聴中がない場合、順序を維持する", () => {
     const podcasts: Podcast[] = [
-      createPodcast({ id: "1", is_watching: false }),
-      createPodcast({ id: "2", is_watching: false }),
+      createPodcast({ id: "1", status: "unwatched" }),
+      createPodcast({ id: "2", status: "unwatched" }),
     ]
 
     const result = moveWatchingToTop(podcasts)
@@ -176,29 +175,25 @@ describe("applyFilterAndSort", () => {
     createPodcast({
       id: "1",
       priority: "low",
-      is_watched: false,
-      is_watching: false,
+      status: "unwatched",
       created_at: "2024-01-03T00:00:00Z",
     }),
     createPodcast({
       id: "2",
       priority: "high",
-      is_watched: true,
-      is_watching: false,
+      status: "watched",
       created_at: "2024-01-02T00:00:00Z",
     }),
     createPodcast({
       id: "3",
       priority: "medium",
-      is_watched: false,
-      is_watching: true,
+      status: "watching",
       created_at: "2024-01-01T00:00:00Z",
     }),
     createPodcast({
       id: "4",
       priority: "high",
-      is_watched: false,
-      is_watching: false,
+      status: "unwatched",
       created_at: "2024-01-04T00:00:00Z",
     }),
   ]
@@ -216,7 +211,7 @@ describe("applyFilterAndSort", () => {
     // 視聴中を先頭: 3(視聴中), 4, 1
     expect(result).toHaveLength(3)
     expect(result[0].id).toBe("3") // 視聴中が先頭
-    expect(result[0].is_watching).toBe(true)
+    expect(result[0].status).toBe("watching")
   })
 
   it("すべて表示 + すべての優先度 + 追加日順", () => {

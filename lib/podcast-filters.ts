@@ -13,9 +13,9 @@ export function filterByWatchStatus(podcasts: Podcast[], filter: WatchFilter): P
     return podcasts
   }
   if (filter === "watched") {
-    return podcasts.filter((p) => p.is_watched)
+    return podcasts.filter((p) => p.status === "watched")
   }
-  return podcasts.filter((p) => !p.is_watched)
+  return podcasts.filter((p) => p.status !== "watched")
 }
 
 /**
@@ -48,8 +48,8 @@ export function sortPodcasts(podcasts: Podcast[], sortBy: SortOption): Podcast[]
 export function moveWatchingToTop(podcasts: Podcast[]): Podcast[] {
   const result = [...podcasts]
   result.sort((a, b) => {
-    if (a.is_watching && !b.is_watching) return -1
-    if (!a.is_watching && b.is_watching) return 1
+    if (a.status === "watching" && b.status !== "watching") return -1
+    if (a.status !== "watching" && b.status === "watching") return 1
     return 0
   })
   return result

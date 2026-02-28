@@ -9,7 +9,7 @@ import { PodcastEditDialog } from "@/components/podcast-edit-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import type { Podcast } from "@/lib/types"
+import type { Podcast, PodcastStatus } from "@/lib/types"
 import {
   getPlatformColor,
   getPlatformLabel,
@@ -21,7 +21,7 @@ import {
 
 type PodcastListItemProps = {
   podcast: Podcast
-  onToggleWatched: (id: string, currentStatus: boolean) => Promise<void>
+  onToggleWatched: (id: string, currentStatus: PodcastStatus) => Promise<void>
   onDelete: (id: string) => Promise<void>
   onChangePriority: (id: string, newPriority: Priority) => Promise<void>
   onStartWatching: (id: string) => Promise<void>
@@ -34,7 +34,7 @@ type PodcastListItemProps = {
       platform?: Platform | null
     }
   ) => Promise<void>
-  onChangeWatchedStatus: (id: string, newStatus: boolean) => Promise<void>
+  onChangeWatchedStatus: (id: string, newStatus: PodcastStatus) => Promise<void>
   onRegenerateAI: (id: string) => Promise<{ summary: string | null }>
 }
 
@@ -65,7 +65,7 @@ export function PodcastListItem({
   return (
     <>
       <div
-        className={`flex gap-3 p-3 sm:p-4 border rounded-lg cursor-pointer hover:shadow-md hover:border-primary/30 transition-all ${podcast.is_watching ? "bg-primary/10" : "bg-card"}`}
+        className={`flex gap-3 p-3 sm:p-4 border rounded-lg cursor-pointer hover:shadow-md hover:border-primary/30 transition-all ${podcast.status === "watching" ? "bg-primary/10" : "bg-card"}`}
         role="button"
         tabIndex={0}
         onClick={handleClick}
@@ -88,7 +88,7 @@ export function PodcastListItem({
             </div>
           )}
           {/* 視聴中ラベル */}
-          {podcast.is_watching && (
+          {podcast.status === "watching" && (
             <Badge className="absolute top-1 left-1 bg-primary text-primary-foreground text-xs">視聴中</Badge>
           )}
         </div>

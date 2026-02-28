@@ -10,12 +10,12 @@ import {
   DropdownMenuSubTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard"
-import type { Podcast } from "@/lib/types"
+import type { Podcast, PodcastStatus } from "@/lib/types"
 import { getPriorityLabel, type Priority } from "@/lib/utils"
 
 type PodcastActionsMenuProps = {
   podcast: Podcast
-  onToggleWatched: (id: string, currentStatus: boolean) => Promise<void>
+  onToggleWatched: (id: string, currentStatus: PodcastStatus) => Promise<void>
   onDelete: (id: string) => Promise<void>
   onChangePriority: (id: string, newPriority: Priority) => Promise<void>
   onStartWatching: (id: string) => Promise<void>
@@ -62,8 +62,8 @@ export function PodcastActionsMenu({
         編集
       </DropdownMenuItem>
       <DropdownMenuSeparator />
-      <DropdownMenuItem onClick={() => onToggleWatched(podcast.id, podcast.is_watched)}>
-        {podcast.is_watched ? (
+      <DropdownMenuItem onClick={() => onToggleWatched(podcast.id, podcast.status)}>
+        {podcast.status === "watched" ? (
           <>
             <X className="mr-2 size-4" />
             未視聴にする

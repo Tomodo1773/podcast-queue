@@ -1,5 +1,7 @@
 import type { Platform, Priority } from "@/lib/utils"
 
+export type PodcastStatus = "unwatched" | "watching" | "watched"
+
 export type Podcast = {
   id: string
   url: string
@@ -8,8 +10,7 @@ export type Podcast = {
   thumbnail_url: string | null
   platform: Platform | null
   priority: Priority
-  is_watched: boolean
-  is_watching: boolean
+  status: PodcastStatus
   watched_at: string | null
   created_at: string
   google_drive_file_created: boolean
