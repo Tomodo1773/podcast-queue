@@ -164,6 +164,33 @@ describe("generateMarkdownContent", () => {
 
     expect(result).not.toContain("![](")
   })
+
+  it("watched_atが指定されている場合はその日付をdateに使用する", () => {
+    const podcast: PodcastData = {
+      title: "テストタイトル",
+      platform: "youtube",
+      url: "https://example.com/video",
+      description: "テスト説明",
+      watched_at: "2025-06-15T10:30:00.000Z",
+    }
+
+    const result = generateMarkdownContent(podcast)
+
+    expect(result).toContain("date: 2025-06-15")
+  })
+
+  it("watched_atが指定されていない場合は現在日時のdateを使用する", () => {
+    const podcast: PodcastData = {
+      title: "テストタイトル",
+      platform: "youtube",
+      url: "https://example.com/video",
+      description: "テスト説明",
+    }
+
+    const result = generateMarkdownContent(podcast)
+
+    expect(result).toMatch(/date: \d{4}-\d{2}-\d{2}/)
+  })
 })
 
 describe("sanitizeFilename (ファイル名のバイト数制限)", () => {

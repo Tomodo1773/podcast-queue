@@ -64,7 +64,8 @@ export function PodcastList({ userId }: PodcastListProps) {
 
   const handleUpdateWatchedStatus = async (id: string, newStatus: boolean) => {
     const supabase = createClient()
-    const watched_at = newStatus ? new Date().toISOString() : null
+    const podcast = podcasts.find((p) => p.id === id)
+    const watched_at = newStatus ? podcast?.watched_at || new Date().toISOString() : null
 
     // 視聴済みにする場合は視聴中も解除
     const updateData = {
@@ -164,8 +165,9 @@ export function PodcastList({ userId }: PodcastListProps) {
       .eq("user_id", userId)
       .eq("is_watching", true)
 
-    // 2. 対象を視聴中に設定
-    const { error } = await supabase.from("podcasts").update({ is_watching: true }).eq("id", id)
+    // 2. 対象を視聴中に設定（watched_atも設定）
+    const watched_at = new Date().toISOString()
+    const { error } = await supabase.from("podcasts").update({ is_watching: true, watched_at }).eq("id", id)
 
     if (error) {
       console.error("[v0] 視聴中設定エラー:", error)
@@ -174,6 +176,7 @@ export function PodcastList({ userId }: PodcastListProps) {
       const updated = podcasts.map((p) => ({
         ...p,
         is_watching: p.id === id,
+        ...(p.id === id && { watched_at }),
       }))
       mutate(updated, false)
 
@@ -202,6 +205,7 @@ export function PodcastList({ userId }: PodcastListProps) {
           speakers: podcast.speakers.length > 0 ? podcast.speakers : undefined,
           summary: podcast.summary || undefined,
           thumbnail_url: podcast.thumbnail_url || undefined,
+          watched_at: podcast.watched_at || undefined,
         }),
       })
 
@@ -255,6 +259,7 @@ export function PodcastList({ userId }: PodcastListProps) {
           speakers: podcast.speakers.length > 0 ? podcast.speakers : undefined,
           summary: podcast.summary || undefined,
           thumbnail_url: podcast.thumbnail_url || undefined,
+          watched_at: podcast.watched_at || undefined,
         }),
       })
 
