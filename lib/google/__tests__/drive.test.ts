@@ -55,6 +55,21 @@ describe("generateMarkdownContent", () => {
     expect(lines[5]).toBe("---")
   })
 
+  it("watched_atが指定された場合はその日付をdateとして使用する", () => {
+    const podcast: PodcastData = {
+      title: "テストタイトル",
+      platform: "youtube",
+      url: "https://example.com/video",
+      description: "テスト説明",
+      watched_at: "2025-06-15T10:00:00Z",
+    }
+
+    const result = generateMarkdownContent(podcast)
+
+    // 2025-06-15 UTCはJSTで2025-06-15
+    expect(result).toContain("date: 2025-06-15")
+  })
+
   it("show_nameがある場合はフロントマターに含まれる", () => {
     const podcast: PodcastData = {
       title: "テストタイトル",

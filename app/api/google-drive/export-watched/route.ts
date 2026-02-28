@@ -55,6 +55,7 @@ export async function POST(_request: NextRequest) {
           speakers: podcast.speakers || undefined,
           summary: podcast.summary || undefined,
           thumbnail_url: podcast.thumbnail_url || undefined,
+          watched_at: podcast.watched_at || undefined,
         }
 
         await createMarkdownFile(accessToken, folderId, podcastData)

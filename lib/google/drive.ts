@@ -10,11 +10,12 @@ export interface PodcastData {
   speakers?: string[]
   summary?: string
   thumbnail_url?: string
+  watched_at?: string | null
 }
 
 export function generateMarkdownContent(podcast: PodcastData): string {
-  // 日本時間(JST)で日付を取得
-  const jstDate = new Date()
+  // 視聴日時があればそれを使用、なければ現在時刻をフォールバック
+  const jstDate = (podcast.watched_at ? new Date(podcast.watched_at) : new Date())
     .toLocaleDateString("ja-JP", {
       timeZone: "Asia/Tokyo",
       year: "numeric",
@@ -104,13 +105,16 @@ export async function createMarkdownFile(
   podcast: PodcastData
 ): Promise<string> {
   const content = generateMarkdownContent(podcast)
-  // 日本時間(JST)で日付プレフィックスを生成
-  const jstDate = new Date().toLocaleDateString("ja-JP", {
-    timeZone: "Asia/Tokyo",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  })
+  // 視聴日時があればそれを使用、なければ現在時刻をフォールバック
+  const jstDate = (podcast.watched_at ? new Date(podcast.watched_at) : new Date()).toLocaleDateString(
+    "ja-JP",
+    {
+      timeZone: "Asia/Tokyo",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }
+  )
   const datePrefix = jstDate.replace(/\//g, "")
   const filename = `${datePrefix}_${sanitizeFilename(podcast.title)}.md`
 

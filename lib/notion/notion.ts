@@ -117,7 +117,8 @@ export async function createNotionPage(
   databaseId: string,
   podcast: PodcastData
 ): Promise<string> {
-  const jstDate = new Date()
+  // 視聴日時があればそれを使用、なければ現在時刻をフォールバック
+  const jstDate = (podcast.watched_at ? new Date(podcast.watched_at) : new Date())
     .toLocaleDateString("ja-JP", {
       timeZone: "Asia/Tokyo",
       year: "numeric",

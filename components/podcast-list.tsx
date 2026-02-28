@@ -92,10 +92,10 @@ export function PodcastList({ userId }: PodcastListProps) {
         false
       )
 
-      // 視聴済みにする場合、Google Drive/Notionファイル作成（バックグラウンド実行）
-      if (newStatus) {
-        tryCreateGoogleDriveFile(id, podcasts)
-        tryCreateNotionPage(id, podcasts)
+      // 視聴済みにする場合、Google Drive/Notionファイル作成（watched_atをそのまま渡す）
+      if (newStatus && watched_at) {
+        tryCreateGoogleDriveFile(id, podcasts, watched_at)
+        tryCreateNotionPage(id, podcasts, watched_at)
       }
     }
   }
@@ -138,19 +138,19 @@ export function PodcastList({ userId }: PodcastListProps) {
     }
   }
 
-  const tryCreateGoogleDriveFile = (id: string, currentPodcasts: Podcast[]) => {
+  const tryCreateGoogleDriveFile = (id: string, currentPodcasts: Podcast[], watchedAt?: string) => {
     const podcast = currentPodcasts.find((p) => p.id === id)
     if (podcast && !podcast.google_drive_file_created) {
       const supabase = createClient()
-      createGoogleDriveFile(id, podcast, supabase)
+      createGoogleDriveFile(id, podcast, supabase, watchedAt)
     }
   }
 
-  const tryCreateNotionPage = (id: string, currentPodcasts: Podcast[]) => {
+  const tryCreateNotionPage = (id: string, currentPodcasts: Podcast[], watchedAt?: string) => {
     const podcast = currentPodcasts.find((p) => p.id === id)
     if (podcast && !podcast.notion_page_created) {
       const supabase = createClient()
-      createNotionPage(id, podcast, supabase)
+      createNotionPage(id, podcast, supabase, watchedAt)
     }
   }
 
@@ -177,16 +177,17 @@ export function PodcastList({ userId }: PodcastListProps) {
       }))
       mutate(updated, false)
 
-      // 4. Google Drive/Notionファイル作成（バックグラウンド実行）
-      tryCreateGoogleDriveFile(id, updated)
-      tryCreateNotionPage(id, updated)
+      // 4. Google Drive/Notionファイル作成（バックグラウンド実行、watched_atはまだnullのため現在時刻を渡す）
+      tryCreateGoogleDriveFile(id, updated, new Date().toISOString())
+      tryCreateNotionPage(id, updated, new Date().toISOString())
     }
   }
 
   const createGoogleDriveFile = async (
     id: string,
     podcast: Podcast,
-    supabase: ReturnType<typeof createClient>
+    supabase: ReturnType<typeof createClient>,
+    watchedAt?: string
   ) => {
     try {
       const response = await fetch("/api/google-drive/create-file", {
@@ -202,6 +203,7 @@ export function PodcastList({ userId }: PodcastListProps) {
           speakers: podcast.speakers.length > 0 ? podcast.speakers : undefined,
           summary: podcast.summary || undefined,
           thumbnail_url: podcast.thumbnail_url || undefined,
+          watched_at: watchedAt ?? podcast.watched_at ?? undefined,
         }),
       })
 
@@ -239,7 +241,8 @@ export function PodcastList({ userId }: PodcastListProps) {
   const createNotionPage = async (
     id: string,
     podcast: Podcast,
-    supabase: ReturnType<typeof createClient>
+    supabase: ReturnType<typeof createClient>,
+    watchedAt?: string
   ) => {
     try {
       const response = await fetch("/api/notion/create-page", {
@@ -255,6 +258,7 @@ export function PodcastList({ userId }: PodcastListProps) {
           speakers: podcast.speakers.length > 0 ? podcast.speakers : undefined,
           summary: podcast.summary || undefined,
           thumbnail_url: podcast.thumbnail_url || undefined,
+          watched_at: watchedAt ?? podcast.watched_at ?? undefined,
         }),
       })
 
