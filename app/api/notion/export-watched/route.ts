@@ -24,7 +24,7 @@ export async function POST(_request: NextRequest) {
       .from("podcasts")
       .select("*")
       .eq("user_id", user.id)
-      .eq("is_watched", true)
+      .eq("status", "watched")
       .eq("notion_page_created", false)
       .order("watched_at", { ascending: false })
 

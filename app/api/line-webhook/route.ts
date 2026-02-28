@@ -128,8 +128,7 @@ export async function POST(request: Request) {
           thumbnail_url: metadata.image || "",
           platform: detectPlatform(url),
           priority: "medium",
-          is_watched: false,
-          is_watching: false,
+          status: "unwatched",
           show_name: metadata.showName || null,
         })
         .select()

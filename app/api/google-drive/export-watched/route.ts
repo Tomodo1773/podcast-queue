@@ -22,7 +22,7 @@ export async function POST(_request: NextRequest) {
       .from("podcasts")
       .select("*")
       .eq("user_id", user.id)
-      .eq("is_watched", true)
+      .eq("status", "watched")
       .eq("google_drive_file_created", false)
       .order("watched_at", { ascending: false })
 

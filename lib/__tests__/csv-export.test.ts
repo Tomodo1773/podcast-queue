@@ -11,8 +11,7 @@ function createPodcast(overrides: Partial<Podcast> = {}): Podcast {
     thumbnail_url: null,
     platform: "youtube",
     priority: "high",
-    is_watched: false,
-    is_watching: false,
+    status: "unwatched",
     watched_at: null,
     created_at: "2024-01-01T00:00:00Z",
     google_drive_file_created: false,
@@ -50,14 +49,16 @@ describe("generateCsv", () => {
     expect(csv.split("\n")[1]).toBe("高")
   })
 
-  it("is_watchedをラベルに変換する", () => {
-    const watched = createPodcast({ is_watched: true })
-    const unwatched = createPodcast({ is_watched: false })
-    const csv = generateCsv([watched, unwatched], ["is_watched"])
+  it("statusをラベルに変換する", () => {
+    const watched = createPodcast({ status: "watched" })
+    const unwatched = createPodcast({ status: "unwatched" })
+    const watching = createPodcast({ status: "watching" })
+    const csv = generateCsv([watched, unwatched, watching], ["status"])
 
     const lines = csv.split("\n")
     expect(lines[1]).toBe("視聴済み")
     expect(lines[2]).toBe("未視聴")
+    expect(lines[3]).toBe("視聴中")
   })
 
   it("tagsとspeakersをカンマ区切りの文字列に変換する", () => {

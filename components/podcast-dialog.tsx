@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard"
 import { showAIGenerateToasts } from "@/lib/ai-toast"
-import type { Podcast } from "@/lib/types"
+import type { Podcast, PodcastStatus } from "@/lib/types"
 import {
   getPlatformColor,
   getPlatformLabel,
@@ -25,6 +25,12 @@ import {
   type Priority,
 } from "@/lib/utils"
 
+const STATUS_LABELS: Record<PodcastStatus, string> = {
+  unwatched: "未視聴",
+  watching: "視聴中",
+  watched: "視聴済み",
+}
+
 type PodcastDialogProps = {
   podcast: Podcast
   open: boolean
@@ -32,7 +38,7 @@ type PodcastDialogProps = {
   onDelete: (id: string) => Promise<void>
   onChangePriority: (id: string, newPriority: Priority) => Promise<void>
   onStartWatching: (id: string) => Promise<void>
-  onChangeWatchedStatus: (id: string, newStatus: boolean) => Promise<void>
+  onChangeWatchedStatus: (id: string, newStatus: PodcastStatus) => Promise<void>
   onRegenerateAI: (id: string) => Promise<{ summary: string | null }>
 }
 
@@ -182,25 +188,22 @@ export function PodcastDialog({
                     type="button"
                     className="flex items-center gap-1 hover:opacity-80 transition-opacity focus:outline-none"
                   >
-                    <Badge variant={podcast.is_watched ? "default" : "outline"}>
-                      {podcast.is_watched ? "視聴済み" : "未視聴"}
+                    <Badge variant={podcast.status === "watched" ? "default" : "outline"}>
+                      {STATUS_LABELS[podcast.status]}
                     </Badge>
                     <ChevronDown className="size-3 text-muted-foreground" />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                  <DropdownMenuItem
-                    onClick={() => onChangeWatchedStatus(podcast.id, false)}
-                    disabled={!podcast.is_watched}
-                  >
-                    未視聴
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => onChangeWatchedStatus(podcast.id, true)}
-                    disabled={podcast.is_watched}
-                  >
-                    視聴済み
-                  </DropdownMenuItem>
+                  {(["unwatched", "watching", "watched"] as PodcastStatus[]).map((s) => (
+                    <DropdownMenuItem
+                      key={s}
+                      onClick={() => onChangeWatchedStatus(podcast.id, s)}
+                      disabled={podcast.status === s}
+                    >
+                      {STATUS_LABELS[s]}
+                    </DropdownMenuItem>
+                  ))}
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
