@@ -94,24 +94,6 @@ export async function createNotionDatabase(accessToken: string, parentPageId: st
   return result.id
 }
 
-export async function ensureDatabaseProperties(accessToken: string, databaseId: string): Promise<void> {
-  const response = await fetch(`${NOTION_API_URL}/databases/${databaseId}`, {
-    method: "PATCH",
-    headers: notionHeaders(accessToken),
-    body: JSON.stringify({
-      properties: {
-        tags: { multi_select: {} },
-        speakers: { multi_select: {} },
-      },
-    }),
-  })
-
-  if (!response.ok) {
-    const error = await response.text()
-    throw new Error(`Notionデータベースのプロパティ更新に失敗しました: ${error}`)
-  }
-}
-
 export async function createNotionPage(
   accessToken: string,
   databaseId: string,

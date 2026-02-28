@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import type { PodcastData } from "@/lib/google/drive"
-import { createNotionPage, ensureDatabaseProperties } from "@/lib/notion/notion"
+import { createNotionPage } from "@/lib/notion/notion"
 import { getNotionAuth, NotionAuthError } from "@/lib/notion/notion-auth"
 import { createClient } from "@/lib/supabase/server"
 
@@ -17,7 +17,6 @@ export async function POST(_request: NextRequest) {
 
   try {
     const { accessToken, databaseId } = await getNotionAuth(supabase, user.id)
-    await ensureDatabaseProperties(accessToken, databaseId)
 
     // 視聴済みかつページ未作成のPodcastを取得
     const { data: podcasts, error: podcastsError } = await supabase
