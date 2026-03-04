@@ -6,6 +6,8 @@ import { useMemo, useState } from "react"
 import { toast } from "sonner"
 import useSWR from "swr"
 import { PodcastCard } from "@/components/podcast-card"
+import { PodcastDialog } from "@/components/podcast-dialog"
+import { PodcastEditDialog } from "@/components/podcast-edit-dialog"
 import { PodcastListItem } from "@/components/podcast-list-item"
 import { Button } from "@/components/ui/button"
 import {
@@ -39,6 +41,8 @@ export function PodcastList({ userId }: PodcastListProps) {
   const [filter, setFilter] = useState<WatchFilter>("unwatched")
   const [priorityFilter, setPriorityFilter] = useState<PriorityFilter>("all")
   const [sortBy, setSortBy] = useState<SortOption>("created_at")
+  const [selectedPodcastId, setSelectedPodcastId] = useState<string | null>(null)
+  const [editingPodcastId, setEditingPodcastId] = useState<string | null>(null)
   const [viewMode, setViewMode] = useState<"grid" | "list">(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem(VIEW_MODE_STORAGE_KEY)
@@ -55,6 +59,11 @@ export function PodcastList({ userId }: PodcastListProps) {
     () => applyFilterAndSort(podcasts, filter, priorityFilter, sortBy),
     [podcasts, filter, priorityFilter, sortBy]
   )
+
+  const selectedPodcast = selectedPodcastId
+    ? (podcasts.find((p) => p.id === selectedPodcastId) ?? null)
+    : null
+  const editingPodcast = editingPodcastId ? (podcasts.find((p) => p.id === editingPodcastId) ?? null) : null
 
   const handleViewModeChange = (mode: "grid" | "list") => {
     setViewMode(mode)
@@ -114,6 +123,8 @@ export function PodcastList({ userId }: PodcastListProps) {
     if (error) {
       console.error("[v0] 削除エラー:", error)
     } else {
+      if (selectedPodcastId === id) setSelectedPodcastId(null)
+      if (editingPodcastId === id) setEditingPodcastId(null)
       mutate(
         podcasts.filter((p) => p.id !== id),
         false
@@ -372,8 +383,8 @@ export function PodcastList({ userId }: PodcastListProps) {
               onDelete={handleDelete}
               onChangePriority={handleChangePriority}
               onStartWatching={handleStartWatching}
-              onUpdate={handleUpdatePodcast}
-              onChangeWatchedStatus={handleChangeWatchedStatus}
+              onSelect={() => setSelectedPodcastId(podcast.id)}
+              onEditSelect={() => setEditingPodcastId(podcast.id)}
             />
           ))}
         </div>
@@ -387,11 +398,35 @@ export function PodcastList({ userId }: PodcastListProps) {
               onDelete={handleDelete}
               onChangePriority={handleChangePriority}
               onStartWatching={handleStartWatching}
-              onUpdate={handleUpdatePodcast}
-              onChangeWatchedStatus={handleChangeWatchedStatus}
+              onSelect={() => setSelectedPodcastId(podcast.id)}
+              onEditSelect={() => setEditingPodcastId(podcast.id)}
             />
           ))}
         </div>
+      )}
+
+      {selectedPodcast && (
+        <PodcastDialog
+          podcast={selectedPodcast}
+          open={true}
+          onOpenChange={(open) => {
+            if (!open) setSelectedPodcastId(null)
+          }}
+          onDelete={handleDelete}
+          onChangePriority={handleChangePriority}
+          onStartWatching={handleStartWatching}
+          onChangeWatchedStatus={handleChangeWatchedStatus}
+        />
+      )}
+      {editingPodcast && (
+        <PodcastEditDialog
+          podcast={editingPodcast}
+          open={true}
+          onOpenChange={(open) => {
+            if (!open) setEditingPodcastId(null)
+          }}
+          onUpdate={handleUpdatePodcast}
+        />
       )}
     </div>
   )
