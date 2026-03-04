@@ -2,11 +2,13 @@
 
 import { ArrowUpDown, Grid3x3, List, Loader2 } from "lucide-react"
 import Link from "next/link"
-import { useMemo, useState } from "react"
+import { useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 import useSWR from "swr"
 import { CsvExportDialog } from "@/components/csv-export-dialog"
 import { PodcastCard } from "@/components/podcast-card"
+import { PodcastDialog } from "@/components/podcast-dialog"
+import { PodcastEditDialog } from "@/components/podcast-edit-dialog"
 import { PodcastListItem } from "@/components/podcast-list-item"
 import { Button } from "@/components/ui/button"
 import {
@@ -40,6 +42,8 @@ export function PodcastList({ userId }: PodcastListProps) {
   const [filter, setFilter] = useState<WatchFilter>("unwatched")
   const [priorityFilter, setPriorityFilter] = useState<PriorityFilter>("all")
   const [sortBy, setSortBy] = useState<SortOption>("created_at")
+  const [selectedPodcastId, setSelectedPodcastId] = useState<string | null>(null)
+  const [editingPodcastId, setEditingPodcastId] = useState<string | null>(null)
   const [viewMode, setViewMode] = useState<"grid" | "list">(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem(VIEW_MODE_STORAGE_KEY)
@@ -56,6 +60,17 @@ export function PodcastList({ userId }: PodcastListProps) {
     () => applyFilterAndSort(podcasts, filter, priorityFilter, sortBy),
     [podcasts, filter, priorityFilter, sortBy]
   )
+
+  const selectedPodcast = selectedPodcastId
+    ? (podcasts.find((p) => p.id === selectedPodcastId) ?? null)
+    : null
+  const editingPodcast = editingPodcastId ? (podcasts.find((p) => p.id === editingPodcastId) ?? null) : null
+
+  // 閉じるアニメーション中もデータを保持するためrefでキャッシュ
+  const selectedPodcastRef = useRef<Podcast | null>(null)
+  if (selectedPodcast !== null) selectedPodcastRef.current = selectedPodcast
+  const editingPodcastRef = useRef<Podcast | null>(null)
+  if (editingPodcast !== null) editingPodcastRef.current = editingPodcast
 
   const handleViewModeChange = (mode: "grid" | "list") => {
     setViewMode(mode)
@@ -133,6 +148,8 @@ export function PodcastList({ userId }: PodcastListProps) {
     if (error) {
       console.error("[v0] 削除エラー:", error)
     } else {
+      if (selectedPodcastId === id) setSelectedPodcastId(null)
+      if (editingPodcastId === id) setEditingPodcastId(null)
       mutate(
         podcasts.filter((p) => p.id !== id),
         false
@@ -433,9 +450,8 @@ export function PodcastList({ userId }: PodcastListProps) {
               onDelete={handleDelete}
               onChangePriority={handleChangePriority}
               onStartWatching={handleStartWatching}
-              onUpdate={handleUpdatePodcast}
-              onChangeWatchedStatus={handleChangeWatchedStatus}
-              onRegenerateAI={handleRegenerateAI}
+              onSelect={() => setSelectedPodcastId(podcast.id)}
+              onEditSelect={() => setEditingPodcastId(podcast.id)}
             />
           ))}
         </div>
@@ -449,12 +465,36 @@ export function PodcastList({ userId }: PodcastListProps) {
               onDelete={handleDelete}
               onChangePriority={handleChangePriority}
               onStartWatching={handleStartWatching}
-              onUpdate={handleUpdatePodcast}
-              onChangeWatchedStatus={handleChangeWatchedStatus}
-              onRegenerateAI={handleRegenerateAI}
+              onSelect={() => setSelectedPodcastId(podcast.id)}
+              onEditSelect={() => setEditingPodcastId(podcast.id)}
             />
           ))}
         </div>
+      )}
+
+      {selectedPodcastRef.current && (
+        <PodcastDialog
+          podcast={selectedPodcastRef.current}
+          open={selectedPodcastId !== null}
+          onOpenChange={(open) => {
+            if (!open) setSelectedPodcastId(null)
+          }}
+          onDelete={handleDelete}
+          onChangePriority={handleChangePriority}
+          onStartWatching={handleStartWatching}
+          onChangeWatchedStatus={handleChangeWatchedStatus}
+          onRegenerateAI={handleRegenerateAI}
+        />
+      )}
+      {editingPodcastRef.current && (
+        <PodcastEditDialog
+          podcast={editingPodcastRef.current}
+          open={editingPodcastId !== null}
+          onOpenChange={(open) => {
+            if (!open) setEditingPodcastId(null)
+          }}
+          onUpdate={handleUpdatePodcast}
+        />
       )}
     </div>
   )
