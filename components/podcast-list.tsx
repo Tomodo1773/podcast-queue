@@ -80,54 +80,25 @@ export function PodcastList({ userId }: PodcastListProps) {
   const handleUpdateStatus = async (id: string, newStatus: PodcastStatus) => {
     const supabase = createClient()
 
-    if (newStatus === "watching") {
-      // 現在視聴中のものをすべて解除
-      await supabase
-        .from("podcasts")
-        .update({ status: "unwatched" })
-        .eq("user_id", userId)
-        .eq("status", "watching")
+    const podcast = podcasts.find((p) => p.id === id)
+    const watched_at =
+      newStatus === "watching"
+        ? new Date().toISOString()
+        : newStatus === "watched"
+          ? podcast?.watched_at || new Date().toISOString()
+          : null
 
-      const watched_at = new Date().toISOString()
-      const { error } = await supabase
-        .from("podcasts")
-        .update({ status: "watching", watched_at })
-        .eq("id", id)
+    const { error } = await supabase.from("podcasts").update({ status: newStatus, watched_at }).eq("id", id)
 
-      if (error) {
-        console.error("[v0] ステータス更新エラー:", error)
-      } else {
-        const updated = podcasts.map((p) => ({
-          ...p,
-          status: (p.id === id
-            ? "watching"
-            : p.status === "watching"
-              ? "unwatched"
-              : p.status) as PodcastStatus,
-          ...(p.id === id && { watched_at }),
-        }))
-        mutate(updated, false)
+    if (error) {
+      console.error("[v0] ステータス更新エラー:", error)
+    } else {
+      const updated = podcasts.map((p) => (p.id === id ? { ...p, status: newStatus, watched_at } : p))
+      mutate(updated, false)
+
+      if (newStatus === "watching" || newStatus === "watched") {
         tryCreateGoogleDriveFile(id, updated)
         tryCreateNotionPage(id, updated)
-      }
-    } else {
-      const podcast = podcasts.find((p) => p.id === id)
-      const watched_at = newStatus === "watched" ? podcast?.watched_at || new Date().toISOString() : null
-
-      const { error } = await supabase.from("podcasts").update({ status: newStatus, watched_at }).eq("id", id)
-
-      if (error) {
-        console.error("[v0] ステータス更新エラー:", error)
-      } else {
-        mutate(
-          podcasts.map((p) => (p.id === id ? { ...p, status: newStatus, watched_at } : p)),
-          false
-        )
-
-        if (newStatus === "watched") {
-          tryCreateGoogleDriveFile(id, podcasts)
-          tryCreateNotionPage(id, podcasts)
-        }
       }
     }
   }
