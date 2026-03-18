@@ -73,12 +73,21 @@ export function getPriorityOrder(priority: Priority): number {
  * URLからプラットフォームを判定する
  */
 export function detectPlatform(url: string): Platform {
-  if (url.includes("youtube.com") || url.includes("youtu.be")) return "youtube"
-  if (url.includes("spotify.com")) return "spotify"
-  if (url.includes("newspicks.com") || url.includes("npx.me")) return "newspicks"
-  if (url.includes("pivot.inc") || url.includes("pivot")) return "pivot"
-  if (url.includes("txbiz.tv-tokyo.co.jp")) return "txbiz"
-  return "other"
+  try {
+    const { hostname } = new URL(url)
+
+    if (hostname === "youtube.com" || hostname.endsWith(".youtube.com") || hostname === "youtu.be")
+      return "youtube"
+    if (hostname === "spotify.com" || hostname.endsWith(".spotify.com")) return "spotify"
+    if (hostname === "newspicks.com" || hostname.endsWith(".newspicks.com") || hostname === "npx.me")
+      return "newspicks"
+    if (hostname === "pivot.inc" || hostname.endsWith(".pivot.inc")) return "pivot"
+    if (hostname === "txbiz.tv-tokyo.co.jp" || hostname.endsWith(".txbiz.tv-tokyo.co.jp")) return "txbiz"
+
+    return "other"
+  } catch {
+    return "other"
+  }
 }
 
 /**
