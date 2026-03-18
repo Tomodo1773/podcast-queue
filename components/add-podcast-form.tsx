@@ -14,13 +14,12 @@ import { createClient } from "@/lib/supabase/client"
 import { detectPlatform, getPriorityLabel, PLATFORM_OPTIONS, type Platform, type Priority } from "@/lib/utils"
 
 type AddPodcastFormProps = {
-  userId: string
   onSuccess?: () => void
   initialUrl?: string
   autoFetch?: boolean
 }
 
-export function AddPodcastForm({ userId, onSuccess, initialUrl, autoFetch }: AddPodcastFormProps) {
+export function AddPodcastForm({ onSuccess, initialUrl, autoFetch }: AddPodcastFormProps) {
   const [url, setUrl] = useState(initialUrl || "")
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
@@ -93,21 +92,17 @@ export function AddPodcastForm({ userId, onSuccess, initialUrl, autoFetch }: Add
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log("[v0] フォーム送信開始")
     const supabase = createClient()
     setIsLoading(true)
     setError(null)
 
     try {
-      console.log("[v0] ユーザーIDを確認:", userId)
       const {
         data: { user },
         error: userError,
       } = await supabase.auth.getUser()
-      console.log("[v0] 認証ユーザー:", user)
 
       if (userError) {
-        console.error("[v0] 認証エラー:", userError)
         throw new Error("認証に失敗しました。再度ログインしてください。")
       }
 
@@ -115,7 +110,6 @@ export function AddPodcastForm({ userId, onSuccess, initialUrl, autoFetch }: Add
         throw new Error("ログインが必要です")
       }
 
-      console.log("[v0] Podcast挿入開始")
       const podcastData = {
         user_id: user.id,
         url,
@@ -127,14 +121,9 @@ export function AddPodcastForm({ userId, onSuccess, initialUrl, autoFetch }: Add
         status: "unwatched",
         show_name: showName || null,
       }
-      console.log("[v0] 挿入データ:", podcastData)
-
       const { data, error: insertError } = await supabase.from("podcasts").insert(podcastData).select()
 
-      console.log("[v0] 挿入結果:", { data, insertError })
-
       if (insertError) {
-        console.error("[v0] 挿入エラー:", insertError)
         throw insertError
       }
 
@@ -154,16 +143,14 @@ export function AddPodcastForm({ userId, onSuccess, initialUrl, autoFetch }: Add
         showAIGenerateToasts(tagPromise, platform)
       }
 
-      console.log("[v0] Podcast追加成功、リダイレクト開始")
       if (onSuccess) {
         onSuccess()
       } else {
         router.push("/podcasts")
       }
       router.refresh()
-      console.log("[v0] フォーム送信完了")
     } catch (error: unknown) {
-      console.error("[v0] Podcast追加エラー:", error)
+      console.error("Podcast追加エラー:", error)
       setError(error instanceof Error ? error.message : "Podcastの追加に失敗しました")
       setIsLoading(false)
     }

@@ -24,12 +24,7 @@ export function PodcastsContainer({ userId }: PodcastsContainerProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      <PodcastsHeader
-        userId={userId}
-        onPodcastAdded={handlePodcastAdded}
-        sharedUrl={sharedUrl}
-        autoFetch={autoFetch}
-      />
+      <PodcastsHeader onPodcastAdded={handlePodcastAdded} sharedUrl={sharedUrl} autoFetch={autoFetch} />
       <main className="container mx-auto px-4 py-8">
         <PodcastList userId={userId} />
       </main>

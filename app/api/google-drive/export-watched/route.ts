@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { createMarkdownFile, type PodcastData } from "@/lib/google/drive"
+import { processWatchedPodcasts } from "@/lib/export/process-watched"
+import { createMarkdownFile } from "@/lib/google/drive"
 import { DriveAuthError, getDriveAuth } from "@/lib/google/drive-auth"
 import { createClient } from "@/lib/supabase/server"
 
@@ -17,81 +18,19 @@ export async function POST(_request: NextRequest) {
   try {
     const { accessToken, folderId } = await getDriveAuth(supabase, user.id)
 
-    // 視聴済みかつファイル未作成のPodcastを取得
-    const { data: podcasts, error: podcastsError } = await supabase
-      .from("podcasts")
-      .select("*")
-      .eq("user_id", user.id)
-      .eq("status", "watched")
-      .eq("google_drive_file_created", false)
-      .order("watched_at", { ascending: false })
-
-    if (podcastsError) {
-      throw podcastsError
-    }
-
-    if (!podcasts || podcasts.length === 0) {
-      return NextResponse.json({
-        success: true,
-        message: "すべての視聴済みPodcastはエクスポート済みです",
-        stats: { total: 0, success: 0, failed: 0, skipped: 0 },
-      })
-    }
-
-    // 各Podcastのファイルを作成
-    let successCount = 0
-    let failedCount = 0
-    const errors: Array<{ podcastId: string; title: string; error: string }> = []
-
-    for (const podcast of podcasts) {
-      try {
-        const podcastData: PodcastData = {
-          title: podcast.title,
-          url: podcast.url,
-          description: podcast.description || "",
-          platform: podcast.platform,
-          show_name: podcast.show_name || undefined,
-          tags: podcast.tags || undefined,
-          speakers: podcast.speakers || undefined,
-          summary: podcast.summary || undefined,
-          thumbnail_url: podcast.thumbnail_url || undefined,
-          watched_at: podcast.watched_at || undefined,
-        }
-
-        await createMarkdownFile(accessToken, folderId, podcastData)
-
-        // ファイル作成成功フラグを更新
-        const { error: updateError } = await supabase
-          .from("podcasts")
-          .update({ google_drive_file_created: true, updated_at: new Date().toISOString() })
-          .eq("id", podcast.id)
-
-        if (updateError) {
-          throw updateError
-        }
-
-        successCount++
-      } catch (error) {
-        console.error(`Podcast ${podcast.id} のファイル作成に失敗:`, error)
-        failedCount++
-        errors.push({
-          podcastId: podcast.id,
-          title: podcast.title,
-          error: error instanceof Error ? error.message : "不明なエラー",
-        })
-      }
-    }
+    const result = await processWatchedPodcasts(supabase, user.id, {
+      flagColumn: "google_drive_file_created",
+      exportFn: (podcast) => createMarkdownFile(accessToken, folderId, podcast),
+    })
 
     return NextResponse.json({
       success: true,
-      message: `エクスポートが完了しました（成功: ${successCount}件、失敗: ${failedCount}件）`,
-      stats: {
-        total: podcasts.length,
-        success: successCount,
-        failed: failedCount,
-        skipped: 0,
-      },
-      errors: errors.length > 0 ? errors : undefined,
+      message:
+        result.total === 0
+          ? "すべての視聴済みPodcastはエクスポート済みです"
+          : `エクスポートが完了しました（成功: ${result.success}件、失敗: ${result.failed}件）`,
+      stats: { total: result.total, success: result.success, failed: result.failed, skipped: 0 },
+      errors: result.errors,
     })
   } catch (error) {
     if (error instanceof DriveAuthError) {

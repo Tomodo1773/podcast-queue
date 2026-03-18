@@ -11,13 +11,12 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { createClient } from "@/lib/supabase/client"
 
 type PodcastsHeaderProps = {
-  userId: string
   onPodcastAdded?: () => void
   sharedUrl?: string | null
   autoFetch?: boolean
 }
 
-export function PodcastsHeader({ userId, onPodcastAdded, sharedUrl, autoFetch }: PodcastsHeaderProps) {
+export function PodcastsHeader({ onPodcastAdded, sharedUrl, autoFetch }: PodcastsHeaderProps) {
   const [open, setOpen] = useState(false)
   const router = useRouter()
 
@@ -80,7 +79,6 @@ export function PodcastsHeader({ userId, onPodcastAdded, sharedUrl, autoFetch }:
             <DialogDescription>PodcastのURLを入力して、自動的にメタデータを取得できます</DialogDescription>
           </DialogHeader>
           <AddPodcastForm
-            userId={userId}
             onSuccess={() => {
               setOpen(false)
               onPodcastAdded?.()
