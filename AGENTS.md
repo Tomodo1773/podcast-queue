@@ -6,7 +6,7 @@
 
 ## サービスレベル
 
-このアプリは10-20人程度のユーザを想定しています。過度な品質は不要です
+個人開発のアプリです。過度な品質は不要です
 
 ## 実装方針
 
@@ -24,25 +24,28 @@
 - 異常系は必要最低限のものに限定
 - 1人開発のため、過度な品質は追求しない
 - 外部リソース中心でモック中心になるテストは見送る
+- テストフレームワーク: Vitest + Testing Library + happy-dom
 
 ## アプリ概要
 
-PodQueueは、ポッドキャストをプラットフォーム横断で一元管理するためのWebアプリケーションです。YouTube、Spotify、NewsPicksなど様々なプラットフォームの動画・音声コンテンツを「あとで聴く」リストとして管理できます。
+PodQueueは、ポッドキャストをプラットフォーム横断で一元管理するためのWebアプリケーション。YouTube、Spotify、NewsPicks等のコンテンツを「あとで聴く」リストとして管理する。
 
-## 主な機能
+## ディレクトリ構成
 
-- **URLからメタデータ自動取得**: URLを入力するだけで、タイトル・説明・サムネイル・番組名を自動取得（OGP/oEmbed対応、YouTube/Spotify専用API対応、HTMLエンティティ自動デコード）
-- **プラットフォーム横断管理**: YouTube、Spotify、NewsPicks、Pivot、テレ東Bizなど複数プラットフォームのコンテンツを一箇所で管理
-- **優先度による管理**: 高・中・低の3段階で優先度を設定し、優先度順でソート可能
-- **視聴ステータス管理**: 未視聴/視聴済みのステータスを切り替え可能
-- **視聴中のピックアップ表示**: 現在視聴中のコンテンツは常にリストの先頭に表示
-- **フィルタリング・並び替え**: 視聴状態・優先度でのフィルタリング、追加日順・優先度順での並び替え
-- **グリッド/リスト表示切替**: 好みに合わせて表示形式を選択可能
-- **LINE連携**: LINEにURLを送信するだけでポッドキャストを登録可能。登録結果はFlex Messageで通知
-- **Google Drive連携**: ポッドキャストを視聴中に設定した際、Google Driveへマークダウンファイルを自動生成（OAuth認証、暗号化されたリフレッシュトークン管理、重複作成防止）
-- **Google Drive一括エクスポート**: 設定ページから、過去の視聴済みデータを一括でGoogle Driveにエクスポート可能。エクスポート状況はトースト通知で確認可能
-- **サンプルポッドキャスト**: デモ用のサンプルURLを公開しており、LINE連携の動作確認に利用可能
-- **AI機能**: Gemini APIでタグ・出演者名を自動生成（6〜12個のタグ、0〜20個の出演者名）。YouTubeはセクション別箇条書きで動画内容を自動要約
+- `app/` — Next.js App Routerのページ・APIルート
+  - `app/api/` — APIエンドポイント（LINE webhook、Google OAuth、Google Drive等）
+  - `app/podcasts/` — ポッドキャスト一覧・詳細ページ
+  - `app/settings/` — 設定ページ
+  - `app/samples/` — サンプルポッドキャストページ
+- `components/` — UIコンポーネント（`components/ui/` はshadcn/ui自動生成）
+- `lib/` — ビジネスロジック・ユーティリティ
+  - `lib/supabase/` — Supabaseクライアント（client/server/admin）
+  - `lib/gemini/` — Gemini AI連携（タグ生成、要約）
+  - `lib/google/` — Google Drive/OAuth連携
+  - `lib/metadata/` — URLからのメタデータ取得
+  - `lib/line/` — LINE Messaging API連携
+- `hooks/` — カスタムReact hooks
+- `scripts/` — DBマイグレーション・ユーティリティスクリプト
 
 ## 実装手順
 
@@ -57,40 +60,57 @@ PodQueueは、ポッドキャストをプラットフォーム横断で一元管
 ## コマンド
 
 ```bash
-# 開発サーバー起動
-pnpm run dev
-
-# ビルド
-pnpm run build
-
-# 本番起動
-pnpm start
-
-# Lint
-pnpm run lint
-
-# フォーマット
-pnpm run format
-
-# 型チェック
-pnpm run typecheck
-
-# 未使用コード検出
-pnpm run knip
-
-# チェック（formatting + linting + typecheck + knip）
-pnpm run check
+pnpm run dev          # 開発サーバー起動
+pnpm run build        # ビルド
+pnpm run test         # テスト実行（vitest run）
+pnpm run test:watch   # テスト監視モード
+pnpm run check        # formatting + linting + typecheck + knip（CI前に必ず実行）
+pnpm run lint         # Biome lint（--write付き）
+pnpm run format       # Biome format（--write付き）
+pnpm run typecheck    # tsc --noEmit
+pnpm run knip         # 未使用コード検出
 ```
 
-## アーキテクチャ
+## 技術スタック
 
-Next.js 16 (App Router) + Supabase + shadcn/ui で構成されたPodcast管理Webアプリ。
-
-### 技術スタック
-
-- **フロントエンド**: React 19, Next.js 16, Tailwind CSS 4
-- **UI**: shadcn/ui (new-york スタイル), Radix UI, Lucide Icons, sonner (トースト通知)
-- **バックエンド**: Supabase (認証 + PostgreSQL)
-- **AI**: Vercel AI SDK + Google Gemini (タグ生成、出演者名抽出)
-- **Observability**: LangSmith (オプション、AIトレーシング)
+- **フレームワーク**: Next.js 16 (App Router), React 19
+- **UI**: shadcn/ui (new-york), Tailwind CSS 4, Radix UI, sonner
+- **DB/認証**: Supabase (PostgreSQL + Auth)
+- **AI**: Vercel AI SDK + Google Gemini
+- **Linter/Formatter**: Biome（ESLint/Prettierは不使用）
+- **テスト**: Vitest + Testing Library + happy-dom
 - **パスエイリアス**: `@/*` でルートからのインポート
+
+## コードスタイル
+
+- Biomeで統一（`biome.json`参照）
+- インデント: スペース2、行幅: 110
+- ダブルクォート、セミコロンなし（ASI）、末尾カンマES5
+- `components/ui/` はshadcn/ui自動生成のためlint対象外
+
+## 環境変数
+
+```
+# 必須
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY
+SUPABASE_SERVICE_ROLE_KEY
+
+# Google Drive連携
+GOOGLE_OAUTH_CLIENT_ID
+GOOGLE_OAUTH_CLIENT_SECRET
+ENCRYPTION_KEY              # リフレッシュトークン暗号化用（node scripts/generate-encryption-key.mjsで生成）
+
+# AI機能
+GEMINI_API_KEY
+
+# LINE連携
+LINE_MESSAGING_CHANNEL_SECRET
+
+# 共通
+NEXT_PUBLIC_APP_URL         # アプリのベースURL
+
+# オプション（Observability）
+LANGCHAIN_TRACING_V2        # "true"で有効化
+LANGSMITH_PROJECT
+```
