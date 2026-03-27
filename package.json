@@ -54,7 +54,7 @@
     "@types/node": "^25",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "happy-dom": "^20.8.4",
+    "happy-dom": "^20.8.8",
     "knip": "^6.0.3",
     "postcss": "^8.5",
     "tailwindcss": "^4.2.2",
