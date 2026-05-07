@@ -37,10 +37,10 @@ importers:
         version: 1.2.4(@types/react@19.2.14)(react@19.2.4)
       '@supabase/ssr':
         specifier: 0.10.2
-        version: 0.10.2(@supabase/supabase-js@2.104.0)
+        version: 0.10.2(@supabase/supabase-js@2.105.2-canary.0)
       '@supabase/supabase-js':
         specifier: latest
-        version: 2.104.0
+        version: 2.105.2-canary.0
       '@tryfabric/martian':
         specifier: ^1.2.4
         version: 1.2.4
@@ -52,7 +52,7 @@ importers:
         version: 6.0.168(zod@4.3.6)
       autoprefixer:
         specifier: ^10.5.0
-        version: 10.5.0(postcss@8.5.8)
+        version: 10.5.0(postcss@8.5.10)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -125,7 +125,7 @@ importers:
         version: 6.0.6(@emnapi/core@1.9.1)(@emnapi/runtime@1.9.2)
       postcss:
         specifier: ^8.5
-        version: 8.5.8
+        version: 8.5.10
       tailwindcss:
         specifier: ^4.2.2
         version: 4.2.2
@@ -1635,23 +1635,23 @@ packages:
   '@standard-schema/utils@0.3.0':
     resolution: {integrity: sha512-e7Mew686owMaPJVNNLs55PUvgz371nKgwsc4vxE49zsODpJEnxgxRo2y/OKrqueavXgZNMDVj3DdHFlaSAeU8g==}
 
-  '@supabase/auth-js@2.104.0':
-    resolution: {integrity: sha512-Vs0ndL+s5an7rOmXtS/nbYnGXL8m+KXlCSrPIcw9bR96ma6qyLYILnE6syuM+rpDnf+Tg4PVNxNB2+oDwoy6mA==}
+  '@supabase/auth-js@2.105.2-canary.0':
+    resolution: {integrity: sha512-+8J4HJ1PJxhlmbQnHIp1bN94Nxiqni15SXjLc9Z5qsS8r8WkR6SRMQ6eHcAvCh0MWrJX5ztgK4xM4n3vzVPCfA==}
     engines: {node: '>=20.0.0'}
 
-  '@supabase/functions-js@2.104.0':
-    resolution: {integrity: sha512-O8EyEz/RT1kfWhyJNpVc/VbLeBsohHGBVif/CI83zoMB+Iul/t/NIekH1/7RsH6kuO+b2D4wJhfiaW8Qr47sRg==}
+  '@supabase/functions-js@2.105.2-canary.0':
+    resolution: {integrity: sha512-Vgs1nU1cD6IqzfK9yVZjEdNTGGWJ1/iy2LkhVJU6HrZx526zL8nTMsUlMhG4YtonUtCY7V3IRjPK4Kd+h0xKOw==}
     engines: {node: '>=20.0.0'}
 
-  '@supabase/phoenix@0.4.0':
-    resolution: {integrity: sha512-RHSx8bHS02xwfHdAbX5Lpbo6PXbgyf7lTaXTlwtFDPwOIw64NnVRwFAXGojHhjtVYI+PEPNSWwkL90f4agN3bw==}
+  '@supabase/phoenix@0.4.1':
+    resolution: {integrity: sha512-hWGJkDAfWUNY8k0C080u3sGNFd2ncl9erhKgP7hnGkgJWEfT5Pd/SXal4QmWXBECVlZrannMAc9sBaaRyWpiUA==}
 
-  '@supabase/postgrest-js@2.104.0':
-    resolution: {integrity: sha512-ynylEq6wduQEycj6pL3P+/yIfDQ+CTnBC5I6p+PzcAO2ybj9coAITVtMfboi+g/dacgMslN5MH73rXsRMB29+Q==}
+  '@supabase/postgrest-js@2.105.2-canary.0':
+    resolution: {integrity: sha512-l2E0VJVvi7U9NwNjkeKYUWU661wskTDcu2R7U4SJZa5AyDToAtlSjSM5mq1HHyi5loFfZhjc1ZRhiG1hmR83wA==}
     engines: {node: '>=20.0.0'}
 
-  '@supabase/realtime-js@2.104.0':
-    resolution: {integrity: sha512-9fUVDoTVAhn7a79+AmEx+asUlRtf2yBrji7TQckcKn/WK4hvAA9Lia9er+lnhuz3WNiF1x6kkA4x7bRCJrU+KA==}
+  '@supabase/realtime-js@2.105.2-canary.0':
+    resolution: {integrity: sha512-FT1yZ41IBG+2PFvDojpi5srHsBR3WG1a1lS4lS3ZVJNx3gmwU0WWkvJTS0EA3L+WN7CoOTxSGBbZ9aUvEEUvxg==}
     engines: {node: '>=20.0.0'}
 
   '@supabase/ssr@0.10.2':
@@ -1659,12 +1659,12 @@ packages:
     peerDependencies:
       '@supabase/supabase-js': ^2.102.1
 
-  '@supabase/storage-js@2.104.0':
-    resolution: {integrity: sha512-s2NHtuAWb9nldJ/fS62WnJE6edvCWn31rrO+FJKlAohs99qdVgtLegUReTU2H9WnZiQlVqaBtu386wt6/6lrRw==}
+  '@supabase/storage-js@2.105.2-canary.0':
+    resolution: {integrity: sha512-gHvjvVYTGoFF+KrZKsNxNE3bFc6usxj2JE9FLf9YDZHnOFMG8kpYvNMkOLz+04YriwrboeQU2ZWzkmveR9gr7Q==}
     engines: {node: '>=20.0.0'}
 
-  '@supabase/supabase-js@2.104.0':
-    resolution: {integrity: sha512-hILwhIjCB53G31jlHUe73NDEmrXudcjcYlVRuvNfEhzf0gyFQaFf7j6rd1UGmYZkFMOg//DFE8Iy9ZbNEgosVw==}
+  '@supabase/supabase-js@2.105.2-canary.0':
+    resolution: {integrity: sha512-58v+XB/mkq7rcJPLsIGoRvCiFBlK5rpD1czsW2atPpNLMRu8PkubQqFbunyI/qJJperD6l1x3ZUOUr+tpBcqFg==}
     engines: {node: '>=20.0.0'}
 
   '@swc/helpers@0.5.15':
@@ -2689,8 +2689,8 @@ packages:
     resolution: {integrity: sha512-pMMHxBOZKFU6HgAZ4eyGnwXF/EvPGGqUr0MnZ5+99485wwW41kW91A4LOGxSHhgugZmSChL5AlElNdwlNgcnLQ==}
     engines: {node: ^10 || ^12 || >=14}
 
-  postcss@8.5.8:
-    resolution: {integrity: sha512-OW/rX8O/jXnm82Ey1k44pObPtdblfiuWnrd8X7GJ7emImCOstunGbXUpp7HdBrFQX6rJzn3sPT397Wp5aCwCHg==}
+  postcss@8.5.12:
+    resolution: {integrity: sha512-W62t/Se6rA0Az3DfCL0AqJwXuKwBeYg6nOaIgzP+xZ7N5BFCI7DYi1qs6ygUYT6rvfi6t9k65UMLJC+PHZpDAA==}
     engines: {node: ^10 || ^12 || >=14}
 
   pretty-format@27.5.1:
@@ -2987,6 +2987,7 @@ packages:
 
   uuid@10.0.0:
     resolution: {integrity: sha512-8XkAphELsDnEGrDxUOHB3RGvXz6TeuYSGEZBOjtTtPm2lwhGBjLgOzLHB63IUWfBpNucQjND6d3AOudO+H3RWQ==}
+    deprecated: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
     hasBin: true
 
   vfile-message@2.0.4:
@@ -4173,23 +4174,23 @@ snapshots:
 
   '@standard-schema/utils@0.3.0': {}
 
-  '@supabase/auth-js@2.104.0':
+  '@supabase/auth-js@2.105.2-canary.0':
     dependencies:
       tslib: 2.8.1
 
-  '@supabase/functions-js@2.104.0':
+  '@supabase/functions-js@2.105.2-canary.0':
     dependencies:
       tslib: 2.8.1
 
-  '@supabase/phoenix@0.4.0': {}
+  '@supabase/phoenix@0.4.1': {}
 
-  '@supabase/postgrest-js@2.104.0':
+  '@supabase/postgrest-js@2.105.2-canary.0':
     dependencies:
       tslib: 2.8.1
 
-  '@supabase/realtime-js@2.104.0':
+  '@supabase/realtime-js@2.105.2-canary.0':
     dependencies:
-      '@supabase/phoenix': 0.4.0
+      '@supabase/phoenix': 0.4.1
       '@types/ws': 8.18.1
       tslib: 2.8.1
       ws: 8.20.0
@@ -4197,23 +4198,23 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@supabase/ssr@0.10.2(@supabase/supabase-js@2.104.0)':
+  '@supabase/ssr@0.10.2(@supabase/supabase-js@2.105.2-canary.0)':
     dependencies:
-      '@supabase/supabase-js': 2.104.0
+      '@supabase/supabase-js': 2.105.2-canary.0
       cookie: 1.1.1
 
-  '@supabase/storage-js@2.104.0':
+  '@supabase/storage-js@2.105.2-canary.0':
     dependencies:
       iceberg-js: 0.8.1
       tslib: 2.8.1
 
-  '@supabase/supabase-js@2.104.0':
+  '@supabase/supabase-js@2.105.2-canary.0':
     dependencies:
-      '@supabase/auth-js': 2.104.0
-      '@supabase/functions-js': 2.104.0
-      '@supabase/postgrest-js': 2.104.0
-      '@supabase/realtime-js': 2.104.0
-      '@supabase/storage-js': 2.104.0
+      '@supabase/auth-js': 2.105.2-canary.0
+      '@supabase/functions-js': 2.105.2-canary.0
+      '@supabase/postgrest-js': 2.105.2-canary.0
+      '@supabase/realtime-js': 2.105.2-canary.0
+      '@supabase/storage-js': 2.105.2-canary.0
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -4288,7 +4289,7 @@ snapshots:
       '@alloc/quick-lru': 5.2.0
       '@tailwindcss/node': 4.2.2
       '@tailwindcss/oxide': 4.2.2
-      postcss: 8.5.8
+      postcss: 8.5.10
       tailwindcss: 4.2.2
 
   '@testing-library/dom@10.4.1':
@@ -4470,13 +4471,13 @@ snapshots:
 
   asynckit@0.4.0: {}
 
-  autoprefixer@10.5.0(postcss@8.5.8):
+  autoprefixer@10.5.0(postcss@8.5.10):
     dependencies:
       browserslist: 4.28.2
       caniuse-lite: 1.0.30001788
       fraction.js: 5.3.4
       picocolors: 1.1.1
-      postcss: 8.5.8
+      postcss: 8.5.10
       postcss-value-parser: 4.2.0
 
   bail@1.0.5: {}
@@ -5291,7 +5292,7 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
-  postcss@8.5.8:
+  postcss@8.5.12:
     dependencies:
       nanoid: 3.3.11
       picocolors: 1.1.1
@@ -5660,7 +5661,7 @@ snapshots:
       esbuild: 0.27.7
       fdir: 6.5.0(picomatch@4.0.4)
       picomatch: 4.0.4
-      postcss: 8.5.10
+      postcss: 8.5.12
       rollup: 4.60.2
       tinyglobby: 0.2.16
     optionalDependencies:
