@@ -52,7 +52,7 @@ PodQueueは、ポッドキャストをプラットフォーム横断で一元管
 1. 実装計画を立てる。セッション内ですでにプランニングが終わっている場合は不要
 2. コードを実装する
 3. テストコードを実装する
-4. pnpm install で依存関係を更新する
+4. `sfw pnpm install` でSocket Firewallを通して依存関係を更新する
 5. pnpm run test でテストを行う
 6. pnpm run check を実行し、lint/format/typecheck/knipが通ることを確認する
 7. ドキュメント(AGENTS.md,README.md)を更新する
@@ -61,6 +61,7 @@ PodQueueは、ポッドキャストをプラットフォーム横断で一元管
 
 ```bash
 pnpm run dev          # 開発サーバー起動
+sfw pnpm install      # 依存関係インストール（Socket Firewall経由）
 pnpm run build        # ビルド
 pnpm run test         # テスト実行（vitest run）
 pnpm run test:watch   # テスト監視モード

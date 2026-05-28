@@ -113,7 +113,12 @@ node scripts/generate-encryption-key.mjs
 
 ## 開発
 
+サプライチェーン攻撃対策として [Socket Firewall Free](https://docs.socket.dev/docs/socket-firewall-free) を導入しています。依存関係を取得するときは `sfw` 経由で実行します。
+
 ```bash
+# 依存関係インストール
+sfw pnpm install
+
 # 開発サーバー起動
 pnpm run dev
 
