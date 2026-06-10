@@ -96,6 +96,89 @@ export function buildSuccessFlexMessage(params: SuccessMessageParams): LineMessa
   }
 }
 
+type RecommendationMessageParams = {
+  title: string
+  channelLabel: string
+  score: number
+  videoUrl: string
+  thumbnailUrl: string
+}
+
+/**
+ * レコメンド通知のFlex Messageを生成
+ * スコアは閾値チューニングのため通知に表示する
+ */
+export function buildRecommendationFlexMessage(params: RecommendationMessageParams): LineMessage {
+  const title = truncate(params.title, 50)
+
+  const bubble: FlexBubble = {
+    type: "bubble",
+    body: {
+      type: "box",
+      layout: "vertical",
+      contents: [
+        {
+          type: "text",
+          text: "おすすめの新着動画🎯",
+          weight: "bold",
+          size: "sm",
+          color: "#1DB446",
+        },
+        {
+          type: "text",
+          text: title,
+          weight: "bold",
+          size: "xl",
+          margin: "md",
+          wrap: true,
+        },
+        {
+          type: "text",
+          text: `${params.channelLabel}｜類似度 ${params.score.toFixed(2)}`,
+          size: "sm",
+          color: "#666666",
+          margin: "md",
+          wrap: true,
+        },
+      ],
+    },
+    footer: {
+      type: "box",
+      layout: "vertical",
+      spacing: "sm",
+      contents: [
+        {
+          type: "button",
+          style: "primary",
+          height: "sm",
+          action: {
+            type: "uri",
+            label: "動画を見る",
+            uri: params.videoUrl,
+          },
+        },
+      ],
+      flex: 0,
+    },
+  }
+
+  if (params.thumbnailUrl) {
+    bubble.hero = {
+      type: "image",
+      url: params.thumbnailUrl,
+      size: "full",
+      aspectRatio: "20:13",
+      aspectMode: "cover",
+    }
+  }
+
+  return {
+    type: "flex",
+    altText: `おすすめの新着動画: ${title}`,
+    contents: bubble,
+  }
+}
+
 /**
  * エラー時のテキストメッセージを生成
  */

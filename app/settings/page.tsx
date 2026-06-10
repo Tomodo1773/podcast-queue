@@ -3,6 +3,7 @@ import Link from "next/link"
 import { redirect } from "next/navigation"
 import { SettingsForm } from "@/components/settings-form"
 import { Button } from "@/components/ui/button"
+import { YoutubeChannelsSettings } from "@/components/youtube-channels-settings"
 import { createClient } from "@/lib/supabase/server"
 
 export default async function SettingsPage() {
@@ -36,6 +37,13 @@ export default async function SettingsPage() {
     .eq("user_id", user.id)
     .single()
 
+  // レコメンド対象のYouTubeチャンネルを取得
+  const { data: youtubeChannels } = await supabase
+    .from("youtube_channels")
+    .select("id, channel_id, label")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: true })
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50/30 to-blue-50/30">
       <header className="border-b bg-white/80 backdrop-blur-sm">
@@ -51,7 +59,7 @@ export default async function SettingsPage() {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8 max-w-2xl">
+      <main className="container mx-auto px-4 py-8 max-w-2xl space-y-6">
         <SettingsForm
           userId={user.id}
           initialLineUserId={lineLink?.line_user_id || ""}
@@ -62,6 +70,7 @@ export default async function SettingsPage() {
           initialNotionDatabaseId={notionSettings?.database_id || ""}
           notionWorkspaceName={notionSettings?.workspace_name || ""}
         />
+        <YoutubeChannelsSettings userId={user.id} initialChannels={youtubeChannels || []} />
       </main>
     </div>
   )

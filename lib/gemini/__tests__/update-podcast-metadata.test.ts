@@ -9,11 +9,18 @@ vi.mock("../generate-youtube-summary", () => ({
   generateYoutubeSummary: vi.fn(),
 }))
 
+vi.mock("../generate-embedding", () => ({
+  buildEmbeddingInput: vi.fn((title: string, description: string) => `${title}\n${description}`),
+  generateEmbedding: vi.fn(),
+}))
+
+import { generateEmbedding } from "../generate-embedding"
 import { generateMetadata } from "../generate-metadata"
 import { generateYoutubeSummary } from "../generate-youtube-summary"
 
 const mockGenerateMetadata = generateMetadata as Mock
 const mockGenerateYoutubeSummary = generateYoutubeSummary as Mock
+const mockGenerateEmbedding = generateEmbedding as Mock
 
 interface MockSupabaseClient {
   from: Mock
@@ -32,6 +39,7 @@ describe("updatePodcastMetadata", () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockGenerateYoutubeSummary.mockResolvedValue(null)
+    mockGenerateEmbedding.mockResolvedValue(null)
   })
 
   it("タグと出演者名を生成してDBを更新する", async () => {
@@ -46,6 +54,18 @@ describe("updatePodcastMetadata", () => {
     expect(result).toEqual({ tags: mockTags, speakers: mockSpeakers, summary: null })
     expect(mockGenerateMetadata).toHaveBeenCalledWith("テストタイトル", "テスト説明")
     expect(supabase.from).toHaveBeenCalledWith("podcasts")
+  })
+
+  it("embeddingが生成された場合はDB更新に含める", async () => {
+    const mockEmbedding = [0.1, 0.2, 0.3]
+    mockGenerateMetadata.mockResolvedValue({ tags: ["金融", "投資"], speakers: [] })
+    mockGenerateEmbedding.mockResolvedValue(mockEmbedding)
+
+    const supabase = createMockSupabase()
+
+    await updatePodcastMetadata(supabase as never, "podcast-1", "テストタイトル", "テスト説明")
+
+    expect(supabase.update).toHaveBeenCalledWith(expect.objectContaining({ embedding: mockEmbedding }))
   })
 
   it("タグも出演者名も空の場合はDBを更新しない", async () => {
