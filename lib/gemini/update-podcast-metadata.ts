@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js"
 import { sanitizeForLog } from "@/lib/utils"
+import { buildEmbeddingInput, generateEmbedding } from "./generate-embedding"
 import { generateMetadata } from "./generate-metadata"
 import { generateYoutubeSummary } from "./generate-youtube-summary"
 
@@ -52,22 +53,25 @@ export async function updatePodcastMetadata(
       }
     })()
 
-  // タグ・出演者生成とYouTube要約生成を並行実行
-  const [metadataResult, youtubeSummary] = await Promise.all([
+  // タグ・出演者生成、YouTube要約生成、embedding生成を並行実行
+  const [metadataResult, youtubeSummary, embedding] = await Promise.all([
     generateMetadata(title, description),
     shouldGenerateYoutubeSummary && url ? generateYoutubeSummary(url) : Promise.resolve(null),
+    generateEmbedding(buildEmbeddingInput(title, description)),
   ])
 
   const { tags, speakers } = metadataResult
   console.log("[updatePodcastMetadata] Generated tags:", tags.length)
   console.log("[updatePodcastMetadata] Generated speakers:", speakers.length)
   console.log("[updatePodcastMetadata] Generated YouTube summary:", youtubeSummary ? "yes" : "no")
+  console.log("[updatePodcastMetadata] Generated embedding:", embedding ? "yes" : "no")
   console.log("[updatePodcastMetadata] Podcast ID:", sanitizeForLog(podcastId))
 
   const updateData: Record<string, unknown> = {}
   if (tags.length > 0) updateData.tags = tags
   if (speakers.length > 0) updateData.speakers = speakers
   if (youtubeSummary) updateData.summary = youtubeSummary
+  if (embedding) updateData.embedding = embedding
 
   if (Object.keys(updateData).length > 0) {
     const { error: updateError } = await supabase.from("podcasts").update(updateData).eq("id", podcastId)

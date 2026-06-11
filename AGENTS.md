@@ -40,10 +40,12 @@ PodQueueは、ポッドキャストをプラットフォーム横断で一元管
 - `components/` — UIコンポーネント（`components/ui/` はshadcn/ui自動生成）
 - `lib/` — ビジネスロジック・ユーティリティ
   - `lib/supabase/` — Supabaseクライアント（client/server/admin）
-  - `lib/gemini/` — Gemini AI連携（タグ生成、要約）
+  - `lib/gemini/` — Gemini AI連携（タグ生成、要約、embedding生成）
   - `lib/google/` — Google Drive/OAuth連携
   - `lib/metadata/` — URLからのメタデータ取得
-  - `lib/line/` — LINE Messaging API連携
+  - `lib/line/` — LINE Messaging API連携（reply/push）
+  - `lib/youtube/` — YouTube Data APIでのチャンネル新着取得
+  - `lib/recommendation/` — レコメンド対象の選定ロジック
 - `hooks/` — カスタムReact hooks
 - `scripts/` — DBマイグレーション・ユーティリティスクリプト
 
@@ -105,8 +107,16 @@ ENCRYPTION_KEY              # リフレッシュトークン暗号化用（node 
 # AI機能
 GEMINI_API_KEY
 
+# YouTube Data API（メタデータ取得・レコメンドの新着取得）
+YOUTUBE_API_KEY
+
 # LINE連携
 LINE_MESSAGING_CHANNEL_SECRET
+LINE_MESSAGING_CHANNEL_ACCESS_TOKEN
+
+# レコメンド（Vercel Cron）
+CRON_SECRET                 # /api/cron/recommend の認証用
+RECOMMEND_SCORE_THRESHOLD   # オプション、類似度閾値（デフォルト0.5）
 
 # 共通
 NEXT_PUBLIC_APP_URL         # アプリのベースURL
