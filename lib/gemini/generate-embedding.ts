@@ -5,7 +5,7 @@ import { removeUrls } from "./generate-metadata"
 /** pgvectorの列定義（vector(768)）と合わせること */
 const EMBEDDING_DIMENSIONS = 768
 
-/** マルチモーダル対応の現行モデル。768次元出力は自動で正規化される */
+/** マルチモーダル対応の現行モデル。指定次元への切り詰め時もAPI側で正規化される */
 const EMBEDDING_MODEL = "gemini-embedding-2"
 
 /**
@@ -15,13 +15,6 @@ const EMBEDDING_MODEL = "gemini-embedding-2"
 export function buildEmbeddingInput(title: string | null, description: string | null): string {
   const parts = [title?.trim(), removeUrls(description || "")].filter(Boolean)
   return parts.join("\n")
-}
-
-/** APIが正規化済みベクトルを返さなかった場合の保険としてL2正規化する（正規化済みなら実質no-op） */
-function normalize(vector: number[]): number[] {
-  const norm = Math.sqrt(vector.reduce((sum, v) => sum + v * v, 0))
-  if (norm === 0) return vector
-  return vector.map((v) => v / norm)
 }
 
 /**
@@ -45,7 +38,7 @@ export async function generateEmbeddings(texts: string[]): Promise<number[][]> {
     },
   })
 
-  return embeddings.map(normalize)
+  return embeddings
 }
 
 /**
