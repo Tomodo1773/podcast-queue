@@ -3,7 +3,7 @@
 -- pgvector拡張を有効化
 create extension if not exists vector;
 
--- ポッドキャストのembedding列（gemini-embedding-001 / 768次元）
+-- ポッドキャストのembedding列（gemini-embedding-2 / 768次元）
 alter table public.podcasts add column if not exists embedding vector(768);
 
 -- ユーザーの興味プロファイル（登録済みポッドキャストのembedding平均）を返す関数

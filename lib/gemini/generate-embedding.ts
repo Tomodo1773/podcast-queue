@@ -5,6 +5,9 @@ import { removeUrls } from "./generate-metadata"
 /** pgvectorの列定義（vector(768)）と合わせること */
 const EMBEDDING_DIMENSIONS = 768
 
+/** マルチモーダル対応の現行モデル。768次元出力は自動で正規化される */
+const EMBEDDING_MODEL = "gemini-embedding-2"
+
 /**
  * embedding入力テキストを組み立てる
  * プロファイル側（登録済みポッドキャスト）と候補側（YouTube新着）で同じ形式に揃える
@@ -14,7 +17,7 @@ export function buildEmbeddingInput(title: string | null, description: string | 
   return parts.join("\n")
 }
 
-/** 768次元出力は正規化されていないためL2正規化する */
+/** APIが正規化済みベクトルを返さなかった場合の保険としてL2正規化する（正規化済みなら実質no-op） */
 function normalize(vector: number[]): number[] {
   const norm = Math.sqrt(vector.reduce((sum, v) => sum + v * v, 0))
   if (norm === 0) return vector
@@ -33,12 +36,11 @@ export async function generateEmbeddings(texts: string[]): Promise<number[][]> {
   const google = createGoogleGenerativeAI({ apiKey })
 
   const { embeddings } = await embedMany({
-    model: google.textEmbedding("gemini-embedding-001"),
+    model: google.textEmbedding(EMBEDDING_MODEL),
     values: texts,
     providerOptions: {
       google: {
         outputDimensionality: EMBEDDING_DIMENSIONS,
-        taskType: "SEMANTIC_SIMILARITY",
       },
     },
   })
