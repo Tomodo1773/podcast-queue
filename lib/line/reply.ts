@@ -42,11 +42,9 @@ export type FlexComponent =
     }
   | { type: "button"; style: string; height: string; action: FlexAction }
 
-export type FlexAction = {
-  type: "uri"
-  label: string
-  uri: string
-}
+export type FlexAction =
+  | { type: "uri"; label: string; uri: string }
+  | { type: "message"; label: string; text: string }
 
 /**
  * LINE Reply APIを使用してメッセージを送信
