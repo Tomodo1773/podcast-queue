@@ -2,6 +2,7 @@ import { createGoogleGenerativeAI } from "@ai-sdk/google"
 import * as ai from "ai"
 import { wrapAISDK } from "langsmith/experimental/vercel"
 import { z } from "zod"
+import { getGeminiApiKey } from "./api-key"
 
 export const MetadataResponseSchema = z.object({
   tags: z
@@ -134,11 +135,8 @@ export function removeUrls(text: string): string {
  * @returns 生成されたタグと出演者名
  */
 export async function generateMetadata(title: string, description: string): Promise<MetadataResponse> {
-  const apiKey = process.env.GEMINI_API_KEY
-  if (!apiKey) {
-    console.warn("GEMINI_API_KEY is not set, skipping metadata generation")
-    return { tags: [], speakers: [] }
-  }
+  const apiKey = getGeminiApiKey("metadata generation")
+  if (!apiKey) return { tags: [], speakers: [] }
 
   try {
     // descriptionからURLを除去してコンテキスト削減

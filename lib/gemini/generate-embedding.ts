@@ -1,5 +1,6 @@
 import { createGoogleGenerativeAI } from "@ai-sdk/google"
 import { embedMany } from "ai"
+import { getGeminiApiKey } from "./api-key"
 import { removeUrls } from "./generate-metadata"
 
 /** pgvectorの列定義（vector(768)）と合わせること */
@@ -46,10 +47,7 @@ export async function generateEmbeddings(texts: string[]): Promise<number[][]> {
  * ポッドキャスト追加時のメタデータ生成フローから利用される
  */
 export async function generateEmbedding(text: string): Promise<number[] | null> {
-  if (!process.env.GEMINI_API_KEY) {
-    console.warn("GEMINI_API_KEY is not set, skipping embedding generation")
-    return null
-  }
+  if (!getGeminiApiKey("embedding generation")) return null
 
   try {
     const [embedding] = await generateEmbeddings([text])
