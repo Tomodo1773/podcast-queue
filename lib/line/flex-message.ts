@@ -157,6 +157,16 @@ export function buildRecommendationFlexMessage(params: RecommendationMessagePara
             uri: params.videoUrl,
           },
         },
+        {
+          type: "button",
+          style: "secondary",
+          height: "sm",
+          action: {
+            type: "message",
+            label: "PodQueueに登録",
+            text: params.videoUrl,
+          },
+        },
       ],
       flex: 0,
     },
