@@ -1,6 +1,7 @@
 import { createGoogleGenerativeAI } from "@ai-sdk/google"
 import * as ai from "ai"
 import { wrapAISDK } from "langsmith/experimental/vercel"
+import { getGeminiApiKey } from "./api-key"
 
 const YOUTUBE_SUMMARY_PROMPT = `提供されたYoutube動画について内容を確認した上で内容を詳細に教えてください。
 
@@ -43,11 +44,8 @@ const { generateText } =
  * @returns 動画内容の要約テキスト（セクション別箇条書き形式）、生成失敗時はnull
  */
 export async function generateYoutubeSummary(url: string): Promise<string | null> {
-  const apiKey = process.env.GEMINI_API_KEY
-  if (!apiKey) {
-    console.warn("GEMINI_API_KEY is not set, skipping YouTube summary generation")
-    return null
-  }
+  const apiKey = getGeminiApiKey("YouTube summary generation")
+  if (!apiKey) return null
 
   try {
     const google = createGoogleGenerativeAI({ apiKey })
