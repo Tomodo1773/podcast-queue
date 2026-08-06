@@ -4,13 +4,22 @@
 
 export type LineMessage =
   | { type: "text"; text: string }
-  | { type: "flex"; altText: string; contents: FlexBubble }
+  | { type: "flex"; altText: string; contents: FlexBubble | FlexCarousel }
 
 export type FlexBubble = {
   type: "bubble"
   hero?: FlexImage
   body?: FlexBox
   footer?: FlexBox
+}
+
+/**
+ * 複数のbubbleをスワイプ形式の1メッセージにまとめるコンテナ
+ * https://developers.line.biz/ja/reference/messaging-api/#f-carousel
+ */
+export type FlexCarousel = {
+  type: "carousel"
+  contents: FlexBubble[]
 }
 
 export type FlexImage = {
