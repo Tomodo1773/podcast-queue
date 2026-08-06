@@ -39,29 +39,38 @@ if (!process.env.GEMINI_API_KEY) {
 // 1回のembedding API呼び出しで処理する件数
 const BATCH_SIZE = 50
 
+// Supabaseの最大返却件数に依存せず全件取得するためのページサイズ
+const FETCH_PAGE_SIZE = 1000
+
 async function main() {
   console.log(`🚀 embedding一括付与スクリプト開始${forceRegenerate ? "（全件再生成）" : ""}\n`)
 
   const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!)
 
   console.log("📋 対象ポッドキャストを取得中...")
-  let query = supabase
-    .from("podcasts")
-    .select("id, title, description")
-    .order("created_at", { ascending: true })
+  const podcasts: Array<{ id: string; title: string | null; description: string | null }> = []
 
-  if (!forceRegenerate) {
-    query = query.is("embedding", null)
+  for (let from = 0; ; from += FETCH_PAGE_SIZE) {
+    let query = supabase.from("podcasts").select("id, title, description")
+    if (!forceRegenerate) {
+      query = query.is("embedding", null)
+    }
+
+    const { data: page, error: fetchError } = await query
+      .order("created_at", { ascending: true })
+      .order("id", { ascending: true })
+      .range(from, from + FETCH_PAGE_SIZE - 1)
+
+    if (fetchError) {
+      console.error("❌ ポッドキャスト取得エラー:", fetchError)
+      process.exit(1)
+    }
+
+    podcasts.push(...(page ?? []))
+    if (!page || page.length < FETCH_PAGE_SIZE) break
   }
 
-  const { data: podcasts, error: fetchError } = await query
-
-  if (fetchError) {
-    console.error("❌ ポッドキャスト取得エラー:", fetchError)
-    process.exit(1)
-  }
-
-  if (!podcasts || podcasts.length === 0) {
+  if (podcasts.length === 0) {
     console.log("✅ 対象ポッドキャストなし（すべて処理済み）")
     process.exit(0)
   }
