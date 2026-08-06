@@ -1,4 +1,4 @@
-# AGENTS.md
+# PodQueue
 
 ## 言語設定
 
@@ -57,7 +57,7 @@ PodQueueは、ポッドキャストをプラットフォーム横断で一元管
 4. `sfw pnpm install` でSocket Firewallを通して依存関係を更新する
 5. pnpm run test でテストを行う
 6. pnpm run check を実行し、lint/format/typecheck/knipが通ることを確認する
-7. ドキュメント(AGENTS.md,README.md)を更新する
+7. ドキュメント(AGENTS.md/CLAUDE.md, README.md)を更新する
 
 ## コマンド
 
@@ -125,3 +125,9 @@ NEXT_PUBLIC_APP_URL         # アプリのベースURL
 LANGCHAIN_TRACING_V2        # "true"で有効化
 LANGSMITH_PROJECT
 ```
+
+## 指示ファイルの同期
+
+`AGENTS.md` と `CLAUDE.md`、`.agents/skills` と `.claude/skills` は、それぞれ同じ内容の別実体として管理する。シンボリックリンクにはしない（Windowsで `git worktree` が失敗するため）。片方だけを変更せず、両方を同じ内容に揃えてコミットする。
+
+クローン後に `git config core.hooksPath .githooks` を実行すると、コミット時に一致を検証する。CIでも同じ検証を行う。
