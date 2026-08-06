@@ -52,7 +52,7 @@ YouTube / Spotify / NewsPicks などのURLを同じリストで管理し、優�
 - **LINE連携** - LINEにURLを送信するだけでPodcastを自動登録（設定画面からLINE User IDを連携）
 - **Google Drive連携** - ポッドキャストを視聴中に設定した際、Google Driveへマークダウンファイル（YAMLフロントマター形式）を自動生成し、視聴後の学びを記録可能（リフレッシュトークンはAES-256-GCMで暗号化保存）
 - **タグ自動生成** - Gemini APIを使用してポッドキャストのタイトル・説明から検索用タグを自動生成（6〜12個）
-- **新着動画レコメンド** - 登録ポッドキャストのembedding（Gemini embeddingモデル + pgvector）から興味プロファイルを生成し、登録したYouTubeチャンネルの新着動画を日次でスコアリング。類似度が閾値を超えた動画をLINEで通知。通知の「PodQueueに登録」ボタンからワンタップで聞きたいリストに追加可能。ショート動画（60秒以下）はレコメンド対象から除外
+- **新着動画レコメンド** - 視聴中・視聴済みポッドキャストのembedding（Gemini embeddingモデル + pgvector）から興味プロファイルを生成し、登録したYouTubeチャンネルの新着動画を日次でスコアリング。類似度が閾値を超えた動画をLINEで通知。通知の「PodQueueに登録」ボタンからワンタップで聞きたいリストに追加可能。ショート動画（60秒以下）はレコメンド対象から除外
 
 ## サンプルポッドキャスト
 
@@ -148,6 +148,16 @@ pnpm run knip
 
 # チェック（formatting + linting + typecheck + knip）
 pnpm run check
+```
+
+### レコメンド用embeddingの再生成
+
+ベクトル入力は、semantic similarity用途のprefix、タイトル、URL除去後の説明先頭500文字で構成します。
+入力仕様を変更した場合は、`NEXT_PUBLIC_SUPABASE_URL`、`SUPABASE_SERVICE_ROLE_KEY`、`GEMINI_API_KEY`
+を設定して既存データを全件再生成します。
+
+```bash
+pnpm exec tsx scripts/backfill-embeddings.ts --force
 ```
 
 ## ライセンス

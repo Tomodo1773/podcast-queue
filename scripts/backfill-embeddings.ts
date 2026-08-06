@@ -8,11 +8,13 @@
  *      - NEXT_PUBLIC_SUPABASE_URL
  *      - SUPABASE_SERVICE_ROLE_KEY（RLSバイパス用）
  *      - GEMINI_API_KEY（Gemini API用）
- *   2. 実行: npx tsx scripts/backfill-embeddings.ts
+ *   2. 実行: pnpm exec tsx scripts/backfill-embeddings.ts
+ *   3. 入力仕様の変更後に全件再生成する場合:
+ *      pnpm exec tsx scripts/backfill-embeddings.ts --force
  *
  * 対象:
- *   - embedding IS NULL のポッドキャスト
- *   - 処理済みのものはスキップ（冪等性）
+ *   - 通常時: embedding IS NULL のポッドキャスト
+ *   - --force指定時: embeddingの有無に関わらず全ポッドキャスト
  */
 
 import { createClient } from "@supabase/supabase-js"
@@ -20,6 +22,7 @@ import { buildEmbeddingInput, generateEmbeddings } from "../lib/gemini/generate-
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
+const forceRegenerate = process.argv.includes("--force")
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
   console.error("❌ 環境変数が不足しています:")
@@ -37,16 +40,21 @@ if (!process.env.GEMINI_API_KEY) {
 const BATCH_SIZE = 50
 
 async function main() {
-  console.log("🚀 embedding一括付与スクリプト開始\n")
+  console.log(`🚀 embedding一括付与スクリプト開始${forceRegenerate ? "（全件再生成）" : ""}\n`)
 
   const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!)
 
   console.log("📋 対象ポッドキャストを取得中...")
-  const { data: podcasts, error: fetchError } = await supabase
+  let query = supabase
     .from("podcasts")
     .select("id, title, description")
-    .is("embedding", null)
     .order("created_at", { ascending: true })
+
+  if (!forceRegenerate) {
+    query = query.is("embedding", null)
+  }
+
+  const { data: podcasts, error: fetchError } = await query
 
   if (fetchError) {
     console.error("❌ ポッドキャスト取得エラー:", fetchError)
@@ -62,17 +70,27 @@ async function main() {
 
   let successCount = 0
   let errorCount = 0
+  let skippedCount = 0
 
   for (let offset = 0; offset < podcasts.length; offset += BATCH_SIZE) {
     const batch = podcasts.slice(offset, offset + BATCH_SIZE)
     console.log(`[${offset + 1}〜${offset + batch.length}/${podcasts.length}] embedding生成中...`)
 
     try {
-      const embeddings = await generateEmbeddings(
-        batch.map((podcast) => buildEmbeddingInput(podcast.title, podcast.description))
-      )
+      const targets = batch
+        .map((podcast) => ({
+          podcast,
+          input: buildEmbeddingInput(podcast.title, podcast.description),
+        }))
+        .filter((target) => target.input)
 
-      for (const [i, podcast] of batch.entries()) {
+      skippedCount += batch.length - targets.length
+      if (targets.length === 0) continue
+
+      const embeddings = await generateEmbeddings(targets.map((target) => target.input))
+
+      for (const [i, target] of targets.entries()) {
+        const { podcast } = target
         const { error: updateError } = await supabase
           .from("podcasts")
           .update({ embedding: embeddings[i] })
@@ -96,6 +114,7 @@ async function main() {
   console.log("=".repeat(60))
   console.log(`✅ 成功: ${successCount}件`)
   console.log(`❌ 失敗: ${errorCount}件`)
+  console.log(`⏭️ スキップ（タイトル・説明なし）: ${skippedCount}件`)
   console.log(`📋 合計: ${podcasts.length}件\n`)
 
   console.log("🎉 スクリプト完了")
