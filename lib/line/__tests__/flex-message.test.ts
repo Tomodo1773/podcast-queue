@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
-import { buildRecommendationFlexMessage } from "../flex-message"
+import { buildRecommendationCarouselMessage } from "../flex-message"
 
-describe("buildRecommendationFlexMessage", () => {
+describe("buildRecommendationCarouselMessage", () => {
   const params = {
     title: "テスト動画",
     channelLabel: "テストチャンネル",
@@ -11,10 +11,12 @@ describe("buildRecommendationFlexMessage", () => {
   }
 
   it("footerに動画を見るボタンとPodQueueに登録ボタンが含まれる", () => {
-    const message = buildRecommendationFlexMessage(params)
-    if (message.type !== "flex") throw new Error("flex message expected")
+    const message = buildRecommendationCarouselMessage([params])
+    if (message.type !== "flex" || message.contents.type !== "carousel") {
+      throw new Error("flex carousel message expected")
+    }
 
-    expect(message.contents.footer?.contents).toEqual([
+    expect(message.contents.contents[0].footer?.contents).toEqual([
       {
         type: "button",
         style: "primary",
@@ -28,5 +30,16 @@ describe("buildRecommendationFlexMessage", () => {
         action: { type: "message", label: "PodQueueに登録", text: params.videoUrl },
       },
     ])
+  })
+
+  it("複数件を1つのcarouselメッセージにまとめる", () => {
+    const params2 = { ...params, title: "テスト動画2", videoUrl: "https://www.youtube.com/watch?v=def456" }
+    const message = buildRecommendationCarouselMessage([params, params2])
+    if (message.type !== "flex" || message.contents.type !== "carousel") {
+      throw new Error("flex carousel message expected")
+    }
+
+    expect(message.contents.contents).toHaveLength(2)
+    expect(message.altText).toBe("おすすめの新着動画が2件あります")
   })
 })

@@ -1,13 +1,13 @@
 import { cosineSimilarity } from "ai"
 import { NextResponse } from "next/server"
 import { buildEmbeddingInput, generateEmbeddings } from "@/lib/gemini/generate-embedding"
-import { buildRecommendationFlexMessage } from "@/lib/line/flex-message"
+import { buildRecommendationCarouselMessage } from "@/lib/line/flex-message"
 import { pushMessage } from "@/lib/line/push"
 import { latestPublishedAt, pickRecommendations, selectNewVideos } from "@/lib/recommendation/select"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { fetchLatestVideos, type YoutubeVideo } from "@/lib/youtube/fetch-latest-videos"
 
-// 1回の通知で送る最大件数（LINE pushは1リクエスト5メッセージまで）
+// 1回の通知で送る最大件数（カルーセル1メッセージにまとめて送信、LINE仕様上は10件まで可能）
 const MAX_RECOMMENDATIONS = 3
 
 type Channel = {
@@ -130,18 +130,17 @@ async function processUser(
 
     const picks = pickRecommendations(scored, threshold, MAX_RECOMMENDATIONS)
     if (picks.length > 0) {
-      await pushMessage(
-        lineLink.line_user_id,
-        picks.map((video) =>
-          buildRecommendationFlexMessage({
+      await pushMessage(lineLink.line_user_id, [
+        buildRecommendationCarouselMessage(
+          picks.map((video) => ({
             title: video.title,
             channelLabel: video.channelLabel,
             score: video.score,
             videoUrl: video.url,
             thumbnailUrl: video.thumbnailUrl,
-          })
-        )
-      )
+          }))
+        ),
+      ])
       notified = picks.length
     }
   }

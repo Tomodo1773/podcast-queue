@@ -105,10 +105,10 @@ type RecommendationMessageParams = {
 }
 
 /**
- * レコメンド通知のFlex Messageを生成
+ * レコメンド通知1件分のbubbleを生成
  * スコアは閾値チューニングのため通知に表示する
  */
-export function buildRecommendationFlexMessage(params: RecommendationMessageParams): LineMessage {
+function buildRecommendationBubble(params: RecommendationMessageParams): FlexBubble {
   const title = truncate(params.title, 50)
 
   const bubble: FlexBubble = {
@@ -182,10 +182,24 @@ export function buildRecommendationFlexMessage(params: RecommendationMessagePara
     }
   }
 
+  return bubble
+}
+
+/**
+ * 複数のレコメンドを1件のカルーセルFlex Messageにまとめて生成
+ * 個別メッセージで送ると複数投稿になり見づらいため、スワイプ形式の1メッセージにまとめる
+ */
+export function buildRecommendationCarouselMessage(items: RecommendationMessageParams[]): LineMessage {
+  const bubbles = items.map(buildRecommendationBubble)
+  const altText =
+    items.length === 1
+      ? `おすすめの新着動画: ${truncate(items[0].title, 50)}`
+      : `おすすめの新着動画が${items.length}件あります`
+
   return {
     type: "flex",
-    altText: `おすすめの新着動画: ${title}`,
-    contents: bubble,
+    altText,
+    contents: { type: "carousel", contents: bubbles },
   }
 }
 
