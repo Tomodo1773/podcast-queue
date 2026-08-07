@@ -67,7 +67,7 @@ async function processUser(
   channels: Channel[],
   threshold: number
 ): Promise<number> {
-  // 興味プロファイル（登録済みポッドキャストのembedding平均）をDB側で計算
+  // 興味プロファイル（視聴中・視聴済みポッドキャストのembedding平均）をDB側で計算
   const { data: profileData, error: profileError } = await supabase.rpc("get_profile_embedding", {
     p_user_id: userId,
   })

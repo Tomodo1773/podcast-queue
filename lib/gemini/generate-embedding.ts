@@ -9,13 +9,30 @@ const EMBEDDING_DIMENSIONS = 768
 /** マルチモーダル対応の現行モデル。指定次元への切り詰め時もAPI側で正規化される */
 const EMBEDDING_MODEL = "gemini-embedding-2"
 
+/** 説明文後半の宣伝・リンク集などが意味を薄めないよう、先頭部分だけを使う */
+const DESCRIPTION_MAX_CHARACTERS = 500
+
+/** Gemini Embedding 2ではtaskTypeの代わりに入力へ用途を明記する */
+const SEMANTIC_SIMILARITY_PREFIX = "task: sentence similarity | query:"
+
+function truncateCharacters(text: string, maxCharacters: number): string {
+  return Array.from(text).slice(0, maxCharacters).join("").trim()
+}
+
 /**
  * embedding入力テキストを組み立てる
  * プロファイル側（登録済みポッドキャスト）と候補側（YouTube新着）で同じ形式に揃える
  */
 export function buildEmbeddingInput(title: string | null, description: string | null): string {
-  const parts = [title?.trim(), removeUrls(description || "")].filter(Boolean)
-  return parts.join("\n")
+  const normalizedTitle = title?.trim() || ""
+  const normalizedDescription = truncateCharacters(removeUrls(description || ""), DESCRIPTION_MAX_CHARACTERS)
+  const fields = [
+    normalizedTitle && `title: ${normalizedTitle}`,
+    normalizedDescription && `text: ${normalizedDescription}`,
+  ].filter(Boolean)
+
+  if (fields.length === 0) return ""
+  return `${SEMANTIC_SIMILARITY_PREFIX} ${fields.join(" | ")}`
 }
 
 /**
@@ -47,6 +64,7 @@ export async function generateEmbeddings(texts: string[]): Promise<number[][]> {
  * ポッドキャスト追加時のメタデータ生成フローから利用される
  */
 export async function generateEmbedding(text: string): Promise<number[] | null> {
+  if (!text.trim()) return null
   if (!getGeminiApiKey("embedding generation")) return null
 
   try {
