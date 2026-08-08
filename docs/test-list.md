@@ -70,6 +70,22 @@
 - [x] weeklyStatsが12週分のデータを返す
 - [x] monthlyStatsが12ヶ月分のデータを返す
 
+### 興味プロファイルの合成 (`lib/recommendation/profile.ts`)
+
+#### `buildProfile`
+- [x] 負例がない場合は正例を正規化して返す
+- [x] 負例方向の成分がgamma分だけ差し引かれる
+- [x] 正例・負例のノルムの大きさに結果が左右されない（正規化されている）
+- [x] gammaが0のときは負例が無視される
+- [x] 負例がゼロベクトルでもNaNを返さない
+
+### レコメンド通知のpostback (`lib/line/postback.ts`)
+
+#### `parseDislikePostbackData`
+- [x] `buildDislikePostbackData` が生成したdataから動画IDを取り出せる
+- [x] dislike以外のactionはnullを返す
+- [x] 動画IDを含まないdataはnullを返す
+
 ---
 
 

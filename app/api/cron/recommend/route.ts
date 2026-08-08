@@ -3,6 +3,7 @@ import { NextResponse } from "next/server"
 import { buildEmbeddingInput, generateEmbeddings } from "@/lib/gemini/generate-embedding"
 import { buildRecommendationCarouselMessage } from "@/lib/line/flex-message"
 import { pushMessage } from "@/lib/line/push"
+import { buildProfile } from "@/lib/recommendation/profile"
 import { latestPublishedAt, pickRecommendations, selectNewVideos } from "@/lib/recommendation/select"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { fetchLatestVideos, type YoutubeVideo } from "@/lib/youtube/fetch-latest-videos"
@@ -32,6 +33,7 @@ export async function GET(request: Request) {
   }
 
   const threshold = Number(process.env.RECOMMEND_SCORE_THRESHOLD ?? "0.5")
+  const dislikeWeight = Number(process.env.RECOMMEND_DISLIKE_WEIGHT ?? "0.25")
   const supabase = createAdminClient()
 
   const { data: channels, error: channelsError } = await supabase.from("youtube_channels").select("*")
@@ -52,7 +54,7 @@ export async function GET(request: Request) {
 
   for (const [userId, userChannels] of channelsByUser) {
     try {
-      notifiedCount += await processUser(supabase, userId, userChannels, threshold)
+      notifiedCount += await processUser(supabase, userId, userChannels, { threshold, dislikeWeight })
     } catch (error) {
       console.error(`[recommend] Failed to process user ${userId}:`, error)
     }
@@ -65,7 +67,7 @@ async function processUser(
   supabase: ReturnType<typeof createAdminClient>,
   userId: string,
   channels: Channel[],
-  threshold: number
+  options: { threshold: number; dislikeWeight: number }
 ): Promise<number> {
   // 興味プロファイル（視聴中・視聴済みポッドキャストのembedding平均）をDB側で計算
   const { data: profileData, error: profileError } = await supabase.rpc("get_profile_embedding", {
@@ -76,7 +78,16 @@ async function processUser(
     console.log(`[recommend] No profile embedding for user ${userId}, skipping`)
     return 0
   }
-  const profile = JSON.parse(profileData as string) as number[]
+  const positive = JSON.parse(profileData as string) as number[]
+
+  // 「興味なし」の負例平均（負例が1件もなければnull）
+  const { data: dislikeData, error: dislikeError } = await supabase.rpc("get_dislike_embedding", {
+    p_user_id: userId,
+  })
+  if (dislikeError) throw dislikeError
+  const negative = dislikeData ? (JSON.parse(dislikeData as string) as number[]) : null
+
+  const profile = buildProfile(positive, negative, options.dislikeWeight)
 
   // 通知先のLINEユーザーIDを取得
   const { data: lineLink } = await supabase
@@ -121,18 +132,24 @@ async function processUser(
     const scored = candidates.map((video, i) => ({
       ...video,
       score: cosineSimilarity(profile, embeddings[i]),
+      baseScore: cosineSimilarity(positive, embeddings[i]),
     }))
 
-    // 閾値チューニング用に全候補のスコアをログ出力
+    // 閾値チューニング用に全候補のスコアをログ出力（baseは負例補正なしのスコア）
+    // 負例補正はプロファイルの向きを変えるためスコア全体がずれる。
+    // baseとの差が全候補で一様ならスケール変化なので閾値側を調整する
     for (const video of scored) {
-      console.log(`[recommend] score=${video.score.toFixed(3)} ${video.title}`)
+      console.log(
+        `[recommend] score=${video.score.toFixed(3)} (base ${video.baseScore.toFixed(3)}) ${video.title}`
+      )
     }
 
-    const picks = pickRecommendations(scored, threshold, MAX_RECOMMENDATIONS)
+    const picks = pickRecommendations(scored, options.threshold, MAX_RECOMMENDATIONS)
     if (picks.length > 0) {
       await pushMessage(lineLink.line_user_id, [
         buildRecommendationCarouselMessage(
           picks.map((video) => ({
+            videoId: video.videoId,
             title: video.title,
             channelLabel: video.channelLabel,
             score: video.score,
