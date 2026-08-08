@@ -48,6 +48,13 @@ PodQueueは、ポッドキャストをプラットフォーム横断で一元管
   - `lib/recommendation/` — レコメンド対象の選定ロジックと興味プロファイルの合成
 - `hooks/` — カスタムReact hooks
 - `scripts/` — DBマイグレーション・ユーティリティスクリプト
+- `docs/adr/` — 設計判断の記録（検討した選択肢と決定の経緯）
+
+## 設計判断の記録
+
+複数案を比較して決めた設計は `docs/adr/` に残す。該当箇所を変更する前に読むこと。
+
+- [ADR 0001: レコメンドの負例をプロファイルベクトルの補正で扱う](docs/adr/0001-recommendation-negative-feedback.md)
 
 ## 実装手順
 
