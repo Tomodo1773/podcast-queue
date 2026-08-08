@@ -52,7 +52,7 @@ YouTube / Spotify / NewsPicks などのURLを同じリストで管理し、優�
 - **LINE連携** - LINEにURLを送信するだけでPodcastを自動登録（設定画面からLINE User IDを連携）
 - **Google Drive連携** - ポッドキャストを視聴中に設定した際、Google Driveへマークダウンファイル（YAMLフロントマター形式）を自動生成し、視聴後の学びを記録可能（リフレッシュトークンはAES-256-GCMで暗号化保存）
 - **タグ自動生成** - Gemini APIを使用してポッドキャストのタイトル・説明から検索用タグを自動生成（6〜12個）
-- **新着動画レコメンド** - 視聴中・視聴済みポッドキャストのembedding（Gemini embeddingモデル + pgvector）から興味プロファイルを生成し、登録したYouTubeチャンネルの新着動画を日次でスコアリング。類似度が閾値を超えた動画をLINEで通知。通知の「PodQueueに登録」ボタンからワンタップで聞きたいリストに追加可能。ショート動画（60秒以下）はレコメンド対象から除外
+- **新着動画レコメンド** - 視聴中・視聴済みポッドキャストのembedding（Gemini embeddingモデル + pgvector）から興味プロファイルを生成し、登録したYouTubeチャンネルの新着動画を日次でスコアリング。類似度が閾値を超えた動画をLINEで通知。通知の「PodQueueに登録」ボタンからワンタップで聞きたいリストに追加可能。「興味なし」ボタンを押すとその動画が負例として保存され、以降は興味プロファイルを負例と逆方向に補正してスコアリングする（Rocchio方式）。ショート動画（60秒以下）はレコメンド対象から除外
 
 ## サンプルポッドキャスト
 
@@ -92,6 +92,8 @@ YOUTUBE_API_KEY=your-youtube-api-key
 CRON_SECRET=your-cron-secret
 # レコメンドの類似度閾値（オプション、デフォルト0.5）
 RECOMMEND_SCORE_THRESHOLD=0.5
+# 「興味なし」の反映の強さ（オプション、デフォルト0.25）
+RECOMMEND_DISLIKE_WEIGHT=0.25
 
 # LINE Messaging API
 LINE_CHANNEL_SECRET=your-line-channel-secret

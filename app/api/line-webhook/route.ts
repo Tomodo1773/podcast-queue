@@ -1,5 +1,6 @@
 import crypto from "crypto"
 import { NextResponse } from "next/server"
+import { handleDislike } from "@/lib/line/handle-dislike"
 import { handleTextMessage } from "@/lib/line/handle-text-message"
 import { createAdminClient } from "@/lib/supabase/admin"
 
@@ -20,6 +21,9 @@ type LineEvent = {
   message?: {
     type: string
     text: string
+  }
+  postback?: {
+    data: string
   }
   source?: {
     userId?: string
@@ -46,11 +50,16 @@ export async function POST(request: Request) {
       const lineUserId = event.source?.userId
       if (!lineUserId) continue
 
-      // テキストメッセージのみ処理
       if (event.type === "message" && event.message?.type === "text") {
         await handleTextMessage(supabase, {
           lineUserId,
           text: event.message.text,
+          replyToken: event.replyToken,
+        })
+      } else if (event.type === "postback" && event.postback) {
+        await handleDislike(supabase, {
+          lineUserId,
+          data: event.postback.data,
           replyToken: event.replyToken,
         })
       }

@@ -54,6 +54,7 @@ export type FlexComponent =
 export type FlexAction =
   | { type: "uri"; label: string; uri: string }
   | { type: "message"; label: string; text: string }
+  | { type: "postback"; label: string; data: string; displayText?: string }
 
 /**
  * LINE Reply APIを使用してメッセージを送信
