@@ -9,7 +9,7 @@ import { replyMessage } from "@/lib/line/reply"
 import { resolveUserId } from "@/lib/line/resolve-user"
 import { fetchMetadata } from "@/lib/metadata/fetcher"
 import type { createAdminClient } from "@/lib/supabase/admin"
-import { detectPlatform } from "@/lib/utils"
+import { detectPlatform, sanitizeForLog } from "@/lib/utils"
 
 // リストページのURL生成
 function getListUrl(): string {
@@ -45,7 +45,7 @@ export async function handleTextMessage(
 
   if (!userId) {
     // 未連携ユーザーにはエラーメッセージを返信
-    console.log("Unlinked LINE user:", lineUserId)
+    console.log("Unlinked LINE user:", sanitizeForLog(lineUserId))
     if (replyToken) {
       await replyMessage(replyToken, [
         buildErrorMessage(
@@ -100,7 +100,7 @@ export async function handleTextMessage(
   }
 
   console.log("Podcast added for user:", userId)
-  console.log("URL:", url)
+  console.log("URL:", sanitizeForLog(url))
 
   // タグ生成・出演者抽出・YouTube要約を同期的に実行（完了後にLINE返信する）
   if (insertData?.[0]) {

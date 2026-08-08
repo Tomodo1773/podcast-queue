@@ -5,6 +5,7 @@ import { parseDislikePostbackData } from "@/lib/line/postback"
 import { replyMessage } from "@/lib/line/reply"
 import { resolveUserId } from "@/lib/line/resolve-user"
 import type { createAdminClient } from "@/lib/supabase/admin"
+import { sanitizeForLog } from "@/lib/utils"
 import { fetchVideoById } from "@/lib/youtube/fetch-video-by-id"
 
 /** replyTokenがない場合もあるため、返信は常にこのヘルパー経由で行う */
@@ -25,13 +26,13 @@ export async function handleDislike(
 
   const parsed = parseDislikePostbackData(data)
   if (!parsed) {
-    console.log("Unknown postback data:", data)
+    console.log("Unknown postback data:", sanitizeForLog(data))
     return
   }
 
   const userId = await resolveUserId(supabase, lineUserId)
   if (!userId) {
-    console.log("Unlinked LINE user:", lineUserId)
+    console.log("Unlinked LINE user:", sanitizeForLog(lineUserId))
     await reply(replyToken, "PodQueueアカウントと連携されていません。")
     return
   }
@@ -83,7 +84,7 @@ export async function handleDislike(
       return
     }
 
-    console.log("Dislike registered for user:", userId, "video:", video.videoId)
+    console.log("Dislike registered for user:", userId, "video:", sanitizeForLog(video.videoId))
     if (replyToken) {
       await replyMessage(replyToken, [buildDislikeRegisteredMessage(video.title)])
     }
