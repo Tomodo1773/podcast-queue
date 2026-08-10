@@ -43,11 +43,18 @@ PodQueueは、ポッドキャストをプラットフォーム横断で一元管
   - `lib/gemini/` — Gemini AI連携（タグ生成、要約、embedding生成）
   - `lib/google/` — Google Drive/OAuth連携
   - `lib/metadata/` — URLからのメタデータ取得
-  - `lib/line/` — LINE Messaging API連携（reply/push）
-  - `lib/youtube/` — YouTube Data APIでのチャンネル新着取得
-  - `lib/recommendation/` — レコメンド対象の選定ロジック
+  - `lib/line/` — LINE Messaging API連携（reply/push、webhookイベントごとのハンドラ）
+  - `lib/youtube/` — YouTube Data APIでの動画・チャンネル新着取得
+  - `lib/recommendation/` — レコメンド対象の選定ロジックと興味プロファイルの合成
 - `hooks/` — カスタムReact hooks
 - `scripts/` — DBマイグレーション・ユーティリティスクリプト
+- `docs/adr/` — 設計判断の記録（検討した選択肢と決定の経緯）
+
+## 設計判断の記録
+
+複数案を比較して決めた設計は `docs/adr/` に残す。該当箇所を変更する前に読むこと。
+
+- [ADR 0001: レコメンドの負例をプロファイルベクトルの補正で扱う](docs/adr/0001-recommendation-negative-feedback.md)
 
 ## 実装手順
 
@@ -117,6 +124,7 @@ LINE_MESSAGING_CHANNEL_ACCESS_TOKEN
 # レコメンド（Vercel Cron）
 CRON_SECRET                 # /api/cron/recommend の認証用
 RECOMMEND_SCORE_THRESHOLD   # オプション、類似度閾値（デフォルト0.5）
+RECOMMEND_DISLIKE_WEIGHT    # オプション、「興味なし」の反映の強さ（デフォルト0.25）
 
 # 共通
 NEXT_PUBLIC_APP_URL         # アプリのベースURL

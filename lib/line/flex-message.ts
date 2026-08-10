@@ -2,6 +2,7 @@
  * LINE Flex Message生成関数
  */
 
+import { buildDislikePostbackData } from "./postback"
 import type { FlexBubble, LineMessage } from "./reply"
 
 type SuccessMessageParams = {
@@ -97,6 +98,7 @@ export function buildSuccessFlexMessage(params: SuccessMessageParams): LineMessa
 }
 
 type RecommendationMessageParams = {
+  videoId: string
   title: string
   channelLabel: string
   score: number
@@ -167,6 +169,17 @@ function buildRecommendationBubble(params: RecommendationMessageParams): FlexBub
             text: params.videoUrl,
           },
         },
+        {
+          type: "button",
+          style: "link",
+          height: "sm",
+          action: {
+            type: "postback",
+            label: "興味なし",
+            data: buildDislikePostbackData(params.videoId),
+            displayText: "興味なし",
+          },
+        },
       ],
       flex: 0,
     },
@@ -200,6 +213,16 @@ export function buildRecommendationCarouselMessage(items: RecommendationMessageP
     type: "flex",
     altText,
     contents: { type: "carousel", contents: bubbles },
+  }
+}
+
+/**
+ * 「興味なし」登録完了時のテキストメッセージを生成
+ */
+export function buildDislikeRegisteredMessage(title: string): LineMessage {
+  return {
+    type: "text",
+    text: `🚫 「${truncate(title, 40)}」を今後のおすすめに反映します`,
   }
 }
 
