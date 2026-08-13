@@ -13,6 +13,12 @@
 
 PodQueueは、YouTube、Spotify、NewsPicksなど様々なプラットフォームの動画・音声コンテンツを「あとで聴く」リストとして一箇所で管理できるWebアプリケーションです。
 
+## システム構成
+
+<p align="center">
+  <img src="docs/architecture/architecture.svg" alt="PodQueueのシステム構成図" width="100%" />
+</p>
+
 ## 使い方イメージ
 
 ### 1) URLを集約して「あとで聴く」をキュー化
