@@ -13,20 +13,23 @@ export function SimpleMarkdown({ text, className }: SimpleMarkdownProps) {
   const lines = text.split("\n")
   const elements: ReactNode[] = []
   let listItems: ReactNode[] = []
-  let listStartIndex = 0
+  let nextElementId = 0
+  let nextListId = 0
+  let currentListId = 0
 
   const flushList = () => {
     if (listItems.length > 0) {
       elements.push(
-        <ul key={`list-${listStartIndex}`} className="list-disc list-inside space-y-1">
+        <ul key={`list-${nextListId}`} className="list-disc list-inside space-y-1">
           {listItems}
         </ul>
       )
+      nextListId += 1
       listItems = []
     }
   }
 
-  const parseBold = (line: string, lineIndex: number): ReactNode[] => {
+  const parseBold = (line: string): ReactNode[] => {
     const parts: ReactNode[] = []
     let lastIndex = 0
     const regex = /\*\*(.+?)\*\*/g
@@ -36,7 +39,7 @@ export function SimpleMarkdown({ text, className }: SimpleMarkdownProps) {
       if (match.index > lastIndex) {
         parts.push(line.slice(lastIndex, match.index))
       }
-      parts.push(<strong key={`bold-${lineIndex}-${match.index}`}>{match[1]}</strong>)
+      parts.push(<strong key={`bold-${match.index}`}>{match[1]}</strong>)
       lastIndex = regex.lastIndex
       match = regex.exec(line)
     }
@@ -48,31 +51,33 @@ export function SimpleMarkdown({ text, className }: SimpleMarkdownProps) {
     return parts.length > 0 ? parts : [line]
   }
 
-  lines.forEach((line, index) => {
+  lines.forEach((line) => {
     const trimmed = line.trim()
 
     if (trimmed.startsWith("### ")) {
       flushList()
       const content = trimmed.slice(4)
       elements.push(
-        <h3 key={`h3-${index}-${content.substring(0, 10)}`} className="font-bold mt-4 mb-2 break-all">
-          {parseBold(content, index)}
+        <h3 key={`h3-${nextElementId}`} className="font-bold mt-4 mb-2 break-all">
+          {parseBold(content)}
         </h3>
       )
+      nextElementId += 1
     } else if (trimmed.startsWith("- ")) {
       if (listItems.length === 0) {
-        listStartIndex = index
+        currentListId = nextListId
       }
       const content = trimmed.slice(2)
-      listItems.push(<li key={`li-${listStartIndex}-${listItems.length}`}>{parseBold(content, index)}</li>)
+      listItems.push(<li key={`li-${currentListId}-${listItems.length}`}>{parseBold(content)}</li>)
     } else {
       flushList()
       if (trimmed.length > 0) {
         elements.push(
-          <p key={`p-${index}-${line.substring(0, 10)}`} className="break-all">
-            {parseBold(trimmed, index)}
+          <p key={`p-${nextElementId}`} className="break-all">
+            {parseBold(trimmed)}
           </p>
         )
+        nextElementId += 1
       }
     }
   })
