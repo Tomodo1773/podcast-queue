@@ -71,14 +71,14 @@ PodQueueは、ポッドキャストをプラットフォーム横断で一元管
 ```bash
 pnpm run dev          # 開発サーバー起動
 sfw pnpm install      # 依存関係インストール（Socket Firewall経由）
-pnpm run build        # ビルド
-pnpm run test         # テスト実行（vitest run）
+sfw pnpm run build        # ビルド
+sfw pnpm run test         # テスト実行（vitest run）
 pnpm run test:watch   # テスト監視モード
-pnpm run check        # formatting + linting + typecheck + knip（CI前に必ず実行）
-pnpm run lint         # Biome lint（--write付き）
-pnpm run format       # Biome format（--write付き）
-pnpm run typecheck    # tsc --noEmit
-pnpm run knip         # 未使用コード検出
+sfw pnpm run check        # formatting + linting + typecheck + knip（CI前に必ず実行）
+sfw pnpm run lint         # Biome lint（--write付き）
+sfw pnpm run format       # Biome format（--write付き）
+sfw pnpm run typecheck    # tsc --noEmit
+sfw pnpm run knip         # 未使用コード検出
 ```
 
 ## 技術スタック
