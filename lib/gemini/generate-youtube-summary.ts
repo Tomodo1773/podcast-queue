@@ -52,7 +52,7 @@ export async function generateYoutubeSummary(url: string): Promise<string | null
 
     // YouTube URLはAI SDKが自動ダウンロードせずGeminiにそのまま渡す
     const { text } = await generateText({
-      model: google("gemini-pro-latest"),
+      model: google("gemini-flash-latest"),
       messages: [
         {
           role: "user",
