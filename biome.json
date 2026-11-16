@@ -16,7 +16,8 @@
       "!**/*.config.js",
       "!**/*.config.ts",
       "!**/*.config.mjs",
-      "!**/components/ui"
+      "!**/components/ui",
+      "!**/*.md"
     ]
   },
   "formatter": {
